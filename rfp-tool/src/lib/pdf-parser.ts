@@ -9,10 +9,10 @@ import { RFPEvent, UploadedRFP } from "@/types";
  */
 async function extractPagesFromPDF(buffer: ArrayBuffer): Promise<string[]> {
   const pdfjs = await import("pdfjs-dist");
-  pdfjs.GlobalWorkerOptions.workerSrc = new URL(
-    "pdfjs-dist/build/pdf.worker.min.mjs",
-    import.meta.url
-  ).toString();
+
+  // Use CDN-hosted worker — reliable in static exports / GitHub Pages
+  pdfjs.GlobalWorkerOptions.workerSrc =
+    `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.mjs`;
 
   const pdf = await pdfjs.getDocument({ data: new Uint8Array(buffer) }).promise;
   const pages: string[] = [];
@@ -40,8 +40,26 @@ async function extractPagesFromPDF(buffer: ArrayBuffer): Promise<string[]> {
 
 export async function parsePDFFile(file: File): Promise<UploadedRFP> {
   const buffer = await file.arrayBuffer();
-  const pages = await extractPagesFromPDF(buffer);
+
+  let pages: string[];
+  try {
+    pages = await extractPagesFromPDF(buffer);
+  } catch (err) {
+    console.error("PDF.js extraction failed:", err);
+    throw new Error(
+      "Failed to extract text from PDF. Please try converting it to Excel (.xlsx) first, or ensure the PDF contains selectable text (not scanned images)."
+    );
+  }
+
   const fullText = pages.join("\n\n");
+
+  // Sanity check: if extracted text is mostly non-printable or too short, warn user
+  const printable = fullText.replace(/[^\x20-\x7E\u00A0-\uFFFF]/g, "").trim();
+  if (printable.length < 20) {
+    throw new Error(
+      "Could not extract readable text from this PDF. It may be a scanned/image-based PDF. Please try uploading an Excel (.xlsx) file instead."
+    );
+  }
 
   const lines = fullText
     .split(/[\n\r]+/)
