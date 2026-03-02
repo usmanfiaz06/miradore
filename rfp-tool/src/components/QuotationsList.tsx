@@ -65,8 +65,8 @@ export default function QuotationsList({
       </div>
 
       {/* Filters */}
-      <div className="flex items-center gap-3">
-        <div className="relative flex-1 max-w-md">
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+        <div className="relative flex-1 sm:max-w-md">
           <Search
             size={16}
             className="absolute left-3.5 top-1/2 -translate-y-1/2 text-text-tertiary"
@@ -80,7 +80,7 @@ export default function QuotationsList({
           />
         </div>
 
-        <div className="flex items-center bg-white rounded-lg border border-border p-0.5">
+        <div className="flex items-center bg-white rounded-lg border border-border p-0.5 overflow-x-auto">
           <button
             onClick={() => setFilterCountry("all")}
             className={`px-3 py-2 rounded-md text-xs font-medium transition-colors ${
@@ -108,7 +108,7 @@ export default function QuotationsList({
       </div>
 
       {/* Table */}
-      <div className="bg-white rounded-2xl border border-border shadow-sm overflow-hidden">
+      <div className="bg-white rounded-2xl border border-border shadow-sm overflow-hidden overflow-x-auto">
         {filtered.length === 0 ? (
           <div className="px-6 py-16 text-center">
             <FileText
@@ -127,7 +127,7 @@ export default function QuotationsList({
             </p>
           </div>
         ) : (
-          <table className="w-full">
+          <table className="w-full min-w-[700px]">
             <thead>
               <tr className="bg-surface-sunken border-b border-border">
                 <th className="px-5 py-3 text-left text-xs font-semibold text-text-secondary uppercase tracking-wide">

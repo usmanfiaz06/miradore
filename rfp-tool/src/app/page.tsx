@@ -137,7 +137,7 @@ export default function Home() {
         isOpen={sidebarOpen}
         onToggle={() => setSidebarOpen((prev) => !prev)}
       />
-      <main className="pt-14 px-4 pb-4 lg:pt-0 lg:ml-64 lg:p-8">
+      <main className="pt-16 px-3 pb-4 sm:px-4 lg:pt-0 lg:ml-64 lg:p-8">
         {renderContent()}
       </main>
     </div>

@@ -106,7 +106,7 @@ export default function QuotationPreview({
   return (
     <div className="animate-fade-in">
       {/* Preview Toolbar */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-6">
         <div className="flex items-center gap-3">
           <button
             onClick={onClose}
@@ -130,10 +130,10 @@ export default function QuotationPreview({
       </div>
 
       {/* Preview Document */}
-      <div className="bg-white rounded-2xl border border-border shadow-lg overflow-hidden max-w-4xl mx-auto">
-        <div ref={printRef} className="p-10">
+      <div className="bg-white rounded-2xl border border-border shadow-lg overflow-hidden max-w-4xl mx-auto overflow-x-auto">
+        <div ref={printRef} className="p-4 sm:p-6 md:p-10">
           {/* Header */}
-          <div className="header flex justify-between items-start mb-10 pb-6 border-b-[3px] border-teal-500">
+          <div className="header flex flex-col sm:flex-row justify-between items-start mb-10 pb-6 border-b-[3px] border-teal-500 gap-4">
             <div className="logo-area">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
@@ -171,7 +171,7 @@ export default function QuotationPreview({
             <div className="section-title text-xs font-semibold text-teal-600 uppercase tracking-wider mb-3">
               Client & Event Details
             </div>
-            <div className="detail-grid grid grid-cols-2 gap-x-8 gap-y-3">
+            <div className="detail-grid grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-3">
               <div className="detail-item">
                 <label className="text-[10px] text-text-tertiary uppercase tracking-wide">
                   Client
@@ -408,7 +408,7 @@ export default function QuotationPreview({
               <h3 className="text-[10px] font-semibold text-teal-600 uppercase tracking-wide mb-3">
                 Bank Account Details
               </h3>
-              <div className="bank-grid grid grid-cols-2 gap-x-8 gap-y-2">
+              <div className="bank-grid grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-2">
                 {quotation.bankDetails.bankName && (
                   <div className="bank-item">
                     <label className="text-[9px] text-text-tertiary uppercase tracking-wide">

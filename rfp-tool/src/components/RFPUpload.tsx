@@ -191,7 +191,7 @@ export default function RFPUpload({
               <button
                 key={index}
                 onClick={() => onSelectEvent(event)}
-                className="w-full px-6 py-4 flex items-center gap-4 hover:bg-teal-50/50 transition-colors group text-left"
+                className="w-full px-4 sm:px-6 py-4 flex items-center gap-3 sm:gap-4 hover:bg-teal-50/50 transition-colors group text-left"
               >
                 {/* Number */}
                 <div className="w-8 h-8 rounded-lg bg-teal-50 flex items-center justify-center flex-shrink-0 group-hover:bg-teal-100 transition-colors">
