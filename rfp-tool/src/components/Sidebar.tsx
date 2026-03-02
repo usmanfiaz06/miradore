@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import {
   FileText,
   Upload,
@@ -36,13 +35,13 @@ export default function Sidebar({
     <aside className="w-64 bg-teal-800 text-white flex flex-col h-screen fixed left-0 top-0 z-30">
       {/* Logo */}
       <div className="px-6 py-5 border-b border-teal-700/50">
-        <Image
-          src="/images/miradore-logo.png"
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={`${process.env.NEXT_PUBLIC_BASE_PATH || ""}/images/miradore-logo.png`}
           alt="Miradore"
           width={160}
           height={44}
           className="brightness-0 invert"
-          priority
         />
         <p className="text-teal-300 text-xs mt-1.5 font-medium tracking-wide uppercase">
           RFP Quotation Tool
