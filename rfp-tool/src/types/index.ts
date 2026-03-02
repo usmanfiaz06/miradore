@@ -26,6 +26,23 @@ export interface LineItem {
   notes: string;
 }
 
+export interface BankDetails {
+  bankName: string;
+  accountTitle: string;
+  accountNumber: string;
+  iban: string;
+  swiftCode: string;
+  branchName: string;
+}
+
+export interface PaymentTranche {
+  id: string;
+  label: string;
+  percentage: number;
+  description: string;
+  dueDate: string;
+}
+
 export interface QuotationData {
   id: string;
   clientName: string;
@@ -44,6 +61,9 @@ export interface QuotationData {
   notes: string;
   createdAt: string;
   validUntil: string;
+  bankDetails: BankDetails;
+  paymentTerms: string;
+  tranches: PaymentTranche[];
 }
 
 export interface RFPEvent {

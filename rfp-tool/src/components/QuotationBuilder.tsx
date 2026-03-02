@@ -15,8 +15,10 @@ import {
   ChevronDown,
   FileText,
   Copy,
+  Landmark,
+  Banknote,
 } from "lucide-react";
-import { QuotationData, LineItem, Country, Currency, RFPEvent } from "@/types";
+import { QuotationData, LineItem, Country, Currency, RFPEvent, BankDetails, PaymentTranche } from "@/types";
 import { COUNTRIES, CURRENCIES, EVENT_CATEGORIES, TIER_PRICING, DEFAULT_LINE_ITEMS_BY_TIER } from "@/lib/constants";
 import {
   generateId,
@@ -88,6 +90,19 @@ function createDefaultQuotation(
     notes: event?.keyServices || "",
     createdAt: getDateString(),
     validUntil: getDateString(30),
+    bankDetails: {
+      bankName: "",
+      accountTitle: "",
+      accountNumber: "",
+      iban: "",
+      swiftCode: "",
+      branchName: "",
+    },
+    paymentTerms: "",
+    tranches: [
+      { id: generateId(), label: "1st Tranche (Advance)", percentage: 50, description: "Upon signing of contract", dueDate: "" },
+      { id: generateId(), label: "2nd Tranche (Final)", percentage: 50, description: "Upon event completion", dueDate: "" },
+    ],
   };
 }
 
@@ -104,6 +119,15 @@ export default function QuotationBuilder({
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(
     new Set(EVENT_CATEGORIES)
   );
+  const [customCategories, setCustomCategories] = useState<string[]>([]);
+
+  // Merge default + custom categories, plus any in-use categories from line items
+  const allCategories = useMemo(() => {
+    const inUse = quotation.lineItems
+      .map((item) => item.category)
+      .filter((c) => c && !EVENT_CATEGORIES.includes(c) && !customCategories.includes(c));
+    return [...EVENT_CATEGORIES, ...customCategories, ...inUse];
+  }, [quotation.lineItems, customCategories]);
 
   const totals = useMemo(
     () => calculateQuotationTotals(quotation),
@@ -168,6 +192,45 @@ export default function QuotationBuilder({
       newItems.splice(itemIndex + 1, 0, duplicate);
       return { ...prev, lineItems: newItems };
     });
+  };
+
+  const updateBankField = (field: keyof BankDetails, value: string) => {
+    setQuotation((prev) => ({
+      ...prev,
+      bankDetails: { ...prev.bankDetails, [field]: value },
+    }));
+  };
+
+  const updateTranche = (id: string, field: keyof PaymentTranche, value: unknown) => {
+    setQuotation((prev) => ({
+      ...prev,
+      tranches: prev.tranches.map((t) =>
+        t.id === id ? { ...t, [field]: value } : t
+      ),
+    }));
+  };
+
+  const addTranche = () => {
+    setQuotation((prev) => ({
+      ...prev,
+      tranches: [
+        ...prev.tranches,
+        {
+          id: generateId(),
+          label: `Tranche ${prev.tranches.length + 1}`,
+          percentage: 0,
+          description: "",
+          dueDate: "",
+        },
+      ],
+    }));
+  };
+
+  const removeTranche = (id: string) => {
+    setQuotation((prev) => ({
+      ...prev,
+      tranches: prev.tranches.filter((t) => t.id !== id),
+    }));
   };
 
   const handleSave = () => {
@@ -373,20 +436,28 @@ export default function QuotationBuilder({
                   </td>
                   <td className="px-3 py-3">
                     <div className="relative">
-                      <select
+                      <input
+                        type="text"
+                        list={`cat-list-${item.id}`}
                         value={item.category}
-                        onChange={(e) =>
-                          updateLineItem(item.id, "category", e.target.value)
-                        }
-                        className="w-full appearance-none px-2.5 py-2 rounded-md border border-transparent hover:border-border focus:border-teal-500 focus:ring-1 focus:ring-teal-500/20 text-xs font-medium text-text-primary bg-transparent cursor-pointer"
-                      >
-                        <option value="">Select category</option>
-                        {EVENT_CATEGORIES.map((cat) => (
-                          <option key={cat} value={cat}>
-                            {cat}
-                          </option>
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          updateLineItem(item.id, "category", val);
+                        }}
+                        onBlur={(e) => {
+                          const val = e.target.value.trim();
+                          if (val && !allCategories.includes(val)) {
+                            setCustomCategories((prev) => [...prev, val]);
+                          }
+                        }}
+                        placeholder="Select or type..."
+                        className="w-full px-2.5 py-2 rounded-md border border-transparent hover:border-border focus:border-teal-500 focus:ring-1 focus:ring-teal-500/20 text-xs font-medium text-text-primary bg-transparent"
+                      />
+                      <datalist id={`cat-list-${item.id}`}>
+                        {allCategories.map((cat) => (
+                          <option key={cat} value={cat} />
                         ))}
-                      </select>
+                      </datalist>
                       <ChevronDown
                         size={12}
                         className="absolute right-2 top-1/2 -translate-y-1/2 text-text-tertiary pointer-events-none"
@@ -477,6 +548,209 @@ export default function QuotationBuilder({
             </p>
           </div>
         )}
+      </div>
+
+      {/* Bank Details */}
+      <div className="bg-white rounded-2xl border border-border shadow-sm overflow-hidden">
+        <div className="px-6 py-4 border-b border-border-subtle">
+          <h2 className="text-base font-semibold text-text-primary flex items-center gap-2">
+            <Landmark size={18} className="text-teal-500" />
+            Receiving Bank Account
+          </h2>
+        </div>
+        <div className="p-6 grid grid-cols-2 gap-5">
+          <div>
+            <label className="block text-xs font-medium text-text-secondary mb-1.5 uppercase tracking-wide">
+              Bank Name
+            </label>
+            <input
+              type="text"
+              value={quotation.bankDetails.bankName}
+              onChange={(e) => updateBankField("bankName", e.target.value)}
+              placeholder="e.g., Al Rajhi Bank"
+              className="w-full px-3.5 py-2.5 rounded-lg border border-border text-sm text-text-primary placeholder-text-tertiary hover:border-teal-300 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-text-secondary mb-1.5 uppercase tracking-wide">
+              Account Title
+            </label>
+            <input
+              type="text"
+              value={quotation.bankDetails.accountTitle}
+              onChange={(e) => updateBankField("accountTitle", e.target.value)}
+              placeholder="e.g., Miradore Events LLC"
+              className="w-full px-3.5 py-2.5 rounded-lg border border-border text-sm text-text-primary placeholder-text-tertiary hover:border-teal-300 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-text-secondary mb-1.5 uppercase tracking-wide">
+              Account Number
+            </label>
+            <input
+              type="text"
+              value={quotation.bankDetails.accountNumber}
+              onChange={(e) => updateBankField("accountNumber", e.target.value)}
+              placeholder="Enter account number"
+              className="w-full px-3.5 py-2.5 rounded-lg border border-border text-sm text-text-primary placeholder-text-tertiary hover:border-teal-300 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 font-mono"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-text-secondary mb-1.5 uppercase tracking-wide">
+              IBAN
+            </label>
+            <input
+              type="text"
+              value={quotation.bankDetails.iban}
+              onChange={(e) => updateBankField("iban", e.target.value)}
+              placeholder="e.g., SA00 0000 0000 0000 0000 0000"
+              className="w-full px-3.5 py-2.5 rounded-lg border border-border text-sm text-text-primary placeholder-text-tertiary hover:border-teal-300 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 font-mono"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-text-secondary mb-1.5 uppercase tracking-wide">
+              SWIFT Code
+            </label>
+            <input
+              type="text"
+              value={quotation.bankDetails.swiftCode}
+              onChange={(e) => updateBankField("swiftCode", e.target.value)}
+              placeholder="e.g., RJHISARI"
+              className="w-full px-3.5 py-2.5 rounded-lg border border-border text-sm text-text-primary placeholder-text-tertiary hover:border-teal-300 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 font-mono"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-text-secondary mb-1.5 uppercase tracking-wide">
+              Branch
+            </label>
+            <input
+              type="text"
+              value={quotation.bankDetails.branchName}
+              onChange={(e) => updateBankField("branchName", e.target.value)}
+              placeholder="e.g., Riyadh Main Branch"
+              className="w-full px-3.5 py-2.5 rounded-lg border border-border text-sm text-text-primary placeholder-text-tertiary hover:border-teal-300 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20"
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Payment Terms & Tranches */}
+      <div className="bg-white rounded-2xl border border-border shadow-sm overflow-hidden">
+        <div className="px-6 py-4 border-b border-border-subtle flex items-center justify-between">
+          <h2 className="text-base font-semibold text-text-primary flex items-center gap-2">
+            <Banknote size={18} className="text-teal-500" />
+            Payment Terms & Tranches
+          </h2>
+          <button
+            onClick={addTranche}
+            className="flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-teal-50 text-teal-700 text-xs font-medium hover:bg-teal-100 transition-colors"
+          >
+            <Plus size={14} />
+            Add Tranche
+          </button>
+        </div>
+        <div className="p-6 space-y-5">
+          <div>
+            <label className="block text-xs font-medium text-text-secondary mb-1.5 uppercase tracking-wide">
+              Payment Terms
+            </label>
+            <textarea
+              value={quotation.paymentTerms}
+              onChange={(e) => updateField("paymentTerms", e.target.value)}
+              rows={2}
+              placeholder="e.g., Payment is due as per the tranche schedule below. All invoices are payable within 15 days of issuance."
+              className="w-full px-3.5 py-2.5 rounded-lg border border-border text-sm text-text-primary placeholder-text-tertiary hover:border-teal-300 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 resize-none"
+            />
+          </div>
+
+          {quotation.tranches.length > 0 && (
+            <div className="space-y-3">
+              <p className="text-xs font-medium text-text-secondary uppercase tracking-wide">
+                Payment Schedule ({formatCurrency(totals.grandTotal, quotation.currency)} total)
+              </p>
+              {quotation.tranches.map((tranche, index) => (
+                <div
+                  key={tranche.id}
+                  className="flex items-start gap-3 p-4 rounded-xl border border-border-subtle bg-surface-sunken/50 group"
+                >
+                  <div className="w-8 h-8 rounded-lg bg-teal-100 flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <span className="text-xs font-bold text-teal-700">{index + 1}</span>
+                  </div>
+                  <div className="flex-1 grid grid-cols-4 gap-3">
+                    <div>
+                      <label className="block text-[10px] text-text-tertiary uppercase mb-1">Label</label>
+                      <input
+                        type="text"
+                        value={tranche.label}
+                        onChange={(e) => updateTranche(tranche.id, "label", e.target.value)}
+                        placeholder="e.g., 1st Tranche"
+                        className="w-full px-2.5 py-2 rounded-md border border-border text-xs text-text-primary hover:border-teal-300 focus:border-teal-500 focus:ring-1 focus:ring-teal-500/20"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] text-text-tertiary uppercase mb-1">Percentage</label>
+                      <div className="relative">
+                        <input
+                          type="number"
+                          value={tranche.percentage}
+                          onChange={(e) => updateTranche(tranche.id, "percentage", parseFloat(e.target.value) || 0)}
+                          min={0}
+                          max={100}
+                          className="w-full px-2.5 py-2 pr-8 rounded-md border border-border text-xs text-text-primary font-mono hover:border-teal-300 focus:border-teal-500 focus:ring-1 focus:ring-teal-500/20"
+                        />
+                        <Percent size={10} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-text-tertiary" />
+                      </div>
+                      <p className="text-[10px] text-teal-600 font-mono mt-1">
+                        {formatCurrency(totals.grandTotal * (tranche.percentage / 100), quotation.currency)}
+                      </p>
+                    </div>
+                    <div>
+                      <label className="block text-[10px] text-text-tertiary uppercase mb-1">Description</label>
+                      <input
+                        type="text"
+                        value={tranche.description}
+                        onChange={(e) => updateTranche(tranche.id, "description", e.target.value)}
+                        placeholder="e.g., Upon signing"
+                        className="w-full px-2.5 py-2 rounded-md border border-border text-xs text-text-primary hover:border-teal-300 focus:border-teal-500 focus:ring-1 focus:ring-teal-500/20"
+                      />
+                    </div>
+                    <div className="flex items-end gap-2">
+                      <div className="flex-1">
+                        <label className="block text-[10px] text-text-tertiary uppercase mb-1">Due Date</label>
+                        <input
+                          type="text"
+                          value={tranche.dueDate}
+                          onChange={(e) => updateTranche(tranche.id, "dueDate", e.target.value)}
+                          placeholder="e.g., 2026-04-01"
+                          className="w-full px-2.5 py-2 rounded-md border border-border text-xs text-text-primary hover:border-teal-300 focus:border-teal-500 focus:ring-1 focus:ring-teal-500/20"
+                        />
+                      </div>
+                      {quotation.tranches.length > 1 && (
+                        <button
+                          onClick={() => removeTranche(tranche.id)}
+                          className="p-1.5 rounded-md hover:bg-red-50 transition-colors mb-0.5 opacity-0 group-hover:opacity-100"
+                          title="Remove tranche"
+                        >
+                          <Trash2 size={13} className="text-red-400" />
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              ))}
+              {quotation.tranches.length > 0 && (
+                <p className={`text-xs font-medium mt-2 ${
+                  quotation.tranches.reduce((s, t) => s + t.percentage, 0) === 100
+                    ? "text-green-600"
+                    : "text-orange-600"
+                }`}>
+                  Total: {quotation.tranches.reduce((s, t) => s + t.percentage, 0)}% of grand total
+                  {quotation.tranches.reduce((s, t) => s + t.percentage, 0) !== 100 && " (should equal 100%)"}
+                </p>
+              )}
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Financial Summary */}

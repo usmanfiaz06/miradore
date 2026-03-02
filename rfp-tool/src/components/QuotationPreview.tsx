@@ -75,6 +75,19 @@ export default function QuotationPreview({
           .notes { margin-top: 32px; padding: 16px; background: #f8f9fa; border-radius: 8px; border-left: 3px solid #0d7377; }
           .notes h3 { font-size: 11px; font-weight: 600; color: #0d7377; text-transform: uppercase; margin-bottom: 6px; }
           .notes p { font-size: 11px; color: #64748b; line-height: 1.5; }
+          .bank-details { margin-top: 32px; padding: 16px; background: #f0f7f7; border-radius: 8px; border: 1px solid #d1e7e7; }
+          .bank-details h3 { font-size: 11px; font-weight: 600; color: #0d7377; text-transform: uppercase; margin-bottom: 10px; }
+          .bank-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 24px; }
+          .bank-grid .bank-item label { font-size: 9px; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em; }
+          .bank-grid .bank-item p { font-size: 11px; color: #1a1a2e; font-weight: 500; margin-top: 1px; }
+          .tranches { margin-top: 24px; }
+          .tranches h3 { font-size: 11px; font-weight: 600; color: #0d7377; text-transform: uppercase; margin-bottom: 10px; }
+          .tranche-table { width: 100%; border-collapse: collapse; }
+          .tranche-table th { background: #f0f7f7; padding: 6px 10px; font-size: 9px; font-weight: 600; color: #0d7377; text-transform: uppercase; text-align: left; border-bottom: 2px solid #0d7377; }
+          .tranche-table th:nth-child(3), .tranche-table th:nth-child(4) { text-align: right; }
+          .tranche-table td { padding: 8px 10px; font-size: 11px; color: #1a1a2e; border-bottom: 1px solid #e2e8f0; }
+          .tranche-table td:nth-child(3), .tranche-table td:nth-child(4) { text-align: right; font-family: 'Courier New', monospace; }
+          .payment-terms { margin-top: 12px; font-size: 10px; color: #64748b; line-height: 1.5; }
           .footer { margin-top: 48px; padding-top: 16px; border-top: 1px solid #e2e8f0; text-align: center; }
           .footer p { font-size: 10px; color: #94a3b8; }
           .footer .brand { color: #0d7377; font-weight: 600; }
@@ -328,6 +341,135 @@ export default function QuotationPreview({
               <p className="text-xs text-text-secondary leading-relaxed whitespace-pre-wrap">
                 {quotation.notes}
               </p>
+            </div>
+          )}
+
+          {/* Payment Tranches */}
+          {quotation.tranches && quotation.tranches.length > 0 && (
+            <div className="tranches mt-8">
+              <h3 className="text-[10px] font-semibold text-teal-600 uppercase tracking-wide mb-3">
+                Payment Schedule
+              </h3>
+              <table className="tranche-table w-full border-collapse">
+                <thead>
+                  <tr>
+                    <th className="bg-teal-50 px-2.5 py-2 text-left text-[9px] font-semibold text-teal-700 uppercase tracking-wide border-b-2 border-teal-500">
+                      Tranche
+                    </th>
+                    <th className="bg-teal-50 px-2.5 py-2 text-left text-[9px] font-semibold text-teal-700 uppercase tracking-wide border-b-2 border-teal-500">
+                      Description
+                    </th>
+                    <th className="bg-teal-50 px-2.5 py-2 text-right text-[9px] font-semibold text-teal-700 uppercase tracking-wide border-b-2 border-teal-500">
+                      %
+                    </th>
+                    <th className="bg-teal-50 px-2.5 py-2 text-right text-[9px] font-semibold text-teal-700 uppercase tracking-wide border-b-2 border-teal-500">
+                      Amount
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {quotation.tranches.map((tranche) => (
+                    <tr key={tranche.id} className="border-b border-border-subtle">
+                      <td className="px-2.5 py-2 text-xs font-medium text-text-primary">
+                        {tranche.label}
+                        {tranche.dueDate && (
+                          <span className="block text-[10px] text-text-tertiary mt-0.5">
+                            Due: {tranche.dueDate}
+                          </span>
+                        )}
+                      </td>
+                      <td className="px-2.5 py-2 text-xs text-text-secondary">
+                        {tranche.description}
+                      </td>
+                      <td className="px-2.5 py-2 text-xs text-text-primary text-right font-mono">
+                        {tranche.percentage}%
+                      </td>
+                      <td className="px-2.5 py-2 text-xs font-semibold text-text-primary text-right font-mono">
+                        {formatCurrency(
+                          totals.grandTotal * (tranche.percentage / 100),
+                          quotation.currency
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              {quotation.paymentTerms && (
+                <p className="payment-terms text-[10px] text-text-secondary mt-3 leading-relaxed">
+                  {quotation.paymentTerms}
+                </p>
+              )}
+            </div>
+          )}
+
+          {/* Bank Details */}
+          {quotation.bankDetails && quotation.bankDetails.bankName && (
+            <div className="bank-details mt-8 p-4 bg-teal-50/50 rounded-lg border border-teal-100">
+              <h3 className="text-[10px] font-semibold text-teal-600 uppercase tracking-wide mb-3">
+                Bank Account Details
+              </h3>
+              <div className="bank-grid grid grid-cols-2 gap-x-8 gap-y-2">
+                {quotation.bankDetails.bankName && (
+                  <div className="bank-item">
+                    <label className="text-[9px] text-text-tertiary uppercase tracking-wide">
+                      Bank Name
+                    </label>
+                    <p className="text-xs text-text-primary font-medium">
+                      {quotation.bankDetails.bankName}
+                    </p>
+                  </div>
+                )}
+                {quotation.bankDetails.accountTitle && (
+                  <div className="bank-item">
+                    <label className="text-[9px] text-text-tertiary uppercase tracking-wide">
+                      Account Title
+                    </label>
+                    <p className="text-xs text-text-primary font-medium">
+                      {quotation.bankDetails.accountTitle}
+                    </p>
+                  </div>
+                )}
+                {quotation.bankDetails.accountNumber && (
+                  <div className="bank-item">
+                    <label className="text-[9px] text-text-tertiary uppercase tracking-wide">
+                      Account Number
+                    </label>
+                    <p className="text-xs text-text-primary font-medium font-mono">
+                      {quotation.bankDetails.accountNumber}
+                    </p>
+                  </div>
+                )}
+                {quotation.bankDetails.iban && (
+                  <div className="bank-item">
+                    <label className="text-[9px] text-text-tertiary uppercase tracking-wide">
+                      IBAN
+                    </label>
+                    <p className="text-xs text-text-primary font-medium font-mono">
+                      {quotation.bankDetails.iban}
+                    </p>
+                  </div>
+                )}
+                {quotation.bankDetails.swiftCode && (
+                  <div className="bank-item">
+                    <label className="text-[9px] text-text-tertiary uppercase tracking-wide">
+                      SWIFT Code
+                    </label>
+                    <p className="text-xs text-text-primary font-medium font-mono">
+                      {quotation.bankDetails.swiftCode}
+                    </p>
+                  </div>
+                )}
+                {quotation.bankDetails.branchName && (
+                  <div className="bank-item">
+                    <label className="text-[9px] text-text-tertiary uppercase tracking-wide">
+                      Branch
+                    </label>
+                    <p className="text-xs text-text-primary font-medium">
+                      {quotation.bankDetails.branchName}
+                    </p>
+                  </div>
+                )}
+              </div>
             </div>
           )}
 
