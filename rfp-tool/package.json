@@ -6,15 +6,13 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint",
-    "postinstall": "cp node_modules/pdfjs-dist/build/pdf.worker.min.mjs public/pdf.worker.min.mjs"
+    "lint": "eslint"
   },
   "dependencies": {
     "@react-pdf/renderer": "^4.3.2",
     "file-saver": "^2.0.5",
     "lucide-react": "^0.576.0",
     "next": "16.1.6",
-    "pdfjs-dist": "^4.8.69",
     "react": "19.2.3",
     "react-dom": "19.2.3",
     "react-dropzone": "^15.0.0",
