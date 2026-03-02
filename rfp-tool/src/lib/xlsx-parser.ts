@@ -2,8 +2,13 @@
 
 import * as XLSX from "xlsx";
 import { RFPEvent, UploadedRFP } from "@/types";
+import { parsePDFFile } from "./pdf-parser";
 
 export async function parseRFPFile(file: File): Promise<UploadedRFP> {
+  // Route PDF files to the dedicated PDF parser
+  if (file.name.toLowerCase().endsWith(".pdf") || file.type === "application/pdf") {
+    return parsePDFFile(file);
+  }
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
 

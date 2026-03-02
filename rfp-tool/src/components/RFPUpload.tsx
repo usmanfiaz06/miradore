@@ -60,6 +60,7 @@ export default function RFPUpload({
       ],
       "application/vnd.ms-excel": [".xls"],
       "text/csv": [".csv"],
+      "application/pdf": [".pdf"],
     },
     maxFiles: 1,
     multiple: false,
@@ -88,7 +89,7 @@ export default function RFPUpload({
             Upload RFP Document
           </h2>
           <p className="text-sm text-text-secondary mt-1">
-            Upload an Excel file containing event details to generate quotations
+            Upload an Excel or PDF file containing event details to generate quotations
           </p>
         </div>
 
@@ -148,7 +149,7 @@ export default function RFPUpload({
                       : "Drag & drop your RFP file here"}
                   </p>
                   <p className="text-xs text-text-secondary mt-1">
-                    or click to browse &middot; Supports .xlsx, .xls, .csv
+                    or click to browse &middot; Supports .xlsx, .xls, .csv, .pdf
                   </p>
                 </div>
               </div>
