@@ -30,10 +30,18 @@ export default function RFPUpload({
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const allowedExtensions = [".xlsx", ".xls", ".csv", ".pdf"];
+
   const onDrop = useCallback(
     async (acceptedFiles: File[]) => {
       const file = acceptedFiles[0];
       if (!file) return;
+
+      const ext = file.name.toLowerCase().slice(file.name.lastIndexOf("."));
+      if (!allowedExtensions.includes(ext)) {
+        setError(`Unsupported file type. Please upload ${allowedExtensions.join(", ")} files.`);
+        return;
+      }
 
       setIsProcessing(true);
       setError(null);
@@ -54,14 +62,6 @@ export default function RFPUpload({
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
-    accept: {
-      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": [
-        ".xlsx",
-      ],
-      "application/vnd.ms-excel": [".xls"],
-      "text/csv": [".csv"],
-      "application/pdf": [".pdf"],
-    },
     maxFiles: 1,
     multiple: false,
   });

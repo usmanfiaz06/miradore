@@ -4,13 +4,12 @@ import { RFPEvent, UploadedRFP } from "@/types";
 
 export async function parsePDFFile(file: File): Promise<UploadedRFP> {
   const pdfjs = await import("pdfjs-dist");
-  pdfjs.GlobalWorkerOptions.workerSrc = new URL(
-    "pdfjs-dist/build/pdf.worker.min.mjs",
-    import.meta.url
-  ).toString();
+
+  const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "";
+  pdfjs.GlobalWorkerOptions.workerSrc = `${basePath}/pdf.worker.min.mjs`;
 
   const arrayBuffer = await file.arrayBuffer();
-  const pdf = await pdfjs.getDocument({ data: arrayBuffer }).promise;
+  const pdf = await pdfjs.getDocument({ data: new Uint8Array(arrayBuffer) }).promise;
 
   // Extract text from all pages
   const pages: string[] = [];
