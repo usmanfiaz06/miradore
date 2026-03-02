@@ -1,17 +1,14 @@
 "use client";
 
 import { useRef } from "react";
-import Image from "next/image";
 import {
-  X,
-  Download,
-  Printer,
-  Mail,
   ArrowLeft,
+  Printer,
 } from "lucide-react";
 import { QuotationData } from "@/types";
 import { COUNTRIES } from "@/lib/constants";
 import { formatCurrency, getCurrencyConfig } from "@/lib/utils";
+import { MIRADORE_LOGO_BASE64 } from "@/lib/logo";
 
 interface QuotationPreviewProps {
   quotation: QuotationData;
@@ -53,8 +50,8 @@ export default function QuotationPreview({
           * { margin: 0; padding: 0; box-sizing: border-box; }
           body { font-family: 'Inter', sans-serif; color: #1a1a2e; padding: 40px; }
           .header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 40px; padding-bottom: 24px; border-bottom: 3px solid #0d7377; }
-          .logo-area h1 { font-size: 24px; font-weight: 700; color: #0d7377; }
-          .logo-area p { font-size: 11px; color: #64748b; margin-top: 4px; }
+          .logo-area img { max-width: 180px; height: auto; }
+          .logo-area p { font-size: 11px; color: #64748b; margin-top: 6px; }
           .quotation-meta { text-align: right; }
           .quotation-meta h2 { font-size: 18px; font-weight: 600; color: #0d7377; }
           .quotation-meta p { font-size: 11px; color: #64748b; margin-top: 2px; }
@@ -125,8 +122,15 @@ export default function QuotationPreview({
           {/* Header */}
           <div className="header flex justify-between items-start mb-10 pb-6 border-b-[3px] border-teal-500">
             <div className="logo-area">
-              <h1 className="text-2xl font-bold text-teal-700">MIRADORE</h1>
-              <p className="text-xs text-text-secondary mt-1">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={MIRADORE_LOGO_BASE64}
+                alt="Miradore"
+                width={180}
+                height={50}
+                style={{ height: "auto", maxWidth: "180px" }}
+              />
+              <p className="text-xs text-text-secondary mt-2">
                 Event Management &middot; Production &middot; Creative
               </p>
               <p className="text-xs text-text-tertiary mt-0.5">

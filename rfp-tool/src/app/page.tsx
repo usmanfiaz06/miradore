@@ -126,14 +126,20 @@ export default function Home() {
     }
   };
 
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
   return (
     <div className="min-h-screen bg-background">
       <Sidebar
         activeView={activeView}
         onViewChange={setActiveView}
         quotationCount={quotations.length}
+        isOpen={sidebarOpen}
+        onToggle={() => setSidebarOpen((prev) => !prev)}
       />
-      <main className="ml-64 p-8">{renderContent()}</main>
+      <main className="pt-14 px-4 pb-4 lg:pt-0 lg:ml-64 lg:p-8">
+        {renderContent()}
+      </main>
     </div>
   );
 }
