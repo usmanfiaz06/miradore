@@ -119,6 +119,15 @@ export default function QuotationBuilder({
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(
     new Set(EVENT_CATEGORIES)
   );
+  const [customCategories, setCustomCategories] = useState<string[]>([]);
+
+  // Merge default + custom categories, plus any in-use categories from line items
+  const allCategories = useMemo(() => {
+    const inUse = quotation.lineItems
+      .map((item) => item.category)
+      .filter((c) => c && !EVENT_CATEGORIES.includes(c) && !customCategories.includes(c));
+    return [...EVENT_CATEGORIES, ...customCategories, ...inUse];
+  }, [quotation.lineItems, customCategories]);
 
   const totals = useMemo(
     () => calculateQuotationTotals(quotation),
@@ -427,20 +436,28 @@ export default function QuotationBuilder({
                   </td>
                   <td className="px-3 py-3">
                     <div className="relative">
-                      <select
+                      <input
+                        type="text"
+                        list={`cat-list-${item.id}`}
                         value={item.category}
-                        onChange={(e) =>
-                          updateLineItem(item.id, "category", e.target.value)
-                        }
-                        className="w-full appearance-none px-2.5 py-2 rounded-md border border-transparent hover:border-border focus:border-teal-500 focus:ring-1 focus:ring-teal-500/20 text-xs font-medium text-text-primary bg-transparent cursor-pointer"
-                      >
-                        <option value="">Select category</option>
-                        {EVENT_CATEGORIES.map((cat) => (
-                          <option key={cat} value={cat}>
-                            {cat}
-                          </option>
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          updateLineItem(item.id, "category", val);
+                        }}
+                        onBlur={(e) => {
+                          const val = e.target.value.trim();
+                          if (val && !allCategories.includes(val)) {
+                            setCustomCategories((prev) => [...prev, val]);
+                          }
+                        }}
+                        placeholder="Select or type..."
+                        className="w-full px-2.5 py-2 rounded-md border border-transparent hover:border-border focus:border-teal-500 focus:ring-1 focus:ring-teal-500/20 text-xs font-medium text-text-primary bg-transparent"
+                      />
+                      <datalist id={`cat-list-${item.id}`}>
+                        {allCategories.map((cat) => (
+                          <option key={cat} value={cat} />
                         ))}
-                      </select>
+                      </datalist>
                       <ChevronDown
                         size={12}
                         className="absolute right-2 top-1/2 -translate-y-1/2 text-text-tertiary pointer-events-none"
