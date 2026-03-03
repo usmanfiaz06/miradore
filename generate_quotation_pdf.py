@@ -18,7 +18,7 @@ class QuotationPDF(FPDF):
         self.set_y(-15)
         self.set_font("Helvetica", "I", 7)
         self.set_text_color(*self.GRAY)
-        self.cell(0, 10, f"Page {self.page_no()}/{{nb}}  |  Miradore Marketing Management L.L.C  |  Confidential", align="C")
+        self.cell(0, 10, f"Page {self.page_no()}/{{nb}}  |  Miradore Experiences, Riyadh  |  Confidential", align="C")
 
     def add_logo_header(self):
         logo_path = os.path.join(os.path.dirname(__file__), "Miradore Logo Color.png")
@@ -27,13 +27,7 @@ class QuotationPDF(FPDF):
         self.set_xy(120, 12)
         self.set_font("Helvetica", "B", 9)
         self.set_text_color(*self.DARK)
-        self.cell(75, 5, "MIRADORE MARKETING MANAGEMENT L.L.C", align="R", new_x="LMARGIN", new_y="NEXT")
-        self.set_x(120)
-        self.set_font("Helvetica", "", 7)
-        self.set_text_color(*self.GRAY)
-        self.cell(75, 4, "License No: 1160569", align="R", new_x="LMARGIN", new_y="NEXT")
-        self.set_x(120)
-        self.cell(75, 4, "VAT #: 104140200700003", align="R", new_x="LMARGIN", new_y="NEXT")
+        self.cell(75, 5, "MIRADORE EXPERIENCES, RIYADH", align="R", new_x="LMARGIN", new_y="NEXT")
 
     def draw_accent_line(self):
         self.set_draw_color(*self.TEAL)
@@ -87,7 +81,7 @@ class QuotationPDF(FPDF):
         self.set_xy(120, right_y + 5)
         self.set_font("Helvetica", "", 8)
         self.set_text_color(*self.DARK)
-        self.cell(75, 5, "Miradore Marketing Management L.L.C", align="R", new_x="LMARGIN", new_y="NEXT")
+        self.cell(75, 5, "Miradore Experiences, Riyadh", align="R", new_x="LMARGIN", new_y="NEXT")
         self.set_xy(120, right_y + 15)
         self.set_font("Helvetica", "B", 8)
         self.set_text_color(*self.TEAL)
@@ -128,9 +122,11 @@ class QuotationPDF(FPDF):
         self.cell(14, 6, str(qty), border=0, align="C", fill=True)
         self.cell(14, 6, str(days), border=0, align="C", fill=True)
         self.set_font("Helvetica", "", 7)
-        self.cell(30, 6, f"{rate:,}" if rate else "-", border=0, align="R", fill=True)
+        rate_text = rate if isinstance(rate, str) else (f"{rate:,}" if rate else "-")
+        self.cell(30, 6, rate_text, border=0, align="R", fill=True)
         self.set_font("Helvetica", "B", 7)
-        self.cell(35, 6, f"{amount_sar:,}" if amount_sar else "-", border=0, align="R", fill=True)
+        amt_text = amount_sar if isinstance(amount_sar, str) else (f"{amount_sar:,}" if amount_sar else "-")
+        self.cell(35, 6, amt_text, border=0, align="R", fill=True)
         self.ln()
 
     def subtotal_row(self, label, amount_sar):
@@ -181,41 +177,43 @@ def generate():
 
     # Section A
     pdf.section_header("SECTION A: VENUE & HOSPITALITY")
-    pdf.item_row(1, "Hotel Ballroom (Dinner for 400 Guests, VIP Seating for 50)", 1, 1, 325000, 325000)
+    pdf.item_row(1, "Hotel Ballroom Hire (Dinner for 400 Guests)", 1, 1, 325000, 325000)
+    pdf.item_row(2, "VIP Seating Arrangement (50 Guests - Premium Setup)", 1, 1, 12000, 12000, alt=True)
     pdf.ln(2)
 
     # Section B
     pdf.section_header("SECTION B: VENUE BRANDING & SETUP")
-    pdf.item_row(2, "Welcome Backdrop (8ft x 8ft, Flex + Frame) with Podium", 1, 1, 16500, 16500)
-    pdf.item_row(3, "SMD/LED Screen - Main (10ft x 30ft)", 1, 1, 33000, 33000, alt=True)
-    pdf.item_row(4, "02 Media Walls (10ft x 20ft, Flex + Frame)", 2, 1, 5500, 11000)
-    pdf.item_row(5, "06 Commercial Branding Panels (10ft x 10ft, Flex + Frame)", 6, 1, 2500, 15000, alt=True)
-    pdf.item_row(6, "06 Digital Standees", 6, 1, 1500, 9000)
-    pdf.item_row(7, "Reception Counter with Branded Fascia", 1, 1, 11000, 11000, alt=True)
-    pdf.item_row(8, "Table Branding, Name Plates & VIP Delegate Collateral", 1, 1, 8000, 8000)
-    pdf.subtotal_row("Subtotal:", 103500)
+    pdf.item_row(3, "Welcome Backdrop (8ft x 8ft, Flex + Frame) with Podium", 1, 1, 16500, 16500)
+    pdf.item_row(4, "SMD/LED Screen - Main (10ft x 30ft)", 1, 1, 37200, 37200, alt=True)
+    pdf.item_row(5, "02 Media Walls (10ft x 20ft, Flex + Frame)", 2, 1, 5500, 11000)
+    pdf.item_row(6, "06 Commercial Branding Panels (10ft x 10ft, Flex + Frame)", 6, 1, 2500, 15000, alt=True)
+    pdf.item_row(7, "06 Digital Standees", 6, 1, 1500, 9000)
+    pdf.item_row(8, "Reception Counter with Branded Fascia", 1, 1, 11000, 11000, alt=True)
+    pdf.item_row(9, "Table Branding, Name Plates & VIP Delegate Collateral", 1, 1, 8000, 8000)
+    pdf.item_row(10, "Cocktail Tables - Coffee Break Area", 10, 1, 200, 2000, alt=True)
+    pdf.subtotal_row("Subtotal:", 109700)
 
     # Section C
     pdf.section_header("SECTION C: TECHNICAL & AUDIO-VISUAL")
-    pdf.item_row(9, "Sound System & 2 Wireless Mics - On-premise (upgrade on-demand)", 1, 1, 0, 0)
-    pdf.item_row(10, "Ambiance Lighting Design & Setup", 1, 1, 18500, 18500, alt=True)
-    pdf.item_row(11, "Content Design & Development (Digital, Print & Social)", 1, 1, 15000, 15000)
+    pdf.item_row(11, "Sound System & 2 Wireless Mics (On-premise)", 1, 1, "On-premise", "On-premise")
+    pdf.item_row(12, "Ambiance Lighting Design & Setup", 1, 1, 18500, 18500, alt=True)
+    pdf.item_row(13, "Content Design & Development (Digital, Print & Social)", 1, 1, 15000, 15000)
     pdf.subtotal_row("Subtotal:", 33500)
 
     # Section D
     pdf.section_header("SECTION D: EVENT SERVICES & PERSONNEL")
-    pdf.item_row(12, "Cultural Night Performance (All Provinces incl. AJK & GB)", 1, 1, 35000, 35000)
-    pdf.item_row(13, "Professional Ushers / Hostesses (Bilingual)", 4, 1, 1750, 7000, alt=True)
-    pdf.item_row(14, "Professional MC / Host (Bilingual - English & Arabic)", 1, 1, 12000, 12000)
-    pdf.item_row(15, "Event Photography (6pm - 11pm)", 1, 1, 4500, 4500, alt=True)
-    pdf.item_row(16, "Event Videography (Highlight Video, Reels & Interviews)", 1, 1, 6000, 6000)
-    pdf.subtotal_row("Subtotal:", 64500)
+    pdf.item_row(14, "Cultural Night Performance (All Provinces incl. AJK & GB)", 1, 1, 50000, 50000)
+    pdf.item_row(15, "Professional Ushers / Hostesses (Bilingual)", 4, 1, 1750, 7000, alt=True)
+    pdf.item_row(16, "Professional MC / Host (Bilingual - English & Arabic)", 1, 1, 15000, 15000)
+    pdf.item_row(17, "Event Photography (6pm - 11pm)", 1, 1, 4500, 4500, alt=True)
+    pdf.item_row(18, "Event Videography (Highlight Video, Reels & Interviews)", 1, 1, 6000, 6000)
+    pdf.subtotal_row("Subtotal:", 82500)
 
     # Section E
     pdf.section_header("SECTION E: LOGISTICS & COORDINATION")
-    pdf.item_row(17, "Logistics, Labor & Transportation", 1, 1, 39000, 39000)
-    pdf.item_row(18, "Dedicated Liaison (PSEB & Embassy Coordination)", 1, 1, 8000, 8000, alt=True)
-    pdf.item_row(19, "Miscellaneous & Contingency", 1, 1, 5000, 5000)
+    pdf.item_row(19, "Logistics, Labor & Transportation", 1, 1, 39000, 39000)
+    pdf.item_row(20, "On-ground Coordination (Hotel, Embassy & PSEB)", 1, 1, 8000, 8000, alt=True)
+    pdf.item_row(21, "Miscellaneous & Contingency", 1, 1, 5000, 5000)
     pdf.subtotal_row("Subtotal:", 52000)
 
     pdf.ln(4)
@@ -230,14 +228,14 @@ def generate():
     pdf.set_text_color(*pdf.TEAL)
     pdf.cell(0, 7, "COST SUMMARY", new_x="LMARGIN", new_y="NEXT")
 
-    pdf.summary_row("Venue & Hospitality:", 325000, bold=True)
-    pdf.summary_row("Production Services (B-E):", 253500, bold=True)
-    pdf.summary_row("Agency Commission (15%):", 38025)
+    pdf.summary_row("Venue & Hospitality:", 337000, bold=True)
+    pdf.summary_row("Production Services (B-E):", 277700, bold=True)
+    pdf.summary_row("Agency Commission (15%):", 41655)
     pdf.ln(1)
-    pdf.summary_row("Subtotal before VAT:", 616525, bold=True)
-    pdf.summary_row("VAT (15%):", 92478.75)
+    pdf.summary_row("Subtotal before VAT:", 656355, bold=True)
+    pdf.summary_row("VAT (15%):", 98453.25)
     pdf.ln(1)
-    pdf.summary_row("*  GRAND TOTAL (INC. VAT):", 709003.75, highlight=True)
+    pdf.summary_row("*  GRAND TOTAL (INC. VAT):", 754808.25, highlight=True)
 
     pdf.ln(6)
 
@@ -259,8 +257,8 @@ def generate():
     pdf.set_text_color(*pdf.GRAY)
     notes = [
         "1.  All prices are in Saudi Riyals (SAR).",
-        "2.  Venue includes dinner for 400 guests with dedicated VIP seating for 50.",
-        "3.  Sound system & wireless mics available on-premise at venue; premium upgrade on-demand.",
+        "2.  Venue includes dinner for 400 guests; VIP seating for 50 quoted separately.",
+        "3.  Sound system & 2 wireless mics are on-premise at the hotel venue.",
         "4.  Seating arrangements as per Embassy/PSEB guidelines.",
         "5.  PSEB reserves the right to adjust quantities as per final requirements.",
         "6.  Any additional requirements beyond this scope will be quoted separately.",
@@ -281,7 +279,7 @@ def generate():
     pdf.cell(0, 5, "ADEEL AHMED - DIRECTOR", new_x="LMARGIN", new_y="NEXT")
     pdf.set_font("Helvetica", "", 7)
     pdf.set_text_color(*pdf.GRAY)
-    pdf.cell(0, 4, "Miradore Marketing Management L.L.C", new_x="LMARGIN", new_y="NEXT")
+    pdf.cell(0, 4, "Miradore Experiences, Riyadh", new_x="LMARGIN", new_y="NEXT")
 
     out_path = os.path.join(os.path.dirname(__file__), "Pakistan_Saudi_Business_Forum_LEAP2026_Quotation.pdf")
     pdf.output(out_path)
