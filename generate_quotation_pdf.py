@@ -126,9 +126,9 @@ class QuotationPDF(FPDF):
         self.cell(14, 6, str(qty), border=0, align="C", fill=True)
         self.cell(14, 6, str(days), border=0, align="C", fill=True)
         self.set_font("Helvetica", "", 7)
-        self.cell(30, 6, f"{rate:,}", border=0, align="R", fill=True)
+        self.cell(30, 6, f"{rate:,}" if rate else "-", border=0, align="R", fill=True)
         self.set_font("Helvetica", "B", 7)
-        self.cell(35, 6, f"{amount_sar:,}", border=0, align="R", fill=True)
+        self.cell(35, 6, f"{amount_sar:,}" if amount_sar else "-", border=0, align="R", fill=True)
         self.ln()
 
     def subtotal_row(self, label, amount_sar):
@@ -185,20 +185,20 @@ def generate():
     # Section B
     pdf.section_header("SECTION B: STAGE PRODUCTION & BRANDING")
     pdf.item_row(2, "Stage Backdrop & Premium Branding Elements", 1, 1, 16500, 16500)
-    pdf.item_row(3, "Stage Base - Premium White Finish (12m x 5m)", 1, 1, 18000, 18000, alt=True)
+    pdf.item_row(3, "Stage Base - Available on-premise (upgrade on-demand)", 1, 1, 0, 0, alt=True)
     pdf.item_row(4, "SMD / LED Screen - Main Stage (P2.5 - 12ft x 10ft)", 2, 1, 16500, 33000)
     pdf.item_row(5, "Registration Counter with Equipment & Branded Fascia", 1, 1, 11000, 11000, alt=True)
     pdf.item_row(6, "Printed Media Walls - Event Branding & Photo Backdrop", 2, 1, 5500, 11000)
     pdf.item_row(7, "Welcome Signage & Directional Branding", 1, 1, 5500, 5500, alt=True)
     pdf.item_row(8, "Table Branding, Name Plates & Delegate Collateral", 1, 1, 8000, 8000)
-    pdf.subtotal_row("Subtotal:", 103000)
+    pdf.subtotal_row("Subtotal:", 85000)
 
     # Section C
     pdf.section_header("SECTION C: TECHNICAL & AUDIO-VISUAL")
-    pdf.item_row(9, "Professional Sound System (Line Array + 8 Wireless Mics)", 1, 1, 22000, 22000)
+    pdf.item_row(9, "Sound System - Available on-premise (upgrade on-demand)", 1, 1, 0, 0)
     pdf.item_row(10, "Professional Lighting Design & Setup", 1, 1, 18500, 18500, alt=True)
     pdf.item_row(11, "Content Design & Development (Digital, Print & Social)", 1, 1, 11000, 11000)
-    pdf.subtotal_row("Subtotal:", 51500)
+    pdf.subtotal_row("Subtotal:", 29500)
 
     # Section D
     pdf.section_header("SECTION D: EVENT SERVICES & PERSONNEL")
@@ -228,13 +228,13 @@ def generate():
     pdf.cell(0, 7, "COST SUMMARY", new_x="LMARGIN", new_y="NEXT")
 
     pdf.summary_row("Venue & Hospitality:", 325000, bold=True)
-    pdf.summary_row("Production Services (B-E):", 258500, bold=True)
-    pdf.summary_row("Agency Commission (15%):", 38775)
+    pdf.summary_row("Production Services (B-E):", 218500, bold=True)
+    pdf.summary_row("Agency Commission (15%):", 32775)
     pdf.ln(1)
-    pdf.summary_row("Subtotal before VAT:", 622275, bold=True)
-    pdf.summary_row("VAT (15%):", 93341.25)
+    pdf.summary_row("Subtotal before VAT:", 576275, bold=True)
+    pdf.summary_row("VAT (15%):", 86441.25)
     pdf.ln(1)
-    pdf.summary_row("*  GRAND TOTAL (INC. VAT):", 715616.25, highlight=True)
+    pdf.summary_row("*  GRAND TOTAL (INC. VAT):", 662716.25, highlight=True)
 
     pdf.ln(6)
 
@@ -257,9 +257,10 @@ def generate():
     notes = [
         "1.  All prices are in Saudi Riyals (SAR).",
         "2.  Venue cost (Crowne Plaza) includes 2 coffee breaks and gala dinner for all delegates.",
-        "3.  Event Permit from SCEGA (if applicable) - not included - to be arranged separately.",
-        "4.  Any additional requirements beyond this scope will be quoted separately.",
-        "5.  This quotation is valid for 30 days from the date of issue.",
+        "3.  Stage base and sound system are available on-premise at the hotel venue; premium upgrades available on-demand.",
+        "4.  Event Permit from SCEGA (if applicable) - not included - to be arranged separately.",
+        "5.  Any additional requirements beyond this scope will be quoted separately.",
+        "6.  This quotation is valid for 30 days from the date of issue.",
     ]
     for note in notes:
         pdf.cell(0, 4.5, note, new_x="LMARGIN", new_y="NEXT")
