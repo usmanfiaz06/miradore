@@ -202,12 +202,12 @@ def generate():
 
     # Section D
     pdf.section_header("SECTION D: EVENT SERVICES & PERSONNEL")
-    pdf.item_row(14, "Cultural Night Performance (All Provinces incl. AJK & GB)", 1, 1, 35000, 35000)
+    pdf.item_row(14, "Cultural Night Performance (All Provinces incl. AJK & GB)", 1, 1, 50000, 50000)
     pdf.item_row(15, "Professional Ushers / Hostesses (Bilingual)", 4, 1, 1750, 7000, alt=True)
     pdf.item_row(16, "Professional MC / Host (Bilingual - English & Arabic)", 1, 1, 15000, 15000)
     pdf.item_row(17, "Event Photography (6pm - 11pm)", 1, 1, 4500, 4500, alt=True)
     pdf.item_row(18, "Event Videography (Highlight Video, Reels & Interviews)", 1, 1, 6000, 6000)
-    pdf.subtotal_row("Subtotal:", 67500)
+    pdf.subtotal_row("Subtotal:", 82500)
 
     # Section E
     pdf.section_header("SECTION E: LOGISTICS & COORDINATION")
@@ -229,13 +229,13 @@ def generate():
     pdf.cell(0, 7, "COST SUMMARY", new_x="LMARGIN", new_y="NEXT")
 
     pdf.summary_row("Venue & Hospitality:", 337000, bold=True)
-    pdf.summary_row("Production Services (B-E):", 262700, bold=True)
-    pdf.summary_row("Agency Commission (15%):", 39405)
+    pdf.summary_row("Production Services (B-E):", 277700, bold=True)
+    pdf.summary_row("Agency Commission (15%):", 41655)
     pdf.ln(1)
-    pdf.summary_row("Subtotal before VAT:", 639105, bold=True)
-    pdf.summary_row("VAT (15%):", 95865.75)
+    pdf.summary_row("Subtotal before VAT:", 656355, bold=True)
+    pdf.summary_row("VAT (15%):", 98453.25)
     pdf.ln(1)
-    pdf.summary_row("*  GRAND TOTAL (INC. VAT):", 734970.75, highlight=True)
+    pdf.summary_row("*  GRAND TOTAL (INC. VAT):", 754808.25, highlight=True)
 
     pdf.ln(6)
 
