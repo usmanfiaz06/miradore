@@ -197,8 +197,8 @@ def generate():
     pdf.section_header("SECTION C: TECHNICAL & AUDIO-VISUAL")
     pdf.item_row(9, "Sound System - Available on-premise (upgrade on-demand)", 1, 1, 0, 0)
     pdf.item_row(10, "Professional Lighting Design & Setup", 1, 1, 18500, 18500, alt=True)
-    pdf.item_row(11, "Content Design & Development (Digital, Print & Social)", 1, 1, 11000, 11000)
-    pdf.subtotal_row("Subtotal:", 29500)
+    pdf.item_row(11, "Content Design & Development (Digital, Print & Social)", 1, 1, 15000, 15000)
+    pdf.subtotal_row("Subtotal:", 33500)
 
     # Section D
     pdf.section_header("SECTION D: EVENT SERVICES & PERSONNEL")
@@ -228,13 +228,13 @@ def generate():
     pdf.cell(0, 7, "COST SUMMARY", new_x="LMARGIN", new_y="NEXT")
 
     pdf.summary_row("Venue & Hospitality:", 325000, bold=True)
-    pdf.summary_row("Production Services (B-E):", 218500, bold=True)
-    pdf.summary_row("Agency Commission (15%):", 32775)
+    pdf.summary_row("Production Services (B-E):", 222500, bold=True)
+    pdf.summary_row("Agency Commission (15%):", 33375)
     pdf.ln(1)
-    pdf.summary_row("Subtotal before VAT:", 576275, bold=True)
-    pdf.summary_row("VAT (15%):", 86441.25)
+    pdf.summary_row("Subtotal before VAT:", 580875, bold=True)
+    pdf.summary_row("VAT (15%):", 87131.25)
     pdf.ln(1)
-    pdf.summary_row("*  GRAND TOTAL (INC. VAT):", 662716.25, highlight=True)
+    pdf.summary_row("*  GRAND TOTAL (INC. VAT):", 668006.25, highlight=True)
 
     pdf.ln(6)
 
