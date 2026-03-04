@@ -9,17 +9,26 @@ import { extractRFPWithAI, getApiKey } from "./ai-service";
 async function extractPagesFromPDF(buffer: ArrayBuffer): Promise<string[]> {
   const pdfjs = await import("pdfjs-dist");
 
-  // Use CDN-hosted worker — reliable in static exports / GitHub Pages
-  pdfjs.GlobalWorkerOptions.workerSrc =
-    `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.mjs`;
+  // Disable worker — runs on main thread. Avoids CDN version mismatch
+  // and hanging issues. Fine for single-document parsing on upload.
+  pdfjs.GlobalWorkerOptions.workerSrc = "";
 
-  const pdf = await pdfjs.getDocument({ data: new Uint8Array(buffer) }).promise;
+  const loadingTask = pdfjs.getDocument({ data: new Uint8Array(buffer) });
+
+  // Timeout: abort if PDF parsing takes longer than 15s
+  const timeoutPromise = new Promise<never>((_, reject) =>
+    setTimeout(() => {
+      loadingTask.destroy();
+      reject(new Error("PDF parsing timed out"));
+    }, 15000)
+  );
+
+  const pdf = await Promise.race([loadingTask.promise, timeoutPromise]);
   const pages: string[] = [];
 
   for (let i = 1; i <= pdf.numPages; i++) {
     const page = await pdf.getPage(i);
     const content = await page.getTextContent();
-    // Join items preserving spacing, insert newlines for significant Y-gaps
     let prevY: number | null = null;
     const parts: string[] = [];
     for (const item of content.items) {
