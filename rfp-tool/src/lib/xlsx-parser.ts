@@ -3,12 +3,26 @@
 import * as XLSX from "xlsx";
 import { RFPEvent, UploadedRFP } from "@/types";
 import { parsePDFFile } from "./pdf-parser";
+import { parseDocxFile } from "./docx-parser";
 
 export async function parseRFPFile(file: File): Promise<UploadedRFP> {
+  const name = file.name.toLowerCase();
+
   // Route PDF files to the dedicated PDF parser
-  if (file.name.toLowerCase().endsWith(".pdf") || file.type === "application/pdf") {
+  if (name.endsWith(".pdf") || file.type === "application/pdf") {
     return parsePDFFile(file);
   }
+
+  // Route Word documents to the DOCX parser
+  if (
+    name.endsWith(".docx") ||
+    name.endsWith(".doc") ||
+    file.type === "application/vnd.openxmlformats-officedocument.wordprocessingml.document" ||
+    file.type === "application/msword"
+  ) {
+    return parseDocxFile(file);
+  }
+
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
 

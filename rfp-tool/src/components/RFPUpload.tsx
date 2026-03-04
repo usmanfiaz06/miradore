@@ -35,7 +35,7 @@ export default function RFPUpload({
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const allowedExtensions = [".xlsx", ".xls", ".csv", ".pdf"];
+  const allowedExtensions = [".xlsx", ".xls", ".csv", ".pdf", ".docx", ".doc"];
 
   const onDrop = useCallback(
     async (acceptedFiles: File[]) => {
@@ -94,7 +94,7 @@ export default function RFPUpload({
             Upload RFP Document
           </h2>
           <p className="text-sm text-text-secondary mt-1">
-            Upload an Excel or PDF file containing event details to generate quotations
+            Upload an Excel, PDF, or Word file containing event details to generate quotations
           </p>
         </div>
 
@@ -166,7 +166,7 @@ export default function RFPUpload({
                       : "Drag & drop your RFP file here"}
                   </p>
                   <p className="text-xs text-text-secondary mt-1">
-                    or click to browse &middot; Supports .xlsx, .xls, .csv, .pdf
+                    or click to browse &middot; Supports .xlsx, .xls, .csv, .pdf, .docx, .doc
                   </p>
                 </div>
               </div>
