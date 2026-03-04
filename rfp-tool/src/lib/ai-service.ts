@@ -3,6 +3,7 @@
 import { RFPEvent, UploadedRFP } from "@/types";
 
 const GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent";
+const REQUEST_TIMEOUT_MS = 30000; // 30 second timeout
 
 export function getApiKey(): string {
   if (typeof window === "undefined") return "";
@@ -19,30 +20,43 @@ export function hasApiKey(): boolean {
 }
 
 async function callGemini(prompt: string, apiKey: string): Promise<string> {
-  const res = await fetch(`${GEMINI_API_URL}?key=${apiKey}`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      contents: [{ parts: [{ text: prompt }] }],
-      generationConfig: {
-        temperature: 0.3,
-        maxOutputTokens: 8192,
-      },
-    }),
-  });
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
 
-  if (!res.ok) {
-    const err = await res.text();
-    if (res.status === 400 || res.status === 403) {
-      throw new Error("Invalid API key. Please check your Gemini API key in Settings.");
+  try {
+    const res = await fetch(`${GEMINI_API_URL}?key=${apiKey}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      signal: controller.signal,
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: prompt }] }],
+        generationConfig: {
+          temperature: 0.3,
+          maxOutputTokens: 8192,
+        },
+      }),
+    });
+
+    if (!res.ok) {
+      const err = await res.text();
+      if (res.status === 400 || res.status === 403) {
+        throw new Error("Invalid API key. Please check your Gemini API key in Settings.");
+      }
+      throw new Error(`AI request failed (${res.status}): ${err.substring(0, 200)}`);
     }
-    throw new Error(`AI request failed: ${err}`);
-  }
 
-  const data = await res.json();
-  const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
-  if (!text) throw new Error("Empty response from AI");
-  return text;
+    const data = await res.json();
+    const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+    if (!text) throw new Error("Empty response from AI");
+    return text;
+  } catch (err: unknown) {
+    if (err instanceof DOMException && err.name === "AbortError") {
+      throw new Error("AI request timed out after 30s. Please try again.");
+    }
+    throw err;
+  } finally {
+    clearTimeout(timeoutId);
+  }
 }
 
 function extractJSON(text: string): string {
