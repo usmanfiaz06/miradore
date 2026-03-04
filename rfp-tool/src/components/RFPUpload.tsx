@@ -12,19 +12,24 @@ import {
   Calendar,
   Users,
   Sparkles,
+  BookOpen,
+  Wand2,
 } from "lucide-react";
 import { UploadedRFP, RFPEvent } from "@/types";
 import { parseRFPFile } from "@/lib/xlsx-parser";
+import { hasApiKey } from "@/lib/ai-service";
 
 interface RFPUploadProps {
   onRFPParsed: (rfp: UploadedRFP) => void;
   onSelectEvent: (event: RFPEvent) => void;
+  onGenerateProposal: () => void;
   uploadedRFP: UploadedRFP | null;
 }
 
 export default function RFPUpload({
   onRFPParsed,
   onSelectEvent,
+  onGenerateProposal,
   uploadedRFP,
 }: RFPUploadProps) {
   const [isProcessing, setIsProcessing] = useState(false);
@@ -108,15 +113,19 @@ export default function RFPUpload({
 
             {isProcessing ? (
               <div className="flex flex-col items-center gap-3">
-                <Loader2
-                  size={40}
-                  className="text-teal-500 animate-spin"
-                />
+                <div className="relative">
+                  <Loader2 size={40} className="text-teal-500 animate-spin" />
+                  {hasApiKey() && (
+                    <Sparkles size={14} className="absolute -top-1 -right-1 text-orange-500" />
+                  )}
+                </div>
                 <p className="text-sm font-medium text-text-primary">
-                  Processing your RFP...
+                  {hasApiKey() ? "AI is analyzing your RFP..." : "Processing your RFP..."}
                 </p>
                 <p className="text-xs text-text-secondary">
-                  Extracting event details and specifications
+                  {hasApiKey()
+                    ? "Using AI to extract events, details, and requirements"
+                    : "Extracting event details and specifications"}
                 </p>
               </div>
             ) : uploadedRFP ? (
@@ -128,10 +137,18 @@ export default function RFPUpload({
                   <p className="text-sm font-medium text-text-primary">
                     {uploadedRFP.fileName}
                   </p>
-                  <p className="text-xs text-text-secondary mt-1">
-                    {uploadedRFP.events.length} events extracted &middot;
-                    Drop a new file to replace
-                  </p>
+                  <div className="flex items-center gap-2 justify-center mt-1">
+                    <p className="text-xs text-text-secondary">
+                      {uploadedRFP.events.length} events extracted
+                    </p>
+                    {uploadedRFP.aiParsed && (
+                      <span className="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-gradient-to-r from-teal-500 to-orange-500 text-white">
+                        <Sparkles size={10} />
+                        AI
+                      </span>
+                    )}
+                    <span className="text-xs text-text-tertiary">&middot; Drop a new file to replace</span>
+                  </div>
                 </div>
               </div>
             ) : (
@@ -180,18 +197,38 @@ export default function RFPUpload({
               </p>
             </div>
             <div className="flex items-center gap-2">
-              <span className="text-xs font-medium text-text-secondary bg-surface-sunken px-3 py-1.5 rounded-full">
-                Click an event to create a quotation
+              <button
+                onClick={onGenerateProposal}
+                className="flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-gradient-to-r from-teal-500 to-teal-600 text-white text-xs font-semibold hover:from-teal-600 hover:to-teal-700 transition-all shadow-sm"
+              >
+                <Wand2 size={14} />
+                Generate Proposal
+              </button>
+              <span className="hidden sm:inline text-xs font-medium text-text-secondary bg-surface-sunken px-3 py-1.5 rounded-full">
+                Click event for quotation
               </span>
             </div>
           </div>
+
+          {/* AI Summary */}
+          {uploadedRFP.rfpSummary && (
+            <div className="px-6 py-4 bg-gradient-to-r from-teal-50/80 to-orange-50/50 border-b border-border-subtle">
+              <div className="flex items-start gap-2.5">
+                <Sparkles size={16} className="text-teal-500 mt-0.5 flex-shrink-0" />
+                <div>
+                  <p className="text-xs font-semibold text-teal-700 mb-1">AI Summary</p>
+                  <p className="text-xs text-text-secondary leading-relaxed">{uploadedRFP.rfpSummary}</p>
+                </div>
+              </div>
+            </div>
+          )}
 
           <div className="divide-y divide-border-subtle max-h-[520px] overflow-y-auto">
             {uploadedRFP.events.map((event, index) => (
               <button
                 key={index}
                 onClick={() => onSelectEvent(event)}
-                className="w-full px-6 py-4 flex items-center gap-4 hover:bg-teal-50/50 transition-colors group text-left"
+                className="w-full px-4 sm:px-6 py-4 flex items-center gap-3 sm:gap-4 hover:bg-teal-50/50 transition-colors group text-left"
               >
                 {/* Number */}
                 <div className="w-8 h-8 rounded-lg bg-teal-50 flex items-center justify-center flex-shrink-0 group-hover:bg-teal-100 transition-colors">

@@ -4,39 +4,41 @@ import {
   FileText,
   Upload,
   LayoutDashboard,
-  Settings,
   HelpCircle,
   ChevronRight,
   Menu,
   X,
+  Sparkles,
+  BookOpen,
 } from "lucide-react";
 
 interface SidebarProps {
   activeView: string;
   onViewChange: (view: string) => void;
   quotationCount: number;
+  proposalCount: number;
   isOpen: boolean;
   onToggle: () => void;
+  onOpenSettings: () => void;
 }
 
 const navItems = [
   { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
   { id: "upload", label: "Upload RFP", icon: Upload },
-  { id: "quotations", label: "Quotations", icon: FileText },
-];
-
-const bottomItems = [
-  { id: "settings", label: "Settings", icon: Settings },
-  { id: "help", label: "Help & Support", icon: HelpCircle },
+  { id: "quotations", label: "Quotations", icon: FileText, countKey: "quotations" as const },
+  { id: "proposals", label: "Proposals", icon: BookOpen, countKey: "proposals" as const },
 ];
 
 export default function Sidebar({
   activeView,
   onViewChange,
   quotationCount,
+  proposalCount,
   isOpen,
   onToggle,
+  onOpenSettings,
 }: SidebarProps) {
+  const counts = { quotations: quotationCount, proposals: proposalCount };
   const handleNavClick = (id: string) => {
     onViewChange(id);
     // Close sidebar on mobile after navigation
@@ -113,9 +115,9 @@ export default function Sidebar({
               >
                 <Icon size={18} className={isActive ? "text-orange-400" : ""} />
                 <span className="flex-1 text-left">{item.label}</span>
-                {item.id === "quotations" && quotationCount > 0 && (
+                {item.countKey && counts[item.countKey] > 0 && (
                   <span className="bg-orange-500 text-white text-xs font-bold px-2 py-0.5 rounded-full min-w-[20px] text-center">
-                    {quotationCount}
+                    {counts[item.countKey]}
                   </span>
                 )}
                 {isActive && (
@@ -128,23 +130,24 @@ export default function Sidebar({
 
         {/* Bottom nav */}
         <div className="px-3 py-4 border-t border-teal-700/50 space-y-1">
-          {bottomItems.map((item) => {
-            const Icon = item.icon;
-            return (
-              <button
-                key={item.id}
-                className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-teal-300 hover:bg-white/8 hover:text-white transition-all"
-              >
-                <Icon size={18} />
-                <span>{item.label}</span>
-              </button>
-            );
-          })}
+          <button
+            onClick={() => { onOpenSettings(); if (window.innerWidth < 1024) onToggle(); }}
+            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-teal-300 hover:bg-white/8 hover:text-white transition-all"
+          >
+            <Sparkles size={18} />
+            <span>AI Settings</span>
+          </button>
+          <button
+            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-teal-300 hover:bg-white/8 hover:text-white transition-all"
+          >
+            <HelpCircle size={18} />
+            <span>Help & Support</span>
+          </button>
         </div>
 
         {/* Version */}
         <div className="px-6 py-3 text-teal-500 text-xs">
-          v1.0.0 &middot; Miradore Events
+          v2.0.0 &middot; Miradore Events
         </div>
       </aside>
     </>

@@ -1,179 +1,89 @@
 "use client";
 
 import { RFPEvent, UploadedRFP } from "@/types";
+import { extractRFPWithAI, getApiKey } from "./ai-service";
 
 /**
- * Extract text from a PDF file using raw binary parsing.
- * No external dependencies — parses PDF text operators directly.
+ * Extract text from a PDF using pdfjs-dist (Mozilla PDF.js).
  */
-function extractTextFromPDF(buffer: ArrayBuffer): string {
-  const bytes = new Uint8Array(buffer);
-  const raw = new TextDecoder("latin1").decode(bytes);
-  const extracted: string[] = [];
+async function extractPagesFromPDF(buffer: ArrayBuffer): Promise<string[]> {
+  const pdfjs = await import("pdfjs-dist");
 
-  // Strategy 1: Extract text between BT (begin text) and ET (end text) operators
-  const btEtRegex = /BT\s([\s\S]*?)ET/g;
-  let match;
-  while ((match = btEtRegex.exec(raw)) !== null) {
-    const block = match[1];
+  // Use CDN-hosted worker — reliable in static exports / GitHub Pages
+  pdfjs.GlobalWorkerOptions.workerSrc =
+    `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.mjs`;
 
-    // Extract Tj strings: (text) Tj
-    const tjRegex = /\(([^)]*)\)\s*(?:Tj|')/g;
-    let tjMatch;
-    while ((tjMatch = tjRegex.exec(block)) !== null) {
-      const decoded = decodePDFString(tjMatch[1]);
-      if (decoded.trim()) extracted.push(decoded);
-    }
+  const pdf = await pdfjs.getDocument({ data: new Uint8Array(buffer) }).promise;
+  const pages: string[] = [];
 
-    // Extract TJ array strings: [(text) kern (text)] TJ
-    const tjArrayRegex = /\[((?:\([^)]*\)|[^[\]])*?)\]\s*TJ/gi;
-    let arrMatch;
-    while ((arrMatch = tjArrayRegex.exec(block)) !== null) {
-      const parts: string[] = [];
-      const partRegex = /\(([^)]*)\)/g;
-      let partMatch;
-      while ((partMatch = partRegex.exec(arrMatch[1])) !== null) {
-        parts.push(decodePDFString(partMatch[1]));
+  for (let i = 1; i <= pdf.numPages; i++) {
+    const page = await pdf.getPage(i);
+    const content = await page.getTextContent();
+    // Join items preserving spacing, insert newlines for significant Y-gaps
+    let prevY: number | null = null;
+    const parts: string[] = [];
+    for (const item of content.items) {
+      if (!("str" in item)) continue;
+      const y = (item as { transform: number[] }).transform[5];
+      if (prevY !== null && Math.abs(y - prevY) > 5) {
+        parts.push("\n");
       }
-      if (parts.length > 0) extracted.push(parts.join(""));
+      parts.push(item.str);
+      prevY = y;
     }
+    pages.push(parts.join(" "));
   }
 
-  // Strategy 2: If BT/ET extraction yields little, fall back to readable ASCII runs
-  if (extracted.join("").replace(/\s/g, "").length < 30) {
-    const runs: string[] = [];
-    let current = "";
-    for (let i = 0; i < bytes.length; i++) {
-      const ch = bytes[i];
-      if (ch >= 32 && ch <= 126) {
-        current += String.fromCharCode(ch);
-      } else {
-        if (current.length >= 4) runs.push(current);
-        current = "";
-      }
-    }
-    if (current.length >= 4) runs.push(current);
-
-    const pdfNoise = /^(stream|endstream|endobj|obj|xref|trailer|startxref|null|true|false)$/i;
-    for (const run of runs) {
-      const clean = run.trim();
-      if (
-        clean.length >= 4 &&
-        !pdfNoise.test(clean) &&
-        !clean.startsWith("/") &&
-        !clean.startsWith("<<") &&
-        !/^\d+\s+\d+\s+(obj|R)$/.test(clean) &&
-        !/^[\d.]+$/.test(clean)
-      ) {
-        extracted.push(clean);
-      }
-    }
-  }
-
-  return extracted.join(" ");
-}
-
-function decodePDFString(s: string): string {
-  return s
-    .replace(/\\n/g, "\n")
-    .replace(/\\r/g, "\r")
-    .replace(/\\t/g, "\t")
-    .replace(/\\\(/g, "(")
-    .replace(/\\\)/g, ")")
-    .replace(/\\\\/g, "\\");
+  return pages;
 }
 
 export async function parsePDFFile(file: File): Promise<UploadedRFP> {
   const buffer = await file.arrayBuffer();
-  const fullText = extractTextFromPDF(buffer);
 
+  let pages: string[];
+  try {
+    pages = await extractPagesFromPDF(buffer);
+  } catch (err) {
+    console.error("PDF.js extraction failed:", err);
+    throw new Error(
+      "Failed to extract text from PDF. Please try converting it to Excel (.xlsx) first, or ensure the PDF contains selectable text (not scanned images)."
+    );
+  }
+
+  const fullText = pages.join("\n\n");
+
+  // Sanity check
+  const printable = fullText.replace(/[^\x20-\x7E\u00A0-\uFFFF]/g, "").trim();
+  if (printable.length < 20) {
+    throw new Error(
+      "Could not extract readable text from this PDF. It may be a scanned/image-based PDF. Please try uploading an Excel (.xlsx) file instead."
+    );
+  }
+
+  // Try AI parsing first if API key is configured
+  const apiKey = getApiKey();
+  if (apiKey) {
+    try {
+      const result = await extractRFPWithAI(fullText, file.name, apiKey);
+      result.aiParsed = true;
+      return result;
+    } catch (err) {
+      console.warn("AI parsing failed, falling back to regex:", err);
+    }
+  }
+
+  // Regex-based parsing fallback
   const lines = fullText
-    .split(/[\n\r]+|(?:\s{3,})/)
+    .split(/[\n\r]+/)
     .map((l) => l.trim())
     .filter((l) => l.length > 1);
 
-  // Extract client name
-  let clientName = "";
-  for (const line of lines.slice(0, 20)) {
-    const lower = line.toLowerCase();
-    if (
-      lower.includes("rfp") ||
-      lower.includes("request for proposal") ||
-      lower.includes("client") ||
-      lower.includes("prepared for")
-    ) {
-      clientName = line
-        .replace(/^(rfp|request for proposal|client|prepared for)[:\s\-]*/i, "")
-        .trim();
-      if (clientName && clientName.length > 2) break;
-    }
-  }
-  if (!clientName && lines.length > 0) {
-    clientName = lines[0].substring(0, 80);
-  }
+  const clientName = extractClientName(lines);
 
-  // Parse events
-  const events: RFPEvent[] = [];
-  let eventNumber = 1;
+  let events = parseTableEvents(lines);
+  if (events.length === 0) events = parseNumberedEvents(lines);
+  if (events.length === 0) events = parseKeywordEvents(lines);
 
-  // Strategy 1: Numbered event patterns
-  for (let i = 0; i < lines.length; i++) {
-    const line = lines[i];
-    if (line.length < 3) continue;
-
-    const numberedMatch = line.match(/^(\d+)[.\)]\s+(.{3,})/);
-    if (numberedMatch) {
-      const name = numberedMatch[2].trim();
-      const skipNames = ["event name", "description", "introduction", "background", "objective"];
-      if (skipNames.includes(name.toLowerCase())) continue;
-
-      events.push({
-        number: parseInt(numberedMatch[1]),
-        eventName: name.substring(0, 120),
-        arabicName: "",
-        date: extractDate(lines.slice(i, i + 3).join(" ")) || "TBD",
-        quarter: extractQuarter(lines.slice(i, i + 3).join(" ")),
-        category: detectCategory(name),
-        estimatedAttendance: extractNumber(lines.slice(i, i + 3).join(" ")),
-        eventTier: extractTier(name),
-      });
-      eventNumber++;
-    }
-  }
-
-  // Strategy 2: Keyword-based event detection
-  if (events.length === 0) {
-    const keywords = [
-      "conference", "seminar", "workshop", "gala", "ceremony",
-      "launch", "summit", "forum", "exhibition", "festival",
-      "concert", "meeting", "reception", "dinner", "celebration",
-      "awards", "opening", "inauguration", "symposium", "convention",
-    ];
-
-    for (const line of lines) {
-      const lower = line.toLowerCase();
-      if (
-        keywords.some((kw) => lower.includes(kw)) &&
-        line.length >= 5 &&
-        line.length <= 150
-      ) {
-        if (events.some((e) => e.eventName === line.trim())) continue;
-        events.push({
-          number: eventNumber,
-          eventName: line.trim().substring(0, 120),
-          arabicName: "",
-          date: "TBD",
-          quarter: "",
-          category: detectCategory(line),
-          estimatedAttendance: 0,
-          eventTier: "Light",
-        });
-        eventNumber++;
-      }
-    }
-  }
-
-  // Strategy 3: Fallback
   if (events.length === 0) {
     events.push({
       number: 1,
@@ -192,8 +102,218 @@ export async function parsePDFFile(file: File): Promise<UploadedRFP> {
     events,
     clientName,
     uploadedAt: new Date().toISOString(),
+    rawText: fullText.substring(0, 12000),
   };
 }
+
+/**
+ * Extract the client/organization name from the document header.
+ */
+function extractClientName(lines: string[]): string {
+  const clientPatterns = [
+    /(?:prepared\s+for|client|company|organization|submitted\s+to)[:\s\-]+(.{3,})/i,
+    /(?:rfp|request\s+for\s+proposal)[:\s\-]+(.{3,})/i,
+  ];
+
+  for (const line of lines.slice(0, 30)) {
+    for (const pat of clientPatterns) {
+      const m = line.match(pat);
+      if (m && m[1].trim().length > 2) return m[1].trim().substring(0, 100);
+    }
+  }
+
+  // Use first non-trivial line
+  for (const line of lines.slice(0, 5)) {
+    if (line.length >= 5 && line.length <= 120) return line;
+  }
+  return "";
+}
+
+/**
+ * Strategy 1: Detect tabular data — rows with consistent column counts
+ * (common in RFP event calendars).
+ */
+function parseTableEvents(lines: string[]): RFPEvent[] {
+  const events: RFPEvent[] = [];
+
+  // Find header row with event-related columns
+  let headerIdx = -1;
+  let headerParts: string[] = [];
+  for (let i = 0; i < Math.min(lines.length, 40); i++) {
+    const lower = lines[i].toLowerCase();
+    // Look for header rows containing "event" AND at least one more keyword
+    const hasEvent = /event\s*name|event\s*title|event/i.test(lower);
+    const hasOther = /date|quarter|category|attendance|tier|type|venue/i.test(lower);
+    if (hasEvent && hasOther) {
+      headerIdx = i;
+      // Split by tabs, multiple spaces, or pipe
+      headerParts = lines[i].split(/\t|\s{3,}|\|/).map((s) => s.trim()).filter(Boolean);
+      break;
+    }
+  }
+
+  if (headerIdx < 0) return events;
+
+  // Find column indices
+  const colMap = mapColumns(headerParts);
+
+  // Parse data rows after header
+  for (let i = headerIdx + 1; i < lines.length; i++) {
+    const line = lines[i];
+    if (!line || line.length < 3) continue;
+
+    // Stop on summary/total/budget rows
+    if (/^\s*(total|budget|summary|notes?:|end|page\s+\d)/i.test(line)) break;
+
+    const cols = line.split(/\t|\s{3,}|\|/).map((s) => s.trim()).filter(Boolean);
+    if (cols.length < 2) continue;
+
+    // Try to extract event name from mapped column, fall back to 2nd column
+    const nameCol = colMap.name >= 0 && colMap.name < cols.length ? colMap.name : 1;
+    const name = (cols[nameCol] || "").trim();
+    if (!name || name.length < 3) continue;
+
+    // Skip if it looks like a sub-header
+    if (/^(event\s*name|#|no\.?|s\.?n\.?|category)$/i.test(name)) continue;
+
+    const numCol = colMap.number >= 0 && colMap.number < cols.length ? colMap.number : 0;
+    const rawNum = cols[numCol];
+    const num = /^\d+$/.test(rawNum) ? parseInt(rawNum) : events.length + 1;
+
+    const dateCol = colMap.date >= 0 && colMap.date < cols.length ? colMap.date : -1;
+    const qtrCol = colMap.quarter >= 0 && colMap.quarter < cols.length ? colMap.quarter : -1;
+    const catCol = colMap.category >= 0 && colMap.category < cols.length ? colMap.category : -1;
+    const attCol = colMap.attendance >= 0 && colMap.attendance < cols.length ? colMap.attendance : -1;
+    const tierCol = colMap.tier >= 0 && colMap.tier < cols.length ? colMap.tier : -1;
+
+    events.push({
+      number: num,
+      eventName: name.substring(0, 150),
+      arabicName: "",
+      date: dateCol >= 0 ? (cols[dateCol] || "TBD") : extractDate(cols.join(" ")) || "TBD",
+      quarter: qtrCol >= 0 ? (cols[qtrCol] || "") : extractQuarter(cols.join(" ")),
+      category: catCol >= 0 ? (cols[catCol] || "") : detectCategory(name),
+      estimatedAttendance: attCol >= 0 ? (parseInt(cols[attCol]) || 0) : extractNumber(cols.join(" ")),
+      eventTier: tierCol >= 0 ? (cols[tierCol] || "Light") : extractTier(name),
+    });
+  }
+
+  return events;
+}
+
+function mapColumns(headers: string[]): {
+  number: number; name: number; date: number; quarter: number;
+  category: number; attendance: number; tier: number;
+} {
+  const m = { number: -1, name: -1, date: -1, quarter: -1, category: -1, attendance: -1, tier: -1 };
+  headers.forEach((h, i) => {
+    const l = h.toLowerCase();
+    if (/^(#|no\.?|s\.?n\.?|number)$/i.test(l)) m.number = i;
+    else if (/event\s*name|event\s*title|event$/i.test(l)) m.name = i;
+    else if (/date|when/i.test(l)) m.date = i;
+    else if (/quarter|qtr/i.test(l)) m.quarter = i;
+    else if (/category|type/i.test(l)) m.category = i;
+    else if (/attend|guest|pax|people|capacity/i.test(l)) m.attendance = i;
+    else if (/tier|level|scale|size/i.test(l)) m.tier = i;
+  });
+  return m;
+}
+
+/**
+ * Strategy 2: Numbered list patterns (e.g., "1. Grand Opening Ceremony")
+ */
+function parseNumberedEvents(lines: string[]): RFPEvent[] {
+  const events: RFPEvent[] = [];
+  const seen = new Set<string>();
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    if (line.length < 5) continue;
+
+    const numberedMatch = line.match(/^(\d{1,3})[.\)]\s+(.{3,})/);
+    if (!numberedMatch) continue;
+
+    const name = numberedMatch[2].trim();
+    const lower = name.toLowerCase();
+
+    // Skip generic headers
+    const skipNames = [
+      "event name", "description", "introduction", "background",
+      "objective", "scope", "overview", "table of contents",
+      "appendix", "terms", "conditions", "requirements",
+    ];
+    if (skipNames.some((s) => lower.startsWith(s))) continue;
+
+    const key = lower.substring(0, 50);
+    if (seen.has(key)) continue;
+    seen.add(key);
+
+    // Gather context from nearby lines
+    const context = lines.slice(i, Math.min(i + 4, lines.length)).join(" ");
+
+    events.push({
+      number: parseInt(numberedMatch[1]),
+      eventName: name.substring(0, 150),
+      arabicName: "",
+      date: extractDate(context) || "TBD",
+      quarter: extractQuarter(context),
+      category: detectCategory(name),
+      estimatedAttendance: extractNumber(context),
+      eventTier: extractTier(name),
+    });
+  }
+
+  return events;
+}
+
+/**
+ * Strategy 3: Lines containing event-type keywords
+ */
+function parseKeywordEvents(lines: string[]): RFPEvent[] {
+  const events: RFPEvent[] = [];
+  const seen = new Set<string>();
+
+  const eventKeywords = [
+    "conference", "seminar", "workshop", "gala", "ceremony",
+    "launch", "summit", "forum", "exhibition", "festival",
+    "concert", "meeting", "reception", "dinner", "celebration",
+    "awards", "opening", "inauguration", "symposium", "convention",
+    "retreat", "briefing", "hackathon", "townhall", "town hall",
+    "activation", "roadshow", "premiere", "show",
+  ];
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    const lower = line.toLowerCase();
+
+    if (line.length < 5 || line.length > 200) continue;
+    if (!eventKeywords.some((kw) => lower.includes(kw))) continue;
+
+    // Skip if it looks like a sentence/paragraph rather than an event name
+    if (line.split(" ").length > 15) continue;
+
+    const key = lower.substring(0, 50);
+    if (seen.has(key)) continue;
+    seen.add(key);
+
+    const context = lines.slice(i, Math.min(i + 4, lines.length)).join(" ");
+
+    events.push({
+      number: events.length + 1,
+      eventName: line.trim().substring(0, 150),
+      arabicName: "",
+      date: extractDate(context) || "TBD",
+      quarter: extractQuarter(context),
+      category: detectCategory(line),
+      estimatedAttendance: extractNumber(context),
+      eventTier: extractTier(line),
+    });
+  }
+
+  return events;
+}
+
+// --- Helper functions ---
 
 function extractDate(text: string): string {
   const patterns = [
@@ -201,6 +321,7 @@ function extractDate(text: string): string {
     /(\d{1,2}\s+(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\w*\s+\d{2,4})/i,
     /((?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\w*\s+\d{1,2},?\s+\d{2,4})/i,
     /(Q[1-4]\s+\d{4})/i,
+    /((?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\w*\s+\d{4})/i,
   ];
   for (const p of patterns) {
     const m = text.match(p);
@@ -219,22 +340,30 @@ function detectCategory(text: string): string {
   if (lower.includes("corporate") || lower.includes("business")) return "Corporate";
   if (lower.includes("cultural") || lower.includes("heritage")) return "Cultural";
   if (lower.includes("sport") || lower.includes("athletic")) return "Sports";
-  if (lower.includes("entertainment") || lower.includes("concert")) return "Entertainment";
-  if (lower.includes("government") || lower.includes("national")) return "Government";
-  if (lower.includes("social") || lower.includes("community")) return "Social";
+  if (lower.includes("entertainment") || lower.includes("concert") || lower.includes("show")) return "Entertainment";
+  if (lower.includes("government") || lower.includes("national") || lower.includes("public")) return "Government";
+  if (lower.includes("social") || lower.includes("community") || lower.includes("charity")) return "Social";
+  if (lower.includes("conference") || lower.includes("summit") || lower.includes("forum")) return "Conference";
+  if (lower.includes("launch") || lower.includes("opening") || lower.includes("inaugur")) return "Launch";
+  if (lower.includes("gala") || lower.includes("dinner") || lower.includes("reception")) return "Gala";
+  if (lower.includes("workshop") || lower.includes("training") || lower.includes("seminar")) return "Workshop";
   return "General";
 }
 
 function extractNumber(text: string): number {
-  const m = text.match(/(\d{2,6})\s*(?:attendees|guests|people|pax|persons?)?/i);
+  const m = text.match(/(\d{2,6})\s*(?:attendees|guests|people|pax|persons?|participants?|invitees?)?/i);
   return m ? parseInt(m[1]) : 0;
 }
 
 function extractTier(text: string): string {
   const lower = text.toLowerCase();
-  if (lower.includes("major") || lower.includes("vip") || lower.includes("premium") || lower.includes("gala"))
-    return "Major";
-  if (lower.includes("medium") || lower.includes("mid") || lower.includes("conference"))
-    return "Medium";
+  if (
+    lower.includes("major") || lower.includes("vip") || lower.includes("premium") ||
+    lower.includes("gala") || lower.includes("grand") || lower.includes("flagship")
+  ) return "Major";
+  if (
+    lower.includes("medium") || lower.includes("mid") || lower.includes("conference") ||
+    lower.includes("summit") || lower.includes("forum")
+  ) return "Medium";
   return "Light";
 }

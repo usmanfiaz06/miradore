@@ -86,4 +86,8 @@ export interface UploadedRFP {
   events: RFPEvent[];
   clientName: string;
   uploadedAt: string;
+  rawText?: string;
+  rfpSummary?: string;
+  requirements?: string[];
+  aiParsed?: boolean;
 }

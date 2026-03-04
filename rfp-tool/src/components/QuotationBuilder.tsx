@@ -250,25 +250,25 @@ export default function QuotationBuilder({
   return (
     <div className="space-y-6 animate-slide-in">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+        <div className="flex items-center gap-3 min-w-0">
           <button
             onClick={onBack}
-            className="p-2 rounded-lg hover:bg-surface-sunken transition-colors"
+            className="p-2 rounded-lg hover:bg-surface-sunken transition-colors flex-shrink-0"
           >
             <ArrowLeft size={20} className="text-text-secondary" />
           </button>
-          <div>
-            <h1 className="text-xl font-bold text-text-primary">
+          <div className="min-w-0">
+            <h1 className="text-lg sm:text-xl font-bold text-text-primary truncate">
               {event ? `Quotation — ${event.eventName}` : "New Quotation"}
             </h1>
-            <p className="text-sm text-text-secondary mt-0.5">
+            <p className="text-xs sm:text-sm text-text-secondary mt-0.5">
               {quotation.id} &middot; Created {quotation.createdAt}
             </p>
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-shrink-0">
           <button
             onClick={() => setShowPreview(true)}
             className="flex items-center gap-2 px-4 py-2.5 rounded-lg border border-border text-sm font-medium text-text-primary hover:bg-surface-sunken transition-colors"
@@ -302,7 +302,7 @@ export default function QuotationBuilder({
             Event & Client Details
           </h2>
         </div>
-        <div className="p-6 grid grid-cols-2 gap-5">
+        <div className="p-6 grid grid-cols-1 sm:grid-cols-2 gap-5">
           <div>
             <label className="block text-xs font-medium text-text-secondary mb-1.5 uppercase tracking-wide">
               Client Name
@@ -400,14 +400,14 @@ export default function QuotationBuilder({
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full">
+          <table className="w-full min-w-[700px]">
             <thead>
               <tr className="bg-surface-sunken">
                 <th className="w-8 px-3 py-3"></th>
                 <th className="px-3 py-3 text-left text-xs font-semibold text-text-secondary uppercase tracking-wide">
                   Category
                 </th>
-                <th className="px-3 py-3 text-left text-xs font-semibold text-text-secondary uppercase tracking-wide min-w-[260px]">
+                <th className="px-3 py-3 text-left text-xs font-semibold text-text-secondary uppercase tracking-wide min-w-[200px]">
                   Description
                 </th>
                 <th className="px-3 py-3 text-center text-xs font-semibold text-text-secondary uppercase tracking-wide w-24">
@@ -558,7 +558,7 @@ export default function QuotationBuilder({
             Receiving Bank Account
           </h2>
         </div>
-        <div className="p-6 grid grid-cols-2 gap-5">
+        <div className="p-6 grid grid-cols-1 sm:grid-cols-2 gap-5">
           <div>
             <label className="block text-xs font-medium text-text-secondary mb-1.5 uppercase tracking-wide">
               Bank Name
@@ -676,7 +676,7 @@ export default function QuotationBuilder({
                   <div className="w-8 h-8 rounded-lg bg-teal-100 flex items-center justify-center flex-shrink-0 mt-0.5">
                     <span className="text-xs font-bold text-teal-700">{index + 1}</span>
                   </div>
-                  <div className="flex-1 grid grid-cols-4 gap-3">
+                  <div className="flex-1 grid grid-cols-2 md:grid-cols-4 gap-3">
                     <div>
                       <label className="block text-[10px] text-text-tertiary uppercase mb-1">Label</label>
                       <input
@@ -754,16 +754,16 @@ export default function QuotationBuilder({
       </div>
 
       {/* Financial Summary */}
-      <div className="grid grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Commission & Tax Controls */}
-        <div className="col-span-2 bg-white rounded-2xl border border-border shadow-sm overflow-hidden">
+        <div className="lg:col-span-2 bg-white rounded-2xl border border-border shadow-sm overflow-hidden">
           <div className="px-6 py-4 border-b border-border-subtle">
             <h2 className="text-base font-semibold text-text-primary flex items-center gap-2">
               <Calculator size={18} className="text-teal-500" />
               Adjustments
             </h2>
           </div>
-          <div className="p-6 grid grid-cols-3 gap-5">
+          <div className="p-6 grid grid-cols-1 sm:grid-cols-3 gap-5">
             {/* Agency Commission */}
             <div>
               <label className="block text-xs font-medium text-text-secondary mb-1.5 uppercase tracking-wide">
