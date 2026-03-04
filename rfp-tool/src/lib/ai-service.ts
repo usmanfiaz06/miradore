@@ -38,11 +38,17 @@ async function callGemini(prompt: string, apiKey: string): Promise<string> {
     });
 
     if (!res.ok) {
-      const err = await res.text();
-      if (res.status === 400 || res.status === 403) {
-        throw new Error("Invalid API key. Please check your Gemini API key in Settings.");
+      // Don't wait to read full error body — fail fast
+      if (res.status === 400 || res.status === 403 || res.status === 401) {
+        throw new Error("Invalid or restricted API key. Check your Gemini API key in Settings.");
       }
-      throw new Error(`AI request failed (${res.status}): ${err.substring(0, 200)}`);
+      if (res.status === 429) {
+        throw new Error("AI rate limit exceeded. Please wait a moment and try again.");
+      }
+      if (res.status === 404) {
+        throw new Error("AI model not available. The Gemini model may not be accessible in your region.");
+      }
+      throw new Error(`AI request failed with status ${res.status}`);
     }
 
     const data = await res.json();
