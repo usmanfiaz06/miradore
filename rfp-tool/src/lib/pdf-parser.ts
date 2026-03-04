@@ -1,11 +1,10 @@
 "use client";
 
 import { RFPEvent, UploadedRFP } from "@/types";
+import { extractRFPWithAI, getApiKey } from "./ai-service";
 
 /**
  * Extract text from a PDF using pdfjs-dist (Mozilla PDF.js).
- * Dynamically imported to avoid SSR/build issues (DOMMatrix not available in Node).
- * Returns an array of page texts for structured processing.
  */
 async function extractPagesFromPDF(buffer: ArrayBuffer): Promise<string[]> {
   const pdfjs = await import("pdfjs-dist");
@@ -53,7 +52,7 @@ export async function parsePDFFile(file: File): Promise<UploadedRFP> {
 
   const fullText = pages.join("\n\n");
 
-  // Sanity check: if extracted text is mostly non-printable or too short, warn user
+  // Sanity check
   const printable = fullText.replace(/[^\x20-\x7E\u00A0-\uFFFF]/g, "").trim();
   if (printable.length < 20) {
     throw new Error(
@@ -61,20 +60,30 @@ export async function parsePDFFile(file: File): Promise<UploadedRFP> {
     );
   }
 
+  // Try AI parsing first if API key is configured
+  const apiKey = getApiKey();
+  if (apiKey) {
+    try {
+      const result = await extractRFPWithAI(fullText, file.name, apiKey);
+      result.aiParsed = true;
+      return result;
+    } catch (err) {
+      console.warn("AI parsing failed, falling back to regex:", err);
+    }
+  }
+
+  // Regex-based parsing fallback
   const lines = fullText
     .split(/[\n\r]+/)
     .map((l) => l.trim())
     .filter((l) => l.length > 1);
 
-  // Extract client name
   const clientName = extractClientName(lines);
 
-  // Parse events using multiple strategies
   let events = parseTableEvents(lines);
   if (events.length === 0) events = parseNumberedEvents(lines);
   if (events.length === 0) events = parseKeywordEvents(lines);
 
-  // Fallback: at least one event from the file
   if (events.length === 0) {
     events.push({
       number: 1,
@@ -93,6 +102,7 @@ export async function parsePDFFile(file: File): Promise<UploadedRFP> {
     events,
     clientName,
     uploadedAt: new Date().toISOString(),
+    rawText: fullText.substring(0, 12000),
   };
 }
 

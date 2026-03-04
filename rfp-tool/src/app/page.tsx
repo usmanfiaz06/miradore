@@ -7,15 +7,24 @@ import RFPUpload from "@/components/RFPUpload";
 import QuotationBuilder from "@/components/QuotationBuilder";
 import QuotationsList from "@/components/QuotationsList";
 import QuotationPreview from "@/components/QuotationPreview";
+import TechnicalProposalBuilder from "@/components/TechnicalProposalBuilder";
+import TechnicalProposalPreview from "@/components/TechnicalProposalPreview";
+import ProposalsList from "@/components/ProposalsList";
+import AISettingsModal from "@/components/AISettingsModal";
 import { QuotationData, RFPEvent, UploadedRFP } from "@/types";
+import { TechnicalProposalData } from "@/lib/ai-service";
 import { calculateQuotationTotals, generateQuotationNumber } from "@/lib/utils";
 
 export default function Home() {
   const [activeView, setActiveView] = useState("dashboard");
   const [quotations, setQuotations] = useState<QuotationData[]>([]);
+  const [proposals, setProposals] = useState<TechnicalProposalData[]>([]);
   const [uploadedRFP, setUploadedRFP] = useState<UploadedRFP | null>(null);
   const [selectedEvent, setSelectedEvent] = useState<RFPEvent | null>(null);
   const [viewingQuotation, setViewingQuotation] = useState<QuotationData | null>(null);
+  const [viewingProposal, setViewingProposal] = useState<TechnicalProposalData | null>(null);
+  const [showSettings, setShowSettings] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const handleRFPParsed = useCallback((rfp: UploadedRFP) => {
     setUploadedRFP(rfp);
@@ -58,6 +67,32 @@ export default function Home() {
     setActiveView("preview");
   }, []);
 
+  const handleSaveProposal = useCallback((proposal: TechnicalProposalData) => {
+    setProposals((prev) => {
+      const existing = prev.findIndex((p) => p.id === proposal.id);
+      if (existing >= 0) {
+        const updated = [...prev];
+        updated[existing] = proposal;
+        return updated;
+      }
+      return [proposal, ...prev];
+    });
+    setActiveView("proposals");
+  }, []);
+
+  const handleDeleteProposal = useCallback((id: string) => {
+    setProposals((prev) => prev.filter((p) => p.id !== id));
+  }, []);
+
+  const handleViewProposal = useCallback((proposal: TechnicalProposalData) => {
+    setViewingProposal(proposal);
+    setActiveView("proposal-preview");
+  }, []);
+
+  const handleGenerateProposal = useCallback(() => {
+    setActiveView("proposal-builder");
+  }, []);
+
   const handleNavigate = useCallback((view: string) => {
     if (view === "new-quotation") {
       setSelectedEvent(null);
@@ -80,13 +115,18 @@ export default function Home() {
     switch (activeView) {
       case "dashboard":
         return (
-          <Dashboard quotations={quotations} onNavigate={handleNavigate} />
+          <Dashboard
+            quotations={quotations}
+            proposals={proposals}
+            onNavigate={handleNavigate}
+          />
         );
       case "upload":
         return (
           <RFPUpload
             onRFPParsed={handleRFPParsed}
             onSelectEvent={handleSelectEvent}
+            onGenerateProposal={handleGenerateProposal}
             uploadedRFP={uploadedRFP}
           />
         );
@@ -119,14 +159,47 @@ export default function Home() {
           );
         }
         return null;
+      case "proposals":
+        return (
+          <ProposalsList
+            proposals={proposals}
+            onView={handleViewProposal}
+            onDelete={handleDeleteProposal}
+            onNavigateUpload={() => setActiveView("upload")}
+          />
+        );
+      case "proposal-builder":
+        if (uploadedRFP) {
+          return (
+            <TechnicalProposalBuilder
+              uploadedRFP={uploadedRFP}
+              onBack={() => setActiveView("upload")}
+              onSave={handleSaveProposal}
+            />
+          );
+        }
+        setActiveView("upload");
+        return null;
+      case "proposal-preview":
+        if (viewingProposal) {
+          return (
+            <TechnicalProposalPreview
+              proposal={viewingProposal}
+              onClose={() => setActiveView("proposals")}
+            />
+          );
+        }
+        return null;
       default:
         return (
-          <Dashboard quotations={quotations} onNavigate={handleNavigate} />
+          <Dashboard
+            quotations={quotations}
+            proposals={proposals}
+            onNavigate={handleNavigate}
+          />
         );
     }
   };
-
-  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
     <div className="min-h-screen bg-background">
@@ -134,12 +207,18 @@ export default function Home() {
         activeView={activeView}
         onViewChange={setActiveView}
         quotationCount={quotations.length}
+        proposalCount={proposals.length}
         isOpen={sidebarOpen}
         onToggle={() => setSidebarOpen((prev) => !prev)}
+        onOpenSettings={() => setShowSettings(true)}
       />
       <main className="pt-16 px-3 pb-4 sm:px-4 lg:pt-0 lg:ml-64 lg:p-8">
         {renderContent()}
       </main>
+      <AISettingsModal
+        isOpen={showSettings}
+        onClose={() => setShowSettings(false)}
+      />
     </div>
   );
 }
