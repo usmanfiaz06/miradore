@@ -89,5 +89,16 @@ export interface UploadedRFP {
   rawText?: string;
   rfpSummary?: string;
   requirements?: string[];
+  requiredDocuments?: string[];
   aiParsed?: boolean;
+}
+
+export interface WalletDocument {
+  id: string;
+  name: string;
+  fileName: string;
+  category: string;
+  uploadedAt: string;
+  fileSize: number;
+  dataUrl: string;
 }

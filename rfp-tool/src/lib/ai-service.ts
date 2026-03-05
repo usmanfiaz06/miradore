@@ -117,12 +117,14 @@ Also extract:
 - clientName: The client or organization name
 - rfpSummary: A 2-3 sentence summary of the entire RFP
 - requirements: Array of key requirements/objectives mentioned in the RFP
+- requiredDocuments: Array of documents that must be submitted with the proposal/bid (e.g., "Company Registration Certificate", "Financial Statements", "Tax Compliance Certificate", "Insurance Certificate", "Past Project References", "Team CVs", "Bank Guarantee", "Bid Bond", "Technical Proposal", "Financial Proposal", "NDA/Confidentiality Agreement"). Look for submission requirements, mandatory documents, eligibility criteria, compliance documents, or any annexures/attachments the bidder must provide.
 
 Respond ONLY with valid JSON in this exact format:
 {
   "clientName": "string",
   "rfpSummary": "string",
   "requirements": ["string"],
+  "requiredDocuments": ["string"],
   "events": [
     {
       "eventName": "string",
@@ -168,6 +170,9 @@ Respond ONLY with valid JSON in this exact format:
     rfpSummary: String(parsed.rfpSummary || ""),
     requirements: Array.isArray(parsed.requirements)
       ? parsed.requirements.map(String)
+      : [],
+    requiredDocuments: Array.isArray(parsed.requiredDocuments)
+      ? parsed.requiredDocuments.map(String)
       : [],
   };
 }

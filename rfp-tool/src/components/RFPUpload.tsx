@@ -14,10 +14,15 @@ import {
   Sparkles,
   BookOpen,
   Wand2,
+  ClipboardList,
+  CheckSquare,
+  Square,
+  FolderOpen,
 } from "lucide-react";
 import { UploadedRFP, RFPEvent } from "@/types";
 import { parseRFPFile } from "@/lib/xlsx-parser";
 import { hasApiKey } from "@/lib/ai-service";
+import { getWalletDocuments } from "./DocumentWallet";
 
 interface RFPUploadProps {
   onRFPParsed: (rfp: UploadedRFP) => void;
@@ -279,6 +284,74 @@ export default function RFPUpload({
                 </div>
               </button>
             ))}
+          </div>
+        </div>
+      )}
+      {/* Required Documents Checklist */}
+      {uploadedRFP && uploadedRFP.requiredDocuments && uploadedRFP.requiredDocuments.length > 0 && (
+        <div className="bg-white rounded-2xl border border-border shadow-sm overflow-hidden animate-slide-in">
+          <div className="px-6 py-4 border-b border-border-subtle">
+            <h2 className="text-lg font-semibold text-text-primary flex items-center gap-2">
+              <ClipboardList size={20} className="text-orange-500" />
+              Required Submission Documents
+            </h2>
+            <p className="text-sm text-text-secondary mt-0.5">
+              Documents that must be submitted alongside this RFP response
+            </p>
+          </div>
+          <div className="divide-y divide-border-subtle">
+            {uploadedRFP.requiredDocuments.map((doc, index) => {
+              const walletDocs = getWalletDocuments();
+              const docLower = doc.toLowerCase();
+              const matched = walletDocs.some(
+                (w) =>
+                  w.name.toLowerCase().includes(docLower) ||
+                  w.category.toLowerCase().includes(docLower) ||
+                  docLower.includes(w.name.toLowerCase()) ||
+                  docLower.includes(w.category.toLowerCase())
+              );
+              return (
+                <div
+                  key={index}
+                  className={`px-6 py-3 flex items-center gap-3 ${
+                    matched ? "bg-green-50/50" : ""
+                  }`}
+                >
+                  {matched ? (
+                    <CheckSquare size={16} className="text-green-600 flex-shrink-0" />
+                  ) : (
+                    <Square size={16} className="text-slate-300 flex-shrink-0" />
+                  )}
+                  <span className={`text-sm ${matched ? "text-green-700 font-medium" : "text-text-primary"}`}>
+                    {doc}
+                  </span>
+                  {matched && (
+                    <span className="text-xs text-green-600 bg-green-100 px-2 py-0.5 rounded-full ml-auto flex items-center gap-1">
+                      <FolderOpen size={10} />
+                      In Wallet
+                    </span>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+          <div className="px-6 py-3 border-t border-border-subtle bg-slate-50">
+            <p className="text-xs text-text-tertiary">
+              {(() => {
+                const walletDocs = getWalletDocuments();
+                const matchCount = uploadedRFP.requiredDocuments!.filter((doc) => {
+                  const docLower = doc.toLowerCase();
+                  return walletDocs.some(
+                    (w) =>
+                      w.name.toLowerCase().includes(docLower) ||
+                      w.category.toLowerCase().includes(docLower) ||
+                      docLower.includes(w.name.toLowerCase()) ||
+                      docLower.includes(w.category.toLowerCase())
+                  );
+                }).length;
+                return `${matchCount} of ${uploadedRFP.requiredDocuments!.length} documents found in your Document Wallet`;
+              })()}
+            </p>
           </div>
         </div>
       )}
