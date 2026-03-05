@@ -3,7 +3,7 @@
 import { RFPEvent, UploadedRFP } from "@/types";
 
 const GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent";
-const REQUEST_TIMEOUT_MS = 30000; // 30 second timeout
+const REQUEST_TIMEOUT_MS = 60000; // 60 second timeout for large proposals
 
 export function getApiKey(): string {
   if (typeof window === "undefined") return "";
@@ -38,8 +38,15 @@ async function callGemini(prompt: string, apiKey: string): Promise<string> {
     });
 
     if (!res.ok) {
-      // Don't wait to read full error body — fail fast
-      if (res.status === 400 || res.status === 403 || res.status === 401) {
+      let errorDetail = "";
+      try {
+        const errBody = await res.json();
+        errorDetail = errBody?.error?.message || JSON.stringify(errBody?.error || errBody).substring(0, 200);
+      } catch {
+        // ignore parse errors
+      }
+
+      if (res.status === 401 || res.status === 403) {
         throw new Error("Invalid or restricted API key. Check your Gemini API key in Settings.");
       }
       if (res.status === 429) {
@@ -48,7 +55,10 @@ async function callGemini(prompt: string, apiKey: string): Promise<string> {
       if (res.status === 404) {
         throw new Error("AI model not available. The Gemini model may not be accessible in your region.");
       }
-      throw new Error(`AI request failed with status ${res.status}`);
+      if (res.status === 400) {
+        throw new Error(`AI request error: ${errorDetail || "Bad request. The document may be too large."}`);
+      }
+      throw new Error(`AI request failed (${res.status}): ${errorDetail || "Unknown error"}`);
     }
 
     const data = await res.json();
