@@ -67,7 +67,7 @@ async function callGemini(prompt: string, apiKey: string): Promise<string> {
     return text;
   } catch (err: unknown) {
     if (err instanceof DOMException && err.name === "AbortError") {
-      throw new Error("AI request timed out after 30s. Please try again.");
+      throw new Error("AI request timed out after 60s. Please try again.");
     }
     throw err;
   } finally {
@@ -175,9 +175,13 @@ Respond ONLY with valid JSON in this exact format:
 export interface TechnicalProposalData {
   id: string;
   rfpFileName: string;
+  rfpReference: string;
   clientName: string;
   clientCompany: string;
   eventName: string;
+  contractTitle: string;
+  contractPeriod: string;
+  submittedTo: string;
   createdAt: string;
   sections: ProposalSection[];
 }
@@ -190,7 +194,7 @@ export interface ProposalSection {
 }
 
 /**
- * Use AI to generate a comprehensive technical proposal.
+ * Use AI to generate a comprehensive technical proposal matching the IDEAS format.
  */
 export async function generateTechnicalProposal(
   rfpData: {
@@ -211,9 +215,9 @@ export async function generateTechnicalProposal(
     ? `\n\nORIGINAL RFP TEXT (excerpt):\n${rfpData.rawText.substring(0, 6000)}`
     : "";
 
-  const prompt = `You are an expert event management proposal writer for Miradore, a premium event management, production, and creative agency operating in Pakistan, Saudi Arabia, and Dubai/UAE.
+  const prompt = `You are an expert event management proposal writer for Miradore Experiences, a premium event management, production, and creative agency with offices in Riyadh (KSA) and Karachi (Pakistan).
 
-Write a comprehensive, professional TECHNICAL PROPOSAL for the following RFP:
+Write a comprehensive, professional TECHNICAL PROPOSAL for the following RFP. Follow the exact structure used in professional government/B2G proposals.
 
 CLIENT: ${rfpData.clientName || "The Client"}
 EVENT(S):
@@ -222,57 +226,34 @@ ${rfpData.rfpSummary ? `\nRFP SUMMARY: ${rfpData.rfpSummary}` : ""}
 ${rfpData.requirements?.length ? `\nKEY REQUIREMENTS:\n${rfpData.requirements.map((r, i) => `${i + 1}. ${r}`).join("\n")}` : ""}
 ${rfpContext}
 
-Generate these sections with rich, professional content. Be specific to the events and requirements described. Include concrete deliverables and methodologies.
+Generate these EXACT sections. Each section must be detailed, specific to this RFP, and written in formal proposal language:
 
-Respond ONLY with valid JSON array of sections:
+1. "Cover Letter" — Formal letter addressed to the client (2-3 paragraphs). Reference the RFP, state Miradore's qualifications, confirm acceptance of terms. Sign off as "Adeel Ahmed, Director, Miradore Experiences".
+
+2. "Company Overview & Ownership Structure" — About Miradore Experiences: dual-market presence (Riyadh KSA + Karachi Pakistan), founded 2019, 35+ staff, core verticals (Government Events, Defence & Security, Technology, Cultural Diplomacy, Corporate Communications). Include service capabilities list. End with "Why Miradore" paragraph.
+
+3. "Understanding of Scope & Strategic Approach" — Show deep understanding of the client's event/project. Outline strategic vision with 2-3 pillars. Include campaign architecture (phases), measurement approach. Be specific to the events described.
+
+4. "Section-by-Section Methodology" — For EACH major scope area/event/service requirement identified in the RFP, provide bullet-point methodology: approach, key deliverables, quality assurance. Use numbered sub-sections (Section 1, Section 2, etc.). This should be the longest section.
+
+5. "Proposed Team Structure & Key Personnel" — Propose a dedicated team with roles, names (use realistic names), years of experience, and engagement type (Dedicated/Part-time). Format as numbered list. Include an org chart description.
+
+6. "Portfolio & Case Studies" — 3-5 relevant case studies. Each with: Client, Scope, and 3-4 bullet points of deliverables. Include events similar to what's being proposed.
+
+7. "Subcontractors & Partner Agencies" — List specialist partners for areas like international PR, OOH advertising, influencer management, printing. Note that Miradore retains full accountability.
+
+8. "AI-Augmented Delivery Capability" — List AI tools used in workflow: content generation, media planning, pre-visualisation, analytics, design acceleration, translation QA. Include estimated productivity gains.
+
+9. "Declarations" — Include: No Conflict of Interest, No Pending Litigation, NDA Acknowledgement, Acceptance of RFP Terms, Proposal Validity (90 days).
+
+Respond ONLY with valid JSON array:
 [
-  {
-    "title": "Executive Summary",
-    "content": "2-3 paragraphs summarizing our understanding, approach, and why Miradore is the right partner..."
-  },
-  {
-    "title": "Company Profile",
-    "content": "About Miradore - our expertise in event management, production, and creative services across Pakistan, KSA, and UAE. Mention our track record with similar events..."
-  },
-  {
-    "title": "Understanding of Requirements",
-    "content": "Detailed analysis of the client's needs based on the RFP. Show deep understanding of each event and its objectives..."
-  },
-  {
-    "title": "Proposed Methodology & Approach",
-    "content": "Our step-by-step approach to planning and executing the events. Include phases: Discovery, Planning, Pre-production, Execution, Post-event..."
-  },
-  {
-    "title": "Event Concepts & Creative Direction",
-    "content": "Creative vision for each event. Include themes, staging concepts, visual identity, and experience design..."
-  },
-  {
-    "title": "Technical Production Plan",
-    "content": "Detailed production specifications including AV equipment, staging, lighting, sound, and technical infrastructure..."
-  },
-  {
-    "title": "Project Team & Staffing",
-    "content": "Key team members and roles. Include Project Director, Creative Director, Production Manager, Event Coordinators, and support staff..."
-  },
-  {
-    "title": "Timeline & Milestones",
-    "content": "Detailed project timeline from contract signing through post-event. Include key milestones and deliverable dates..."
-  },
-  {
-    "title": "Quality Assurance & Risk Management",
-    "content": "Our quality control processes, risk mitigation strategies, contingency plans, and safety protocols..."
-  },
-  {
-    "title": "Value-Added Services",
-    "content": "Additional services we offer that add value: digital/social media coverage, sustainability practices, VIP management, post-event analytics..."
-  },
-  {
-    "title": "Terms & Conditions",
-    "content": "Standard terms including payment schedule, cancellation policy, intellectual property, confidentiality, and liability..."
-  }
+  {"title": "Cover Letter", "content": "..."},
+  {"title": "Company Overview & Ownership Structure", "content": "..."},
+  ...
 ]
 
-Make the content specific, detailed, and compelling. Each section should be 150-300 words. Use professional language suitable for a formal proposal document.`;
+Make content specific, detailed, and compelling. Each section should be 200-500 words. Use professional language suitable for a government/B2G proposal document.`;
 
   const response = await callGemini(prompt, apiKey);
   const jsonStr = extractJSON(response);
