@@ -44,9 +44,13 @@ export default function TechnicalProposalBuilder({
     existingProposal || {
       id: `TP-${generateId()}`,
       rfpFileName: uploadedRFP.fileName,
+      rfpReference: "",
       clientName: uploadedRFP.clientName || "",
       clientCompany: "",
       eventName: uploadedRFP.events[0]?.eventName || "",
+      contractTitle: "",
+      contractPeriod: "",
+      submittedTo: uploadedRFP.clientName || "",
       createdAt: new Date().toISOString().split("T")[0],
       sections: [],
     }
@@ -202,6 +206,30 @@ export default function TechnicalProposalBuilder({
         <div className="p-6 grid grid-cols-1 sm:grid-cols-2 gap-5">
           <div>
             <label className="block text-xs font-medium text-text-secondary mb-1.5 uppercase tracking-wide">
+              RFP Reference
+            </label>
+            <input
+              type="text"
+              value={proposal.rfpReference}
+              onChange={(e) => setProposal((p) => ({ ...p, rfpReference: e.target.value }))}
+              placeholder="e.g. RFP-DEPO-IDEAS-2026-001"
+              className="w-full px-3.5 py-2.5 rounded-lg border border-border text-sm text-text-primary placeholder-text-tertiary hover:border-teal-300 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-text-secondary mb-1.5 uppercase tracking-wide">
+              Submitted To
+            </label>
+            <input
+              type="text"
+              value={proposal.submittedTo}
+              onChange={(e) => setProposal((p) => ({ ...p, submittedTo: e.target.value }))}
+              placeholder="e.g. Defence Export Promotion Organisation (DEPO)"
+              className="w-full px-3.5 py-2.5 rounded-lg border border-border text-sm text-text-primary placeholder-text-tertiary hover:border-teal-300 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-text-secondary mb-1.5 uppercase tracking-wide">
               Client Name
             </label>
             <input
@@ -221,6 +249,30 @@ export default function TechnicalProposalBuilder({
               value={proposal.clientCompany}
               onChange={(e) => setProposal((p) => ({ ...p, clientCompany: e.target.value }))}
               placeholder="Enter company name"
+              className="w-full px-3.5 py-2.5 rounded-lg border border-border text-sm text-text-primary placeholder-text-tertiary hover:border-teal-300 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-text-secondary mb-1.5 uppercase tracking-wide">
+              Contract Title
+            </label>
+            <input
+              type="text"
+              value={proposal.contractTitle}
+              onChange={(e) => setProposal((p) => ({ ...p, contractTitle: e.target.value }))}
+              placeholder="e.g. Integrated Communications, Media & Production"
+              className="w-full px-3.5 py-2.5 rounded-lg border border-border text-sm text-text-primary placeholder-text-tertiary hover:border-teal-300 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-text-secondary mb-1.5 uppercase tracking-wide">
+              Contract Period
+            </label>
+            <input
+              type="text"
+              value={proposal.contractPeriod}
+              onChange={(e) => setProposal((p) => ({ ...p, contractPeriod: e.target.value }))}
+              placeholder="e.g. 12 Months: March 2026 - February 2027"
               className="w-full px-3.5 py-2.5 rounded-lg border border-border text-sm text-text-primary placeholder-text-tertiary hover:border-teal-300 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20"
             />
           </div>

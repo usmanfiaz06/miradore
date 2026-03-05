@@ -10,6 +10,7 @@ import {
   X,
   Sparkles,
   BookOpen,
+  FolderOpen,
 } from "lucide-react";
 
 interface SidebarProps {
@@ -27,6 +28,7 @@ const navItems = [
   { id: "upload", label: "Upload RFP", icon: Upload },
   { id: "quotations", label: "Quotations", icon: FileText, countKey: "quotations" as const },
   { id: "proposals", label: "Proposals", icon: BookOpen, countKey: "proposals" as const },
+  { id: "wallet", label: "Document Wallet", icon: FolderOpen },
 ];
 
 export default function Sidebar({

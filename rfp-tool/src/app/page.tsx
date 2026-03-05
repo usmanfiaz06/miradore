@@ -11,6 +11,7 @@ import TechnicalProposalBuilder from "@/components/TechnicalProposalBuilder";
 import TechnicalProposalPreview from "@/components/TechnicalProposalPreview";
 import ProposalsList from "@/components/ProposalsList";
 import AISettingsModal from "@/components/AISettingsModal";
+import DocumentWallet from "@/components/DocumentWallet";
 import { QuotationData, RFPEvent, UploadedRFP } from "@/types";
 import { TechnicalProposalData } from "@/lib/ai-service";
 import { calculateQuotationTotals, generateQuotationNumber } from "@/lib/utils";
@@ -190,6 +191,12 @@ export default function Home() {
           );
         }
         return null;
+      case "wallet":
+        return (
+          <DocumentWallet
+            highlightDocuments={uploadedRFP?.requiredDocuments || []}
+          />
+        );
       default:
         return (
           <Dashboard
