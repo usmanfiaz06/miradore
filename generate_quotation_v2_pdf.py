@@ -65,7 +65,8 @@ class QuotationPDF(FPDF):
         self.set_text_color(*self.DARK)
         info_items = [
             "Event: Pakistan Night - Welcome Networking Evening",
-            "Venue: Crowne Plaza Hotel - Riyadh (Ballroom)",
+            "Venue Option A: Crowne Plaza Hotel - Riyadh (Ballroom)",
+            "Venue Option B: JW Marriott Riyadh (Hall with Buffet)",
             "Hospitality: Buffet Dinner + Coffee Break",
             "Date: April 14, 2026 (7:00 PM - 11:00 PM)",
             "Context: LEAP 2026 - Riyadh, Saudi Arabia",
@@ -191,9 +192,18 @@ def generate():
 
     # Section A: Venue & Hospitality
     pdf.section_header("SECTION A: VENUE & HOSPITALITY")
+
+    # Option A - Crowne Plaza
+    pdf.section_header("OPTION A: CROWNE PLAZA HOTEL - RIYADH")
     pdf.item_row(1, "Hotel Crowne Plaza Ballroom (Buffet Dinner + Coffee Break, 400 Guests)", 1, 1, 325000, 325000)
     pdf.item_row(2, "VIP Sofas (50 Pieces @ 350 SAR each)", 50, 1, 350, 17500, alt=True)
-    pdf.subtotal_row("Subtotal:", 342500)
+    pdf.subtotal_row("Option A Subtotal:", 342500)
+
+    # Option B - JW Marriott
+    pdf.section_header("OPTION B: JW MARRIOTT RIYADH")
+    pdf.item_row(1, "JW Marriott Riyadh - Hall with Buffet (400 Guests)", 1, 1, 165000, 165000)
+    pdf.item_row(2, "VIP Sofas (50 Pieces @ 350 SAR each)", 50, 1, 350, 17500, alt=True)
+    pdf.subtotal_row("Option B Subtotal:", 182500)
 
     # Section B: Stage & Screens
     pdf.section_header("SECTION B: STAGE & SCREENS")
@@ -244,21 +254,48 @@ def generate():
     pdf.cell(0, 7, "COST SUMMARY", new_x="LMARGIN", new_y="NEXT")
 
     # Calculations
-    venue_hospitality = 342500
     production_services = 31300 + 53600 + 12000 + 61000 + 5000  # 162,900
     agency_commission = production_services * 0.15  # 24,435
-    subtotal_before_vat = venue_hospitality + production_services + agency_commission  # 529,835
-    vat = subtotal_before_vat * 0.15  # 79,475.25
-    grand_total = subtotal_before_vat + vat  # 609,310.25
 
-    pdf.summary_row("Venue & Hospitality:", venue_hospitality, bold=True)
+    # Option A - Crowne Plaza
+    venue_a = 342500
+    subtotal_a = venue_a + production_services + agency_commission  # 529,835
+    vat_a = subtotal_a * 0.15  # 79,475.25
+    grand_total_a = subtotal_a + vat_a  # 609,310.25
+
+    # Option B - JW Marriott
+    venue_b = 182500
+    subtotal_b = venue_b + production_services + agency_commission  # 369,835
+    vat_b = subtotal_b * 0.15  # 55,475.25
+    grand_total_b = subtotal_b + vat_b  # 425,310.25
+
+    # --- Option A Summary ---
+    pdf.set_font("Helvetica", "B", 8)
+    pdf.set_text_color(*pdf.ORANGE)
+    pdf.cell(0, 7, "OPTION A: CROWNE PLAZA HOTEL - RIYADH", new_x="LMARGIN", new_y="NEXT")
+    pdf.summary_row("Venue & Hospitality:", venue_a, bold=True)
     pdf.summary_row("Production Services (B-F):", production_services, bold=True)
     pdf.summary_row("Agency Commission (15%):", agency_commission)
     pdf.ln(1)
-    pdf.summary_row("Subtotal before VAT:", subtotal_before_vat, bold=True)
-    pdf.summary_row("VAT (15%):", vat)
+    pdf.summary_row("Subtotal before VAT:", subtotal_a, bold=True)
+    pdf.summary_row("VAT (15%):", vat_a)
     pdf.ln(1)
-    pdf.summary_row("*  GRAND TOTAL (INC. VAT):", grand_total, highlight=True)
+    pdf.summary_row("*  GRAND TOTAL - OPTION A (INC. VAT):", grand_total_a, highlight=True)
+
+    pdf.ln(4)
+
+    # --- Option B Summary ---
+    pdf.set_font("Helvetica", "B", 8)
+    pdf.set_text_color(*pdf.ORANGE)
+    pdf.cell(0, 7, "OPTION B: JW MARRIOTT RIYADH", new_x="LMARGIN", new_y="NEXT")
+    pdf.summary_row("Venue & Hospitality:", venue_b, bold=True)
+    pdf.summary_row("Production Services (B-F):", production_services, bold=True)
+    pdf.summary_row("Agency Commission (15%):", agency_commission)
+    pdf.ln(1)
+    pdf.summary_row("Subtotal before VAT:", subtotal_b, bold=True)
+    pdf.summary_row("VAT (15%):", vat_b)
+    pdf.ln(1)
+    pdf.summary_row("*  GRAND TOTAL - OPTION B (INC. VAT):", grand_total_b, highlight=True)
 
     pdf.ln(6)
 
@@ -280,7 +317,8 @@ def generate():
     pdf.set_text_color(*pdf.GRAY)
     notes = [
         "1.  All prices are in Saudi Riyals (SAR).",
-        "2.  Venue includes buffet dinner + coffee break for 400 guests at Crowne Plaza Ballroom.",
+        "2.  Option A: Crowne Plaza Ballroom - buffet dinner + coffee break for 400 guests (325,000 SAR).",
+        "    Option B: JW Marriott Riyadh - hall with buffet for 400 guests (165,000 SAR).",
         "3.  VIP sofas (50 pcs) quoted separately at 350 SAR per piece.",
         "4.  Sound system, wireless mics & ambiance lighting are on-premise at the hotel venue.",
         "5.  Stage screen includes center screen (10m x 4m), 2 side panels (3m x 4m each), and servers.",
