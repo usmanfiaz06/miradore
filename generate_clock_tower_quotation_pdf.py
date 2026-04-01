@@ -202,16 +202,16 @@ def generate():
 
     # Section C: Hospitality
     pdf.section_header("SECTION C: HOSPITALITY")
-    pdf.item_row(3, "Saudi Hospitality - Inside the Hall", 1, 1, 9100, 9100)
-    pdf.item_row(4, "Saudi Hospitality - Balcony", 1, 1, 9100, 9100, alt=True)
-    pdf.subtotal_row("Subtotal:", 18200)
+    pdf.item_row(3, "Saudi Hospitality - Inside the Hall", 1, 1, 9000, 9000)
+    pdf.item_row(4, "Saudi Hospitality - Balcony", 1, 1, 9000, 9000, alt=True)
+    pdf.subtotal_row("Subtotal:", 18000)
 
     # Section D: Event Services & Personnel
     pdf.section_header("SECTION D: EVENT SERVICES & PERSONNEL")
-    pdf.item_row(5, "Event MC / Host", 1, 1, 8500, 8500)
-    pdf.item_row(6, "Media Coverage - Photography & Videography", 1, 1, 7200, 7200, alt=True)
+    pdf.item_row(5, "Event MC / Host", 1, 1, 10000, 10000)
+    pdf.item_row(6, "Media Coverage - Photography & Videography", 1, 1, 6500, 6500, alt=True)
     pdf.item_row(7, "Event Organizers / Coordinators", 3, 1, 1200, 3600)
-    pdf.subtotal_row("Subtotal:", 19300)
+    pdf.subtotal_row("Subtotal:", 20100)
 
     pdf.ln(4)
 
@@ -226,14 +226,14 @@ def generate():
     pdf.cell(0, 7, "COST SUMMARY", new_x="LMARGIN", new_y="NEXT")
 
     # Calculations
-    services_total = 2750 + 16800 + 18200 + 19300  # 57,050
-    agency_commission = services_total * 0.15  # 8,557.50
+    services_total = 2750 + 16800 + 18000 + 20100  # 57,650
+    agency_commission = services_total * 0.07  # 4,035.50
     subtotal_before_vat = services_total + agency_commission  # 65,607.50
     vat = subtotal_before_vat * 0.15  # 9,841.125
     grand_total = subtotal_before_vat + vat  # 75,448.625
 
     pdf.summary_row("Services Total (A-D):", services_total, bold=True)
-    pdf.summary_row("Agency Commission (15%):", agency_commission)
+    pdf.summary_row("Agency Commission (7%):", agency_commission)
     pdf.ln(1)
     pdf.summary_row("Subtotal before VAT:", subtotal_before_vat, bold=True)
     pdf.summary_row("VAT (15%):", round(vat, 2))
