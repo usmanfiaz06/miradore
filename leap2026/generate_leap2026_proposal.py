@@ -331,7 +331,7 @@ TT = r + 4
 sm.merge_cells(start_row=TT, start_column=2, end_row=TT, end_column=5)
 sm.cell(row=TT, column=2, value="PAYMENT TERMS & KEY CONDITIONS").font = f(11, True, TEAL)
 terms = [
-    "Payment Terms: 50% advance upon confirmation / work order; 30% two (2) days before the event; 20% balance after the event, upon successful delivery and verification.",
+    "Preferred Payment Terms (negotiable): 50% advance upon confirmation / work order — primarily to cover the mandatory advance payment required by Crowne Plaza Riyadh RDC to secure the venue, plus mobilization of fabrication and long-lead items; 30% two (2) days before the event; 20% balance after the event, upon successful delivery and verification.",
     "The Crowne Plaza Riyadh RDC venue & catering package (Lot A, item A.1) is passed through at actual hotel package cost, with no markup.",
     "Prices are quoted in Saudi Riyals (SAR); PKR equivalents are provided at the reference exchange rate stated above and will be aligned to the prevailing rate at invoicing.",
     "Quoted totals are inclusive of all applicable taxes; VAT (15%) is shown separately for full transparency.",
@@ -477,37 +477,37 @@ lota_items = [
             "coffee-break services, banquet seating & tables, hotel service staff and dedicated 5 Mbps internet. "
             "Passed through at actual hotel package cost.", 1, "Package", 325000, "#,##0"),
     ("A.1.1", "Event Management, Production Planning, Venue Coordination & Technical Rehearsal — end-to-end show "
-              "management for the Forum.", 1, "Job", 13000, "#,##0"),
+              "management for the Forum.", 1, "Job", 18500, "#,##0"),
     ("A.1.2", "Main Stage — portable stage 10m x 4m (40 sqm) with premium stage carpet and step access, as part of "
-              "the main-stage arrangements under A.1.", 1, "Job", 9500, "#,##0"),
+              "the main-stage arrangements under A.1.", 1, "Job", 12500, "#,##0"),
     ("A.2", "VVIP Front-Row Premium Sofa Seating Layout with personalised name tags — 50 premium sofas, including 25 "
-            "coffee tables with black stretch cloth and floral table-top arrangements.", 1, "Lot", 15750, "#,##0"),
+            "coffee tables with black stretch cloth and floral table-top arrangements.", 1, "Lot", 19500, "#,##0"),
     ("A.3", "10ft x 8ft Media Wall (flex with stand) outside the conference hall, with red carpet (12m x 2m), ambiance "
-            "lighting and 6 Q-poles for entrance styling.", 1, "Job", 8400, "#,##0"),
-    ("A.4", "Reception / Guest Registration Desk with 2 chairs and flex backdrop branding.", 1, "Job", 10800, "#,##0"),
+            "lighting and 6 Q-poles for entrance styling.", 1, "Job", 10500, "#,##0"),
+    ("A.4", "Reception / Guest Registration Desk with 2 chairs and flex backdrop branding.", 1, "Job", 13500, "#,##0"),
     ("A.5", "High-Luminance 55\" Digital Standees around the greeting zone, including electricity sourcing and "
-            "PSEB-approved digital content loop (content prepared by vendor).", 4, "Nos", 1025, "#,##0"),
+            "PSEB-approved digital content loop (content prepared by vendor).", 4, "Nos", 1350, "#,##0"),
     ("A.6", "Complete Lighting & Sound System for keynotes, presentations and panel discussions — line-array speakers, "
             "digital console, wireless and podium microphones, moving heads, parcans, city colors and uplights, with "
-            "dedicated audio and lighting engineers.", 1, "Job", 19900, "#,##0"),
+            "dedicated audio and lighting engineers.", 1, "Job", 26500, "#,##0"),
     ("A.7", "High-Resolution 30ft x 12ft SMD Main Screen with integrated neon border, including media server, washout "
-            "and full content design as per PSEB-approved event flow and speakers.", 1, "Job", 26500, "#,##0"),
+            "and full content design as per PSEB-approved event flow and speakers.", 1, "Job", 34500, "#,##0"),
     ("A.7.1", "6ft x 8ft SMD Mirror Panels throughout the hall, with content designed as per PSEB's directions and "
-              "approval.", 4, "Nos", 2400, "#,##0"),
+              "approval.", 4, "Nos", 3150, "#,##0"),
     ("A.8", "Customised wooden speaker podium with the official event logo integrated onto the front fascia, podium "
-            "microphone and step stool.", 1, "Job", 4500, "#,##0"),
+            "microphone and step stool.", 1, "Job", 5000, "#,##0"),
     ("A.9", "5-Course Continental Buffet Dinner for 300 participants (buffet setup) with table service for the "
             "Minister and VVIP tables — included within the Crowne Plaza hotel package under A.1; menu options to be "
             "provided for PSEB approval.", None, None, None, None),
     ("A.10", "Dedicated on-site project coordinator liaising continuously with hotel banquet staff to ensure flawless "
-             "event flow throughout the Forum.", 1, "Job", 4500, "#,##0"),
+             "event flow throughout the Forum.", 1, "Job", 5500, "#,##0"),
     ("A.11", "Sourced Media Crew — one professional photography team and one videography team for complete event "
              "coverage, including: 100% raw photo/video upload to a shared secure Google Drive by midnight; polished "
              "90-second highlight reel next day; ten short speaker/segment clips (15-sec and 30-sec variants) for "
              "social media next day; and a 3–5 minute high-production event documentary within 2 days of the Forum.",
-     1, "Job", 8500, "#,##0"),
+     1, "Job", 11500, "#,##0"),
     ("A.12", "Professional Ushers / Hostesses for guest management, registration support and VVIP handling.",
-     10, "Person", 830, "#,##0"),
+     10, "Person", 950, "#,##0"),
 ]
 r = HR + 1
 first = r
