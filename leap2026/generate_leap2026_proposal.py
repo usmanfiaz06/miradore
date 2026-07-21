@@ -4,10 +4,17 @@ PSEB — Pakistan Saudi Business Forum & Pakistan Pavilion at LEAP 2026
 Commercial Proposal workbook generator for Miradore Experiences, Riyadh.
 
 Builds one print-ready Excel workbook (exportable straight to PDF):
-  Cover | Summary | Lot A - Forum | Lot B - Pavilion | Schedule | Team | Internal (hidden)
+  Cover | Summary | Lot A - Forum | Lot B - Pavilion | Team | Internal (hidden)
 
 All money cells are formulas driven by editable inputs (rates, qty, VAT %,
 agency commission %, SAR->PKR rate) so the numbers stay live.
+
+Pricing structure:
+  - Crowne Plaza venue & catering package (Lot A / A.1): 325,000 SAR + VAT,
+    passed through at actual cost (no markup, no commission).
+  - Lot A production & services: supplier BOQ prices marked up per line.
+  - Lot B turnkey pavilion: single all-inclusive package at 232,000 + VAT.
+  - Agency commission 12% on production & service items, per lot.
 """
 
 import math
@@ -34,7 +41,6 @@ LOGO = "/home/user/miradore/Miradore Logo Color.png"
 
 thin = Side(style="thin", color=LINE)
 box = Border(left=thin, right=thin, top=thin, bottom=thin)
-b_bottom = Border(bottom=Side(style="medium", color=TEAL))
 
 
 def f(size=10, bold=False, color=INK, italic=False):
@@ -51,7 +57,6 @@ def set_widths(ws, widths):
 
 
 def band(ws, row, ncols, text, sub=None):
-    """Teal title band across ncols at `row`; optional grey subtitle at row+1."""
     ws.merge_cells(start_row=row, start_column=1, end_row=row, end_column=ncols)
     c = ws.cell(row=row, column=1, value=text)
     c.font = f(15, True, WHITE)
@@ -134,7 +139,6 @@ cover_line(15, "Pakistan Saudi Business Forum", f(18, True, INK), height=26)
 cover_line(16, "& Pakistan Pavilion at LEAP 2026", f(18, True, INK), height=26)
 cover_line(17, "Riyadh, Kingdom of Saudi Arabia   ·   30 August – 3 September 2026", f(11.5, False, MUTED), height=20)
 
-# orange divider
 cv.row_dimensions[19].height = 3
 for col in range(3, 7):
     cv.cell(row=19, column=col).fill = fill(ORANGE)
@@ -147,10 +151,9 @@ cover_line(24, "6th Floor, New State Life Tower, Jinnah Avenue, Blue Area, Islam
 cover_line(26, "In response to PSEB RFQ — Onboarding an Event Management Vendor for the Pakistan Saudi Business\nForum and the Pakistan Pavilion at LEAP 2026 in Riyadh, Kingdom of Saudi Arabia", f(9.5, False, MUTED, True), height=28)
 
 cover_line(29, "PREPARED BY", f(10, True, ORANGE), height=16)
-cover_line(30, "Miradore Experiences — Riyadh, KSA", f(13, True, INK), height=20)
-cover_line(31, "Muhammad Usman Fiaz   ·   +966 54 803 6101   ·   1usmanfiaz@gmail.com", f(10.5, False, MUTED), height=15)
+cover_line(30, "Miradore Experiences — Riyadh, Kingdom of Saudi Arabia", f(13, True, INK), height=20)
 
-cover_line(33, "Ref: MIR-PSEB-LEAP-2026-001        Date: 21 July 2026        Validity: 60 days", f(10, True, INK), height=16)
+cover_line(32, "Ref: MIR-PSEB-LEAP-2026-001        Date: 21 July 2026        Validity: 60 days", f(10, True, INK), height=16)
 
 for r in range(35, 37):
     for col in range(1, NC + 1):
@@ -163,7 +166,7 @@ c.alignment = Alignment(horizontal="center", vertical="center")
 page(cv, area="A1:H36")
 
 # =============================================================================
-# 2. SUMMARY  (also hosts the 3 commercial parameters used everywhere)
+# 2. SUMMARY  (hosts the 3 commercial parameters used everywhere)
 # =============================================================================
 sm = wb.create_sheet("Summary")
 set_widths(sm, [3, 46, 17, 17, 20, 3])
@@ -174,17 +177,18 @@ band(sm, 1, NC, "EXECUTIVE SUMMARY & COMMERCIAL OVERVIEW",
 sm.merge_cells("B4:E4")
 c = sm["B4"]
 c.value = ("Miradore Experiences is pleased to submit this financial proposal for both lots of the PSEB RFQ. "
-           "We will act as the single point of contact for end-to-end delivery: venue sourcing and advance-payment "
-           "facilitation at Crowne Plaza Riyadh RDC for the 300-guest Business Forum, and turnkey design, fabrication, "
-           "regulatory approvals, power, hospitality and multi-crew media coverage for the 162-SQM Pakistan Pavilion "
-           "(Hall 3 — H170 / J170) at Riyadh Exhibition & Convention Centre, Malham. Itemized unit rates are provided "
-           "for every RFP line under each lot, as required.")
+           "Lot A covers the 300-guest Pakistan Saudi Business Forum at Crowne Plaza Riyadh RDC — the hotel venue & "
+           "catering package is passed through at actual cost, with all production, branding, AV, staging and media "
+           "services itemized at unit rates. Lot B covers the 162-SQM Pakistan Pavilion at Riyadh Exhibition & "
+           "Convention Centre, Malham (Hall 3 — H170 / J170), offered as a single all-inclusive turnkey package "
+           "(design, fabrication, approvals, power and installation) plus daily hospitality, provisioning, cleaning "
+           "and multi-crew media coverage across all four LEAP days.")
 c.font = f(10)
 c.alignment = Alignment(wrap_text=True, vertical="top")
-sm.row_dimensions[4].height = 72
+sm.row_dimensions[4].height = 78
 
 # ---- Commercial parameters (single source of truth)
-PR = 6  # start row of parameter box
+PR = 6
 sm.merge_cells(start_row=PR, start_column=2, end_row=PR, end_column=5)
 c = sm.cell(row=PR, column=2, value="COMMERCIAL PARAMETERS  (editable inputs)")
 c.font = f(10, True, WHITE)
@@ -218,12 +222,10 @@ VAT = "Summary!$C$7"
 COMM = "Summary!$C$8"
 FX = "Summary!$C$9"
 
-# ---- Per-lot totals table (rows filled after lot sheets exist -> use known cell addresses)
-# Lot sheet layout (built below) guarantees these footer cells:
-#   subtotal F_sub, commission F_comm, total excl F_ex, VAT F_vat, total incl F_inc
+# Lot sheet footer cells (built below; asserted to match)
 LOTA, LOTB = "'Lot A - Forum'", "'Lot B - Pavilion'"
-LA = {"sub": "F17", "comm": "F18", "ex": "F19", "vat": "F20", "inc": "F21"}
-LB = {"sub": "F16", "comm": "F17", "ex": "F18", "vat": "F19", "inc": "F20"}
+LA = {"sub": "F20", "comm": "F21", "ex": "F22", "vat": "F23", "inc": "F24"}
+LB = {"sub": "F11", "comm": "F12", "ex": "F13", "vat": "F14", "inc": "F15"}
 
 TR = PR + 5  # 11
 sm.merge_cells(start_row=TR, start_column=2, end_row=TR, end_column=5)
@@ -242,16 +244,16 @@ for j, htxt in enumerate(hdr):
 sm.row_dimensions[r].height = 18
 
 rows = [
-    ("Lot A — Pakistan Saudi Business Forum (30 Aug 2026)", f"={LOTA}!{LA['sub']}", "Subtotal of itemized BOQ — see Lot A sheet"),
-    ("Lot B — Pakistan Pavilion at LEAP 2026 (31 Aug – 3 Sep)", f"={LOTB}!{LB['sub']}", "Subtotal of itemized BOQ — see Lot B sheet"),
-    ("Combined Subtotal", None, ""),
-    ("Agency Commission / Management Fee", None, "As per Commercial Parameters"),
-    ("Total (excl. VAT)", None, ""),
-    ("VAT", None, ""),
-    ("GRAND TOTAL — BOTH LOTS (incl. VAT)", None, "Inclusive of all applicable taxes"),
+    ("Lot A — Pakistan Saudi Business Forum (30 Aug 2026)", f"={LOTA}!{LA['sub']}", "Incl. Crowne Plaza venue & catering package at cost (325,000) + itemized production & services", 28),
+    ("Lot B — Pakistan Pavilion at LEAP 2026 (31 Aug – 3 Sep)", f"={LOTB}!{LB['sub']}", "Turnkey pavilion package + LEAP-days services — see Lot B sheet", 28),
+    ("Combined Subtotal", None, "", 18),
+    ("Agency Commission / Management Fee", None, "As per Commercial Parameters", 18),
+    ("Total (excl. VAT)", None, "", 18),
+    ("VAT", None, "", 18),
+    ("GRAND TOTAL — BOTH LOTS (incl. VAT)", None, "Inclusive of all applicable taxes", 22),
 ]
 R0 = r + 1
-for i, (label, formula, note) in enumerate(rows):
+for i, (label, formula, note, ht) in enumerate(rows):
     rr = R0 + i
     lab = sm.cell(row=rr, column=2, value=label)
     sar = sm.cell(row=rr, column=3)
@@ -260,17 +262,18 @@ for i, (label, formula, note) in enumerate(rows):
     if formula:
         sar.value = formula
     lab.font = f(10)
+    lab.alignment = Alignment(vertical="center", wrap_text=True)
     nt.font = f(8.5, False, MUTED, True)
     nt.alignment = Alignment(vertical="center", wrap_text=True)
     sar.number_format = "#,##0"
     pkr.number_format = "#,##0"
-    sar.alignment = pkr.alignment = Alignment(horizontal="right")
+    sar.alignment = pkr.alignment = Alignment(horizontal="right", vertical="center")
     for col in range(2, 6):
         sm.cell(row=rr, column=col).border = box
-    sm.row_dimensions[rr].height = 26 if i < 2 else 18
+    sm.row_dimensions[rr].height = ht
 
 sm.cell(row=R0 + 2, column=3, value=f"=C{R0}+C{R0+1}")
-sm.cell(row=R0 + 3, column=3, value=f"=ROUND(C{R0+2}*{COMM},2)")
+sm.cell(row=R0 + 3, column=3, value=f"={LOTA}!{LA['comm']}+{LOTB}!{LB['comm']}")
 sm.cell(row=R0 + 4, column=3, value=f"=C{R0+2}+C{R0+3}")
 sm.cell(row=R0 + 5, column=3, value=f"=ROUND(C{R0+4}*{VAT},2)")
 sm.cell(row=R0 + 6, column=3, value=f"=C{R0+4}+C{R0+5}")
@@ -279,9 +282,8 @@ for i in range(7):
 for i in (2, 4):
     for col in range(2, 6):
         sm.cell(row=R0 + i, column=col).fill = fill(TEAL_LIGHT)
-    sm.cell(row=R0 + i, column=2).font = f(10, True)
-    sm.cell(row=R0 + i, column=3).font = f(10, True)
-    sm.cell(row=R0 + i, column=4).font = f(10, True)
+    for col in (2, 3, 4):
+        sm.cell(row=R0 + i, column=col).font = f(10, True)
 gr = R0 + 6
 for col in range(2, 6):
     sm.cell(row=gr, column=col).fill = fill(TEAL)
@@ -290,9 +292,8 @@ for col in (3, 4):
     sm.cell(row=gr, column=col).font = f(11, True, WHITE)
     sm.cell(row=gr, column=col).number_format = "#,##0.00" if col == 3 else "#,##0"
 sm.cell(row=gr, column=5).font = f(8.5, False, WHITE, True)
-sm.row_dimensions[gr].height = 22
 
-# ---- Per-lot standalone totals (PSEB may award lots separately)
+# ---- Per-lot standalone totals
 TR2 = gr + 2
 sm.merge_cells(start_row=TR2, start_column=2, end_row=TR2, end_column=5)
 sm.cell(row=TR2, column=2, value="LOT-WISE TOTALS  (each lot priced to stand alone for independent award)").font = f(11, True, TEAL)
@@ -312,18 +313,18 @@ lots = [
 for i, (label, ex, inc) in enumerate(lots):
     rr = r + 1 + i
     sm.cell(row=rr, column=2, value=label).font = f(10)
+    sm.cell(row=rr, column=2).alignment = Alignment(vertical="center", wrap_text=True)
     sm.cell(row=rr, column=3, value=ex)
     sm.cell(row=rr, column=4, value=inc)
     sm.cell(row=rr, column=5, value=f"=ROUND(D{rr}*{FX},0)")
-    for col in (3, 4, 5):
+    for col in (3, 4):
         sm.cell(row=rr, column=col).number_format = "#,##0.00"
-        sm.cell(row=rr, column=col).alignment = Alignment(horizontal="right")
+        sm.cell(row=rr, column=col).alignment = Alignment(horizontal="right", vertical="center")
     sm.cell(row=rr, column=5).number_format = "#,##0"
+    sm.cell(row=rr, column=5).alignment = Alignment(horizontal="right", vertical="center")
     for col in range(2, 6):
         sm.cell(row=rr, column=col).border = box
-        if i == 1:
-            pass
-    sm.row_dimensions[rr].height = 17
+    sm.row_dimensions[rr].height = 20
 
 # ---- Terms
 TT = r + 4
@@ -331,6 +332,7 @@ sm.merge_cells(start_row=TT, start_column=2, end_row=TT, end_column=5)
 sm.cell(row=TT, column=2, value="PAYMENT TERMS & KEY CONDITIONS").font = f(11, True, TEAL)
 terms = [
     "Payment strictly on actual basis post-event, upon successful delivery, verification and performance certification by PSEB (no advance payment), as per the RFP.",
+    "The Crowne Plaza Riyadh RDC venue & catering package (Lot A, item A.1) is passed through at actual hotel package cost, with no markup.",
     "Prices are quoted in Saudi Riyals (SAR); PKR equivalents are provided at the reference exchange rate stated above and will be aligned to the prevailing rate at invoicing.",
     "Quoted totals are inclusive of all applicable taxes; VAT (15%) is shown separately for full transparency.",
     "PSEB may increase or decrease quantities of any item; unit rates above will apply pro-rata.",
@@ -351,15 +353,13 @@ for t in terms:
 page(sm, area=f"A1:F{rr+1}")
 
 # =============================================================================
-# BOQ sheet builder
+# BOQ helpers
 # =============================================================================
-def boq_sheet(name, title, subtitle, items, note_lines):
-    """items: list of (code, desc, qty, unit, rate, rate_fmt) — rate None => text 'Included'."""
-    ws = wb.create_sheet(name)
-    set_widths(ws, [8, 62, 7, 9, 13, 14, 14, 16])
-    NC = 8
-    band(ws, 1, NC, title, subtitle)
+BOQ_NC = 8
 
+def boq_header(ws, title, subtitle):
+    set_widths(ws, [10, 62, 7, 9, 13, 14, 14, 16])
+    band(ws, 1, BOQ_NC, title, subtitle)
     HR = 4
     headers = ["Item\nCode", "Description of Sourced Scope", "Qty", "Unit",
                "Unit Rate\n(SAR)", "Total\n(SAR)", "Unit Rate\n(PKR)", "Total\n(PKR)"]
@@ -370,15 +370,28 @@ def boq_sheet(name, title, subtitle, items, note_lines):
         c.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
         c.border = box
     ws.row_dimensions[HR].height = 30
+    return HR
 
-    r = HR + 1
-    first = r
-    for i, (code, desc, qty, unit, rate, fmt) in enumerate(items):
-        ws.cell(row=r, column=1, value=code).font = f(10, True, TEAL)
-        ws.cell(row=r, column=1).alignment = Alignment(horizontal="center", vertical="center")
-        d = ws.cell(row=r, column=2, value=desc)
-        d.font = f(9.5)
-        d.alignment = Alignment(wrap_text=True, vertical="center")
+
+def item_row(ws, r, code, desc, qty, unit, rate, fmt, shade):
+    ws.cell(row=r, column=1, value=code).font = f(10, True, TEAL)
+    ws.cell(row=r, column=1).alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
+    d = ws.cell(row=r, column=2, value=desc)
+    d.font = f(9.5)
+    d.alignment = Alignment(wrap_text=True, vertical="center")
+    if rate is None:
+        # included-in-package row: no amount, excluded from sums (text is ignored by SUM)
+        ws.cell(row=r, column=3, value="—")
+        ws.cell(row=r, column=4, value="—")
+        inc = ws.cell(row=r, column=6, value="Included in A.1")
+        inc.font = f(8.5, False, MUTED, True)
+        ws.cell(row=r, column=7, value="—").font = f(9.5, False, MUTED)
+        ws.cell(row=r, column=8, value="—").font = f(9.5, False, MUTED)
+        for col in (3, 4, 6, 7, 8):
+            ws.cell(row=r, column=col).alignment = Alignment(horizontal="center", vertical="center")
+        for col in (3, 4):
+            ws.cell(row=r, column=col).font = f(9.5)
+    else:
         ws.cell(row=r, column=3, value=qty).alignment = Alignment(horizontal="center", vertical="center")
         ws.cell(row=r, column=3).font = f(9.5)
         ws.cell(row=r, column=4, value=unit).alignment = Alignment(horizontal="center", vertical="center")
@@ -391,79 +404,82 @@ def boq_sheet(name, title, subtitle, items, note_lines):
         tc.number_format = "#,##0"
         tc.font = f(9.5, True)
         tc.alignment = Alignment(horizontal="right", vertical="center")
-        pr = ws.cell(row=r, column=7, value=f"=ROUND(E{r}*{FX},0)")
+        pr_ = ws.cell(row=r, column=7, value=f"=ROUND(E{r}*{FX},0)")
         pt = ws.cell(row=r, column=8, value=f"=ROUND(F{r}*{FX},0)")
-        for cc in (pr, pt):
+        for cc in (pr_, pt):
             cc.number_format = "#,##0"
             cc.font = f(9.5, False, MUTED)
             cc.alignment = Alignment(horizontal="right", vertical="center")
-        if i % 2 == 1:
-            for col in range(1, NC + 1):
-                ws.cell(row=r, column=col).fill = fill(TEAL_XLIGHT)
-        for col in range(1, NC + 1):
-            ws.cell(row=r, column=col).border = box
-        ws.row_dimensions[r].height = desc_height(desc)
-        r += 1
-    last = r - 1
+    if shade:
+        for col in range(1, BOQ_NC + 1):
+            ws.cell(row=r, column=col).fill = fill(TEAL_XLIGHT)
+    for col in range(1, BOQ_NC + 1):
+        ws.cell(row=r, column=col).border = box
+    ws.row_dimensions[r].height = desc_height(desc)
 
-    # footer block
-    def foot(row, label, sar_formula, emph=0):
-        ws.merge_cells(start_row=row, start_column=1, end_row=row, end_column=5)
-        c = ws.cell(row=row, column=1, value=label)
-        c.alignment = Alignment(horizontal="right", vertical="center")
-        sc = ws.cell(row=row, column=6, value=sar_formula)
-        sc.number_format = "#,##0.00"
-        sc.alignment = Alignment(horizontal="right", vertical="center")
-        pk = ws.cell(row=row, column=8, value=f"=ROUND(F{row}*{FX},0)")
-        pk.number_format = "#,##0"
-        pk.alignment = Alignment(horizontal="right", vertical="center")
-        for col in range(1, NC + 1):
-            ws.cell(row=row, column=col).border = box
-        if emph == 2:
-            for col in range(1, NC + 1):
-                ws.cell(row=row, column=col).fill = fill(TEAL)
-            c.font = f(11, True, WHITE)
-            sc.font = f(11, True, WHITE)
-            pk.font = f(10, True, WHITE)
-            ws.row_dimensions[row].height = 22
-        elif emph == 1:
-            for col in range(1, NC + 1):
-                ws.cell(row=row, column=col).fill = fill(TEAL_LIGHT)
-            c.font = f(10, True)
-            sc.font = f(10, True)
-            pk.font = f(9.5, True, MUTED)
-            ws.row_dimensions[row].height = 18
-        else:
-            c.font = f(10)
-            sc.font = f(10)
-            pk.font = f(9.5, False, MUTED)
-            ws.row_dimensions[row].height = 17
 
-    foot(r,     "Subtotal", f"=SUM(F{first}:F{last})", emph=1)
-    foot(r + 1, "Agency Commission / Management Fee (12%)", f"=ROUND(F{r}*{COMM},2)")
-    foot(r + 2, "Total (excl. VAT)", f"=F{r}+F{r+1}", emph=1)
-    foot(r + 3, "VAT (15%)", f"=ROUND(F{r+2}*{VAT},2)")
-    foot(r + 4, f"{title.split('—')[0].strip()} — TOTAL (incl. VAT)", f"=F{r+2}+F{r+3}", emph=2)
+def foot(ws, row, label, sar_formula, emph=0):
+    ws.merge_cells(start_row=row, start_column=1, end_row=row, end_column=5)
+    c = ws.cell(row=row, column=1, value=label)
+    c.alignment = Alignment(horizontal="right", vertical="center")
+    sc = ws.cell(row=row, column=6, value=sar_formula)
+    sc.number_format = "#,##0.00"
+    sc.alignment = Alignment(horizontal="right", vertical="center")
+    pk = ws.cell(row=row, column=8, value=f"=ROUND(F{row}*{FX},0)")
+    pk.number_format = "#,##0"
+    pk.alignment = Alignment(horizontal="right", vertical="center")
+    for col in range(1, BOQ_NC + 1):
+        ws.cell(row=row, column=col).border = box
+    if emph == 2:
+        for col in range(1, BOQ_NC + 1):
+            ws.cell(row=row, column=col).fill = fill(TEAL)
+        c.font = f(11, True, WHITE)
+        sc.font = f(11, True, WHITE)
+        pk.font = f(10, True, WHITE)
+        ws.row_dimensions[row].height = 22
+    elif emph == 1:
+        for col in range(1, BOQ_NC + 1):
+            ws.cell(row=row, column=col).fill = fill(TEAL_LIGHT)
+        c.font = f(10, True)
+        sc.font = f(10, True)
+        pk.font = f(9.5, True, MUTED)
+        ws.row_dimensions[row].height = 18
+    else:
+        c.font = f(10)
+        sc.font = f(10)
+        pk.font = f(9.5, False, MUTED)
+        ws.row_dimensions[row].height = 17
 
-    rr = r + 6
+
+def notes_block(ws, start_row, note_lines):
+    rr = start_row
     for t in note_lines:
-        ws.merge_cells(start_row=rr, start_column=1, end_row=rr, end_column=NC)
+        ws.merge_cells(start_row=rr, start_column=1, end_row=rr, end_column=BOQ_NC)
         c = ws.cell(row=rr, column=1, value=t)
         c.font = f(8.5, False, MUTED, True)
         c.alignment = Alignment(wrap_text=True, vertical="top")
         ws.row_dimensions[rr].height = desc_height(t, cpl=150, line_h=11, extra=3, min_h=13)
         rr += 1
-
-    page(ws, landscape=True, fit_h=1, titles=f"{HR}:{HR}", area=f"A1:H{rr+1}")
-    return {"sub": f"F{r}", "comm": f"F{r+1}", "ex": f"F{r+2}", "vat": f"F{r+3}", "inc": f"F{r+4}"}
+    return rr
 
 
-# ----------------------------------------------------------------------------- LOT A
+# =============================================================================
+# 3. LOT A — items: (code, desc, qty, unit, rate, fmt); rate None => included in A.1
+# =============================================================================
+la_ws = wb.create_sheet("Lot A - Forum")
+HR = boq_header(la_ws, "LOT A — PAKISTAN SAUDI BUSINESS FORUM",
+                "Crowne Plaza Riyadh RDC · 30 August 2026 · 300 Guests · Itemized BOQ (SAR, with PKR equivalents)")
+
 lota_items = [
-    ("A.1", "Venue Booking for 30 Aug 2026 — Crowne Plaza Riyadh RDC Hotel: securing the venue for 300 guests on "
-            "PSEB's behalf including all mandatory advance payments to hotel management, full seating arrangements, "
-            "main stage (10m x 4m, carpeted), dedicated 5 Mbps internet line, and end-to-end hotel/banquet coordination "
-            "with technical rehearsal.", 1, "Job", 22500, "#,##0"),
+    ("A.1", "Venue Booking for 30 Aug 2026 — Crowne Plaza Riyadh RDC Hotel: booking on PSEB's behalf and securing the "
+            "venue by facilitating all mandatory advance payments required by hotel management. All-inclusive hotel "
+            "package covering ballroom/hall space for 300 guests, 5-course continental buffet dinner with two "
+            "coffee-break services, banquet seating & tables, hotel service staff and dedicated 5 Mbps internet. "
+            "Passed through at actual hotel package cost.", 1, "Package", 325000, "#,##0"),
+    ("A.1.1", "Event Management, Production Planning, Venue Coordination & Technical Rehearsal — end-to-end show "
+              "management for the Forum.", 1, "Job", 13000, "#,##0"),
+    ("A.1.2", "Main Stage — portable stage 10m x 4m (40 sqm) with premium stage carpet and step access, as part of "
+              "the main-stage arrangements under A.1.", 1, "Job", 9500, "#,##0"),
     ("A.2", "VVIP Front-Row Premium Sofa Seating Layout with personalised name tags — 50 premium sofas, including 25 "
             "coffee tables with black stretch cloth and floral table-top arrangements.", 1, "Lot", 15750, "#,##0"),
     ("A.3", "10ft x 8ft Media Wall (flex with stand) outside the conference hall, with red carpet (12m x 2m), ambiance "
@@ -480,8 +496,9 @@ lota_items = [
               "approval.", 4, "Nos", 2400, "#,##0"),
     ("A.8", "Customised wooden speaker podium with the official event logo integrated onto the front fascia, podium "
             "microphone and step stool.", 1, "Job", 4500, "#,##0"),
-    ("A.9", "5-Course Continental Buffet Dinner for 300 participants with two coffee-break services, table service for "
-            "the Minister and VVIP tables; menu options to be provided for PSEB approval.", 300, "Person", 395, "#,##0"),
+    ("A.9", "5-Course Continental Buffet Dinner for 300 participants (buffet setup) with table service for the "
+            "Minister and VVIP tables — included within the Crowne Plaza hotel package under A.1; menu options to be "
+            "provided for PSEB approval.", None, None, None, None),
     ("A.10", "Dedicated on-site project coordinator liaising continuously with hotel banquet staff to ensure flawless "
              "event flow throughout the Forum.", 1, "Job", 4500, "#,##0"),
     ("A.11", "Sourced Media Crew — one professional photography team and one videography team for complete event "
@@ -489,40 +506,60 @@ lota_items = [
              "90-second highlight reel next day; ten short speaker/segment clips (15-sec and 30-sec variants) for "
              "social media next day; and a 3–5 minute high-production event documentary within 2 days of the Forum.",
      1, "Job", 8500, "#,##0"),
+    ("A.12", "Professional Ushers / Hostesses for guest management, registration support and VVIP handling.",
+     10, "Person", 830, "#,##0"),
 ]
+r = HR + 1
+first = r
+for i, (code, desc, qty, unit, rate, fmt) in enumerate(lota_items):
+    item_row(la_ws, r, code, desc, qty, unit, rate, fmt, shade=(i % 2 == 1))
+    r += 1
+last = r - 1
+
+foot(la_ws, r,     "Subtotal", f"=SUM(F{first}:F{last})", emph=1)
+foot(la_ws, r + 1, "Agency Commission / Management Fee (12%)", f"=ROUND(F{r}*{COMM},2)")
+foot(la_ws, r + 2, "Total (excl. VAT)", f"=F{r}+F{r+1}", emph=1)
+foot(la_ws, r + 3, "VAT (15%)", f"=ROUND(F{r+2}*{VAT},2)")
+foot(la_ws, r + 4, "LOT A — TOTAL (incl. VAT)", f"=F{r+2}+F{r+3}", emph=2)
+la_refs = {"sub": f"F{r}", "comm": f"F{r+1}", "ex": f"F{r+2}", "vat": f"F{r+3}", "inc": f"F{r+4}"}
+
 lota_notes = [
-    "Note 1: A.1 covers venue securing and advance-payment facilitation with Crowne Plaza Riyadh RDC on PSEB's behalf; banquet space is confirmed against the catering package in A.9.",
-    "Note 2: A.9 rate is per person and includes the 5-course continental buffet dinner and two coffee-break services; final headcount will be billed on actuals as per PSEB confirmation.",
+    "Note 1: A.1 is the Crowne Plaza Riyadh RDC all-inclusive package (hall space + full catering for 300 guests) passed through at actual hotel package cost, with no markup.",
+    "Note 2: A.9 (5-course continental buffet & coffee breaks) is included within the A.1 hotel package; final headcount will be settled on actuals as per PSEB confirmation.",
     "Note 3: All artwork and screen content will be produced by Miradore and released only after PSEB's written approval.",
 ]
-la_refs = boq_sheet("Lot A - Forum",
-                    "LOT A — PAKISTAN SAUDI BUSINESS FORUM",
-                    "Crowne Plaza Riyadh RDC · 30 August 2026 · 300 Guests · Itemized BOQ (SAR, with PKR equivalents)",
-                    lota_items, lota_notes)
+end = notes_block(la_ws, r + 7, lota_notes)
+page(la_ws, landscape=True, fit_h=1, titles=f"{HR}:{HR}", area=f"A1:H{end+1}")
 
-# ----------------------------------------------------------------------------- LOT B
+# =============================================================================
+# 4. LOT B — turnkey pavilion as ONE package line + LEAP-days services
+# =============================================================================
+lb_ws = wb.create_sheet("Lot B - Pavilion")
+HR = boq_header(lb_ws, "LOT B — PAKISTAN PAVILION AT LEAP 2026",
+                "Riyadh Exhibition & Convention Centre (RECC), Malham · 31 Aug – 3 Sep 2026 · 162 SQM · Hall 3 (H170 / J170)")
+
+turnkey_desc = (
+    "TURNKEY PAKISTAN PAVILION — ALL-INCLUSIVE PACKAGE (162 SQM · 3 Blocks · 20 Exhibitor Booths · 30-SQM Networking "
+    "Lounge · Ministerial Meeting Room), built to Annex I–III blueprints & specifications. Package includes:\n"
+    "•  Design, fabrication, sourcing, logistics & transportation to RECC Malham; structural build of Blocks A, B & C; "
+    "on-site management and full dismantling\n"
+    "•  Block A & C wood/MDF build (16 booths: 2 x 9-SQM + 6 x 6-SQM per block); Block B premium architectural build "
+    "(4 x 6-SQM booths, lounge & meeting room)\n"
+    "•  Glass-walled ministerial meeting room (two 250cm x 240cm glass walls + glass door) with 55\" LED TV, 2 "
+    "single-seater and one 2-seater sofa\n"
+    "•  P2.6 LED screens (3.5m x 1m) for block branding; 43\" LED TV per booth; backlit light boxes; neon accent "
+    "lighting; premium wooden flooring with neon edge\n"
+    "•  3D acrylic + neon block logos, die-cut vinyl logos and full booth branding\n"
+    "•  Branded info counter with bar stool, 3 chairs and 1 round table per booth; networking lounge seating with "
+    "round tables\n"
+    "•  Organizer stand-build permit, official stand audit approval, structural clearance and health/safety/security "
+    "clearances ahead of move-in deadlines\n"
+    "•  Main electrical power line drops, panel deployment and per-booth hookups — minimum 2 multi-pin power sockets "
+    "in every booth, meeting room and networking area, engineered to run all SMDs, LCDs and lighting rigs"
+)
+
 lotb_items = [
-    ("B.1", "Turnkey Fabrication, Sourcing, Logistics & Transportation of the 162-SQM Pakistan Pavilion (Hall 3 — "
-            "Booths H170 / J170) across 3 blocks — workshop fabrication, safe transportation to RECC Malham, "
-            "structural build per Annex I–III blueprints, on-site management and full dismantling/teardown.",
-     1, "Job", 58000, "#,##0"),
-    ("B.2", "Block A & Block C Wood/MDF Build per Annex II — 16 booths (2 x 9-SQM and 6 x 6-SQM per block). Each booth "
-            "fully fitted: 43\" LED TV, branded info counter with die-cut logo, bar stool, 3 chairs and 1 round table, "
-            "vinyl logo branding. Block branding: P2.6 LED screens (3.5m x 1m), backlit light boxes, neon accents, 3D "
-            "acrylic + neon block logos, and premium wooden flooring with neon edge lighting.", 1, "Job", 96000, "#,##0"),
-    ("B.3", "Block B Premium Architectural Build per Annex III — 4 x 6-SQM booths, 30-SQM networking lounge and "
-            "ministerial meeting room. Includes glass-walled meeting room (two 250cm x 240cm glass walls with glass "
-            "door), 55\" LED TV, two single-seater and one 2-seater sofas; per booth: 43\" LED TV, branded counter, bar "
-            "stool, 3 chairs, 1 round table and vinyl logos; lounge seating with round tables, P2.6 SMD screen, light "
-            "boxes, 3D acrylic + neon logo and wooden flooring with neon.", 1, "Job", 40000, "#,##0"),
-    ("B.4", "Organizer Stand-Build Permit, official stand audit approval, structural clearance and health/safety/"
-            "security clearances for the entire pavilion, secured ahead of move-in deadlines.", 1, "Job", 12500, "#,##0"),
-    ("B.5", "Main Electrical Power Line Drops sourcing, supply and electrical panel deployment for Blocks A & C "
-            "(Annex II) and Block B (Annex III), engineered to run all SMDs, booth LCDs and lighting rigs.",
-     1, "Job", 16500, "#,##0"),
-    ("B.6", "Granular Exhibitor Booth Electrical Hookups — minimum 2 multi-pin power sockets per stall, meeting room "
-            "and networking area (20 stalls + meeting room) for laptops, LEDs, mobiles, printers and related equipment.",
-     1, "Job", 9000, "#,##0"),
+    ("B.1 – B.6", turnkey_desc, 1, "Package", 232000, "#,##0"),
     ("B.7", "Running Tea & Coffee Station for the entire pavilion (approx. 500 cups/day) with service staff and "
             "consumables — 4 days.", 4, "Day", 4250, "#,##0"),
     ("B.8", "Lounge Catering — premium assorted dates, traditional one-bite snacks and local confectioneries served in "
@@ -540,74 +577,34 @@ lotb_items = [
              "next morning; minimum 10 short clips daily (15-sec / 30-sec) by 10 AM; and 3–5 minute pavilion "
              "documentary within 2 days of event close.", 4, "Day", 9750, "#,##0"),
 ]
+r = HR + 1
+first = r
+for i, (code, desc, qty, unit, rate, fmt) in enumerate(lotb_items):
+    item_row(lb_ws, r, code, desc, qty, unit, rate, fmt, shade=(i % 2 == 1))
+    r += 1
+last = r - 1
+
+foot(lb_ws, r,     "Subtotal", f"=SUM(F{first}:F{last})", emph=1)
+foot(lb_ws, r + 1, "Agency Commission / Management Fee (12%)", f"=ROUND(F{r}*{COMM},2)")
+foot(lb_ws, r + 2, "Total (excl. VAT)", f"=F{r}+F{r+1}", emph=1)
+foot(lb_ws, r + 3, "VAT (15%)", f"=ROUND(F{r+2}*{VAT},2)")
+foot(lb_ws, r + 4, "LOT B — TOTAL (incl. VAT)", f"=F{r+2}+F{r+3}", emph=2)
+lb_refs = {"sub": f"F{r}", "comm": f"F{r+1}", "ex": f"F{r+2}", "vat": f"F{r+3}", "inc": f"F{r+4}"}
+
 lotb_notes = [
-    "Note 1: B.1–B.6 together constitute the complete turnkey pavilion package (fabrication, logistics, build, approvals and power) per Annex I–III specifications — everything required to hand over a fully operational 162-SQM pavilion before move-in deadline.",
-    "Note 2: A dedicated Project Manager and on-site coordination team (including tea servers) are deployed from project start for exhibitor coordination, booth design/artwork liaison and troubleshooting — included across B.1 and B.7.",
+    "Note 1: Line B.1 – B.6 consolidates the complete turnkey pavilion scope of the RFP (fabrication & logistics, Block A & C build, Block B build, organizer approvals & clearances, main power supply and per-booth electrical hookups) as one all-inclusive package price — everything required to hand over a fully operational 162-SQM pavilion before the move-in deadline.",
+    "Note 2: A dedicated Project Manager and on-site coordination team (including tea servers) are deployed from project start for exhibitor coordination, booth design/artwork liaison and troubleshooting.",
     "Note 3: All raw footage, edits and creative assets are delivered as exclusive intellectual property of PSEB.",
 ]
-lb_refs = boq_sheet("Lot B - Pavilion",
-                    "LOT B — PAKISTAN PAVILION AT LEAP 2026",
-                    "Riyadh Exhibition & Convention Centre (RECC), Malham · 31 Aug – 3 Sep 2026 · 162 SQM · Hall 3 (H170 / J170)",
-                    lotb_items, lotb_notes)
+end = notes_block(lb_ws, r + 6, lotb_notes)
+page(lb_ws, landscape=True, fit_h=1, titles=f"{HR}:{HR}", area=f"A1:H{end+1}")
 
 # sanity: footer refs used on Summary must match reality
 assert la_refs == LA, f"Lot A footer moved: {la_refs}"
 assert lb_refs == LB, f"Lot B footer moved: {lb_refs}"
 
 # =============================================================================
-# 5. SCHEDULE
-# =============================================================================
-sc = wb.create_sheet("Schedule")
-set_widths(sc, [24, 20, 78, 34])
-NC = 4
-band(sc, 1, NC, "PROJECT DELIVERY SCHEDULE",
-     "Granular fabrication, shipping, move-in, dry-run and teardown timeline — both lots")
-
-HR = 4
-for j, htxt in enumerate(["Phase", "Dates (2026)", "Key Activities", "Output / Milestone"], start=1):
-    c = sc.cell(row=HR, column=j, value=htxt)
-    c.font = f(9.5, True, WHITE)
-    c.fill = fill(TEAL)
-    c.alignment = Alignment(horizontal="center", vertical="center")
-    c.border = box
-sc.row_dimensions[HR].height = 20
-
-schedule = [
-    ("Award & Kick-off", "22 – 26 Jul", "Contract signing; dedicated PM assigned to PSEB; kick-off meeting; master production plan and approval calendar issued.", "Signed work order; project plan"),
-    ("Design & Approvals", "27 Jul – 8 Aug", "Pavilion shop drawings per Annex I–III; Forum stage/branding designs; all artwork routed for PSEB written approval; hotel contracting and advance payment to Crowne Plaza RDC to lock 30 Aug.", "PSEB-approved designs; venue secured"),
-    ("Regulatory Clearances", "3 – 20 Aug", "Stand-building permit submissions to LEAP organizer; structural calculations; stand audit approval; health, safety & security clearances.", "All permits & audit approvals"),
-    ("Fabrication", "9 – 22 Aug", "Workshop fabrication of Blocks A, B & C (wood/MDF, glass meeting room, counters, light boxes, 3D acrylic logos); procurement of LED/SMD, TVs, furniture and flooring.", "Pavilion structures ready for QC"),
-    ("Pre-Build & QC", "23 – 25 Aug", "Full pre-assembly and quality check at workshop; PSEB/client walkthrough (photos/video shared); snag rectification; packing.", "QC sign-off"),
-    ("Transport & Move-in", "26 – 27 Aug", "Safe transportation to RECC Malham; marshalling per organizer schedule; move-in and marking of Hall 3 (H170/J170).", "Materials on site"),
-    ("Pavilion Build", "27 – 29 Aug", "Structural build of all 3 blocks; electrical main drops, panels and per-booth hookups; SMD/LED installation; branding; organizer stand audit inspection.", "Pavilion structurally complete"),
-    ("Forum Setup & Rehearsal", "29 – 30 Aug", "Overnight setup at Crowne Plaza RDC: stage, SMD screens, sound & lighting, VVIP sofa layout, registration, media wall; full technical rehearsal morning of 30 Aug.", "Rehearsal sign-off"),
-    ("EVENT — Business Forum", "30 Aug", "Pakistan Saudi Business Forum: 300 guests, keynotes, B2B, networking dinner; full media coverage; raw data uploaded by midnight.", "Lot A delivered"),
-    ("Pavilion Dry-Run & Handover", "30 Aug", "Final snagging, content loading on all screens, cleaning, hospitality setup; pavilion handover to PSEB before LEAP opening.", "Pavilion handover"),
-    ("EVENT — LEAP 2026 Live Days", "31 Aug – 3 Sep", "Daily operations: exhibitor support, tea/coffee station, lounge catering, water provisioning, continuous cleaning; 2+2 media crews; daily highlights and social clips per schedule.", "4 live days delivered"),
-    ("Teardown", "3 – 4 Sep", "Dismantling per organizer schedule, waste removal, material back-load, venue handback.", "Clean handback"),
-    ("Closeout", "5 – 7 Sep", "Final pavilion documentary (within 2 days of close); Forum documentary; complete digital asset handover to PSEB; verification and performance certification support; final invoicing on actuals.", "Closeout & certification"),
-]
-r = HR + 1
-for i, (ph, dt, act, out) in enumerate(schedule):
-    sc.cell(row=r, column=1, value=ph).font = f(9.5, True, TEAL)
-    sc.cell(row=r, column=2, value=dt).font = f(9.5)
-    sc.cell(row=r, column=3, value=act).font = f(9.5)
-    sc.cell(row=r, column=4, value=out).font = f(9.5, False, MUTED)
-    sc.cell(row=r, column=1).alignment = Alignment(vertical="center", wrap_text=True)
-    sc.cell(row=r, column=2).alignment = Alignment(vertical="center", horizontal="center")
-    sc.cell(row=r, column=3).alignment = Alignment(vertical="center", wrap_text=True)
-    sc.cell(row=r, column=4).alignment = Alignment(vertical="center", wrap_text=True)
-    if i % 2 == 1:
-        for col in range(1, NC + 1):
-            sc.cell(row=r, column=col).fill = fill(TEAL_XLIGHT)
-    for col in range(1, NC + 1):
-        sc.cell(row=r, column=col).border = box
-    sc.row_dimensions[r].height = desc_height(act, cpl=88, line_h=12, extra=6, min_h=24)
-    r += 1
-page(sc, landscape=True, titles=f"{HR}:{HR}", area=f"A1:D{r}")
-
-# =============================================================================
-# 6. TEAM
+# 5. TEAM
 # =============================================================================
 tm = wb.create_sheet("Team")
 set_widths(tm, [30, 66, 34])
@@ -625,8 +622,8 @@ for j, htxt in enumerate(["Role", "Profile & Responsibility", "Deployment"], sta
 tm.row_dimensions[HR].height = 20
 
 team = [
-    ("Project Director & Client Lead — Muhammad Usman Fiaz",
-     "Overall engagement owner and commercial lead; direct escalation line for PSEB leadership; oversees both lots end-to-end. Contact: +966 54 803 6101 · 1usmanfiaz@gmail.com.",
+    ("Project Director & Client Lead",
+     "Overall engagement owner and commercial lead; direct escalation line for PSEB leadership; oversees both lots end-to-end.",
      "Full engagement, pre-event & on-site"),
     ("Dedicated Project Manager (single point of contact for PSEB)",
      "Assigned exclusively to PSEB for all pre-event and on-site liaison: exhibitor coordination, booth design & artwork approvals, schedule control, daily progress reporting and troubleshooting.",
@@ -684,7 +681,7 @@ c.alignment = Alignment(wrap_text=True)
 page(tm, landscape=True, titles=f"{HR}:{HR}", area=f"A1:C{rr+1}")
 
 # =============================================================================
-# 7. INTERNAL (hidden) — costing & margin, not for client
+# 6. INTERNAL (hidden) — costing & margin, not for client
 # =============================================================================
 iv = wb.create_sheet("Internal")
 set_widths(iv, [9, 52, 15, 15, 13, 11, 42])
@@ -700,82 +697,61 @@ for j, htxt in enumerate(["Item", "Line", "Quote (SAR)", "Cost (SAR)", "Margin (
     c.alignment = Alignment(horizontal="center", vertical="center")
     c.border = box
 
-# (code, label, quote_ref_row_on_lot_sheet, cost, source)
+# Lot A sheet item rows: A.1=5, A.1.1=6, A.1.2=7, A.2=8, A.3=9, A.4=10, A.5=11,
+# A.6=12, A.7=13, A.7.1=14, A.8=15, (A.9 included=16), A.10=17, A.11=18, A.12=19
 lota_cost = [
-    ("A.1", "Venue booking + mgmt + stage + internet", 5, 17400, "Innovation BOQ: event mgmt 10,000 + stage & carpet 7,400"),
-    ("A.2", "VVIP 50 sofas + tables + florals", 6, 12250, "Innovation BOQ A.2 subtotal 12,250"),
-    ("A.3", "Media wall + red carpet + Q-poles", 7, 6500, "Innovation BOQ A.3 6,500"),
-    ("A.4", "Registration desk + backdrop", 8, 8500, "Innovation BOQ A.4 8,500"),
-    ("A.5", "Digital standees x4", 9, 3200, "Innovation BOQ A.5 4 x 800"),
-    ("A.6", "Lighting + sound complete", 10, 15500, "Innovation BOQ A.6 10,000 + A.6.1 5,500"),
-    ("A.7", "SMD main screen + server/washout", 11, 20500, "Innovation BOQ A.7 14,000 + A.7.1 6,500"),
-    ("A.7.1", "SMD mirror panels x4", 12, 6300, "Est. ~350/sqm x 17.8 sqm + rigging (est.)"),
-    ("A.8", "Branded podium + mic + stool", 13, 2800, "Market estimate (not in supplier BOQ)"),
-    ("A.9", "Buffet dinner 300 pax @325", 14, 97500, "Crowne Plaza RDC: 325/pax + VAT, incl. dinner + 2 coffee breaks"),
-    ("A.10", "On-site project coordinator", 15, 2500, "Internal staffing estimate"),
-    ("A.11", "Media crew + full deliverables", 16, 6000, "Innovation BOQ A.10 4,500 + editing/deliverables est. 1,500"),
+    ("A.1", "Crowne Plaza package (hall + catering) — pass-through", 5, 325000, "Crowne Plaza RDC offer: 325,000 + 15% VAT, incl. hall space, dinner + 2 coffee breaks (priced as-is, no markup)"),
+    ("A.1.1", "Event management & technical rehearsal", 6, 10000, "Innovation BOQ A.1 10,000"),
+    ("A.1.2", "Stage 10m x 4m + carpet", 7, 7400, "Innovation BOQ A.8 5,600 + stage carpet 1,800"),
+    ("A.2", "VVIP 50 sofas + tables + florals", 8, 12250, "Innovation BOQ A.2 subtotal 12,250"),
+    ("A.3", "Media wall + red carpet + Q-poles", 9, 6500, "Innovation BOQ A.3 6,500"),
+    ("A.4", "Registration desk + backdrop", 10, 8500, "Innovation BOQ A.4 8,500"),
+    ("A.5", "Digital standees x4", 11, 3200, "Innovation BOQ A.5 4 x 800"),
+    ("A.6", "Lighting + sound complete", 12, 15500, "Innovation BOQ A.6 10,000 + A.6.1 5,500"),
+    ("A.7", "SMD main screen + server/washout", 13, 20500, "Innovation BOQ A.7 14,000 + A.7.1 6,500"),
+    ("A.7.1", "SMD mirror panels x4", 14, 6300, "Est. ~350/sqm x 17.8 sqm + rigging (est.)"),
+    ("A.8", "Branded podium + mic + stool", 15, 2800, "Market estimate (not in supplier BOQ)"),
+    ("A.10", "On-site project coordinator", 17, 2500, "Internal staffing estimate"),
+    ("A.11", "Media crew + full deliverables", 18, 6000, "Innovation BOQ A.10 4,500 + editing/deliverables est. 1,500"),
+    ("A.12", "Ushers x10", 19, 6500, "Innovation BOQ A.11 10 x 650"),
 ]
+# Lot B sheet item rows: B.1-B.6=5, B.7=6, B.8=7, B.9=8, B.10=9, B.11=10
 lotb_cost = [
-    ("B.1-B.6", "Turnkey pavilion (booth package)", None, 130435, "Alpha Dimensions revised QUT-0126-26: 130,435 + VAT = 150,000 incl. VAT (orig. detailed quote 335,810 excl. VAT)"),
-    ("B.7", "Tea & coffee station 4 days", None, 6000, "Partially covered in Alpha revised (catering incl.); staff/consumables top-up est."),
-    ("B.8", "Lounge dates & snacks 4 days", None, 10000, "Catering supplier est. ~2,500/day"),
-    ("B.9", "Water bottles 880", None, 1320, "Est. 1.50/bottle wholesale"),
-    ("B.10", "Cleaning & waste 4 days", None, 4800, "Est. 1,200/day"),
-    ("B.11", "2+2 media crews 4 days + editing", None, 24000, "Partially covered in Alpha revised (coverage incl.); add'l crews/editing est. 6,000/day"),
+    ("B.1-B.6", "Turnkey pavilion (booth package)", 5, 130435, "Alpha Dimensions revised QUT-0126-26: 130,435 + VAT = 150,000 incl. VAT (orig. detailed quote 335,810 excl. VAT)"),
+    ("B.7", "Tea & coffee station 4 days", 6, 6000, "Partially covered in Alpha revised (catering incl.); staff/consumables top-up est."),
+    ("B.8", "Lounge dates & snacks 4 days", 7, 10000, "Catering supplier est. ~2,500/day"),
+    ("B.9", "Water bottles 880", 8, 1320, "Est. 1.50/bottle wholesale"),
+    ("B.10", "Cleaning & waste 4 days", 9, 4800, "Est. 1,200/day"),
+    ("B.11", "2+2 media crews 4 days + editing", 10, 24000, "Partially covered in Alpha revised (coverage incl.); add'l crews/editing est. 6,000/day"),
 ]
+
+def internal_row(r, code, label, quote_formula, cost, src):
+    iv.cell(row=r, column=1, value=code).font = f(9.5, True, TEAL)
+    iv.cell(row=r, column=2, value=label).font = f(9.5)
+    iv.cell(row=r, column=3, value=quote_formula).number_format = "#,##0"
+    iv.cell(row=r, column=4, value=cost).number_format = "#,##0"
+    iv.cell(row=r, column=4).font = Font(name=FONT, size=9.5, color="0000FF")
+    iv.cell(row=r, column=5, value=f"=C{r}-D{r}").number_format = "#,##0"
+    iv.cell(row=r, column=6, value=f"=IF(D{r}=0,\"n/a\",C{r}/D{r}-1)").number_format = "0.0%"
+    iv.cell(row=r, column=7, value=src).font = f(8.5, False, MUTED, True)
+    iv.cell(row=r, column=7).alignment = Alignment(wrap_text=True, vertical="center")
+    for col in range(1, NC + 1):
+        iv.cell(row=r, column=col).border = box
+    iv.row_dimensions[r].height = desc_height(src, cpl=44, line_h=11, extra=5, min_h=16)
 
 r = HR + 1
-iv_first_a = r
+iv_first = r
 for code, label, lot_row, cost, src in lota_cost:
-    iv.cell(row=r, column=1, value=code).font = f(9.5, True, TEAL)
-    iv.cell(row=r, column=2, value=label).font = f(9.5)
-    iv.cell(row=r, column=3, value=f"='Lot A - Forum'!F{lot_row}").number_format = "#,##0"
-    iv.cell(row=r, column=4, value=cost).number_format = "#,##0"
-    iv.cell(row=r, column=4).font = Font(name=FONT, size=9.5, color="0000FF")
-    iv.cell(row=r, column=5, value=f"=C{r}-D{r}").number_format = "#,##0"
-    iv.cell(row=r, column=6, value=f"=IF(D{r}=0,\"n/a\",C{r}/D{r}-1)").number_format = "0.0%"
-    iv.cell(row=r, column=7, value=src).font = f(8.5, False, MUTED, True)
-    iv.cell(row=r, column=7).alignment = Alignment(wrap_text=True, vertical="center")
-    for col in range(1, NC + 1):
-        iv.cell(row=r, column=col).border = box
-    iv.row_dimensions[r].height = desc_height(src, cpl=44, line_h=11, extra=5, min_h=16)
+    internal_row(r, code, label, f"='Lot A - Forum'!F{lot_row}", cost, src)
     r += 1
-iv_last_a = r - 1
-
-# Lot B: quote refs
-iv.cell(row=r, column=1, value="B.1-B.6").font = f(9.5, True, TEAL)
-iv.cell(row=r, column=2, value=lotb_cost[0][1]).font = f(9.5)
-iv.cell(row=r, column=3, value="=SUM('Lot B - Pavilion'!F5:F10)").number_format = "#,##0"
-iv.cell(row=r, column=4, value=lotb_cost[0][3]).number_format = "#,##0"
-iv.cell(row=r, column=4).font = Font(name=FONT, size=9.5, color="0000FF")
-iv.cell(row=r, column=5, value=f"=C{r}-D{r}").number_format = "#,##0"
-iv.cell(row=r, column=6, value=f"=IF(D{r}=0,\"n/a\",C{r}/D{r}-1)").number_format = "0.0%"
-iv.cell(row=r, column=7, value=lotb_cost[0][4]).font = f(8.5, False, MUTED, True)
-iv.cell(row=r, column=7).alignment = Alignment(wrap_text=True, vertical="center")
-for col in range(1, NC + 1):
-    iv.cell(row=r, column=col).border = box
-iv.row_dimensions[r].height = desc_height(lotb_cost[0][4], cpl=44, line_h=11, extra=5, min_h=16)
-r += 1
-for i, (code, label, _, cost, src) in enumerate(lotb_cost[1:]):
-    lot_row = 11 + i  # B.7 at row 11 ... B.11 at row 15 on Lot B sheet
-    iv.cell(row=r, column=1, value=code).font = f(9.5, True, TEAL)
-    iv.cell(row=r, column=2, value=label).font = f(9.5)
-    iv.cell(row=r, column=3, value=f"='Lot B - Pavilion'!F{lot_row}").number_format = "#,##0"
-    iv.cell(row=r, column=4, value=cost).number_format = "#,##0"
-    iv.cell(row=r, column=4).font = Font(name=FONT, size=9.5, color="0000FF")
-    iv.cell(row=r, column=5, value=f"=C{r}-D{r}").number_format = "#,##0"
-    iv.cell(row=r, column=6, value=f"=IF(D{r}=0,\"n/a\",C{r}/D{r}-1)").number_format = "0.0%"
-    iv.cell(row=r, column=7, value=src).font = f(8.5, False, MUTED, True)
-    iv.cell(row=r, column=7).alignment = Alignment(wrap_text=True, vertical="center")
-    for col in range(1, NC + 1):
-        iv.cell(row=r, column=col).border = box
-    iv.row_dimensions[r].height = desc_height(src, cpl=44, line_h=11, extra=5, min_h=16)
+for code, label, lot_row, cost, src in lotb_cost:
+    internal_row(r, code, label, f"='Lot B - Pavilion'!F{lot_row}", cost, src)
     r += 1
 iv_last = r - 1
 
 iv.cell(row=r, column=2, value="TOTALS (excl. VAT, before agency commission)").font = f(10, True)
-iv.cell(row=r, column=3, value=f"=SUM(C{iv_first_a}:C{iv_last})").number_format = "#,##0"
-iv.cell(row=r, column=4, value=f"=SUM(D{iv_first_a}:D{iv_last})").number_format = "#,##0"
+iv.cell(row=r, column=3, value=f"=SUM(C{iv_first}:C{iv_last})").number_format = "#,##0"
+iv.cell(row=r, column=4, value=f"=SUM(D{iv_first}:D{iv_last})").number_format = "#,##0"
 iv.cell(row=r, column=5, value=f"=C{r}-D{r}").number_format = "#,##0"
 iv.cell(row=r, column=6, value=f"=IF(D{r}=0,\"n/a\",C{r}/D{r}-1)").number_format = "0.0%"
 for col in range(1, NC + 1):
@@ -784,11 +760,11 @@ for col in range(1, NC + 1):
 for col in (3, 4, 5, 6):
     iv.cell(row=r, column=col).font = f(10, True)
 r += 1
-iv.cell(row=r, column=2, value="Agency commission (12%) — additional revenue on top").font = f(9.5)
-iv.cell(row=r, column=3, value=f"=ROUND(C{r-1}*{COMM},0)").number_format = "#,##0"
+iv.cell(row=r, column=2, value="Agency commission (12% on lot subtotals) — additional revenue on top").font = f(9.5)
+iv.cell(row=r, column=3, value=f"='Lot A - Forum'!{LA['comm']}+'Lot B - Pavilion'!{LB['comm']}").number_format = "#,##0"
 r += 2
 iv.merge_cells(start_row=r, start_column=1, end_row=r, end_column=NC)
-c = iv.cell(row=r, column=1, value="Assumptions: hotel per-person cost 325 SAR + 15% VAT (dinner + 2 coffee breaks) per Crowne Plaza RDC offer relayed 18 Jul 2026; supplier costs from Innovation Events BOQ (WhatsApp, 18 Jul 2026) and Alpha Dimensions QUT-0126-26 (20 Jul 2026); 'est.' items are internal estimates. Costs above are excl. VAT; input VAT on supplier invoices is recoverable.")
+c = iv.cell(row=r, column=1, value="Assumptions: Crowne Plaza RDC package 325,000 SAR + 15% VAT (hall + dinner + 2 coffee breaks, 300 pax) per offer relayed 18 Jul 2026, passed through at cost; supplier costs from Innovation Events BOQ (WhatsApp, 18 Jul 2026) and Alpha Dimensions QUT-0126-26 (20 Jul 2026); 'est.' items are internal estimates. Costs above are excl. VAT; input VAT on supplier invoices is recoverable.")
 c.font = f(8.5, False, MUTED, True)
 c.alignment = Alignment(wrap_text=True, vertical="top")
 iv.row_dimensions[r].height = 40
