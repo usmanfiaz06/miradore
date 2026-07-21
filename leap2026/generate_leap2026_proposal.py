@@ -331,7 +331,7 @@ TT = r + 4
 sm.merge_cells(start_row=TT, start_column=2, end_row=TT, end_column=5)
 sm.cell(row=TT, column=2, value="PAYMENT TERMS & KEY CONDITIONS").font = f(11, True, TEAL)
 terms = [
-    "Payment strictly on actual basis post-event, upon successful delivery, verification and performance certification by PSEB (no advance payment), as per the RFP.",
+    "Payment Terms: 50% advance upon confirmation / work order; 30% two (2) days before the event; 20% balance after the event, upon successful delivery and verification.",
     "The Crowne Plaza Riyadh RDC venue & catering package (Lot A, item A.1) is passed through at actual hotel package cost, with no markup.",
     "Prices are quoted in Saudi Riyals (SAR); PKR equivalents are provided at the reference exchange rate stated above and will be aligned to the prevailing rate at invoicing.",
     "Quoted totals are inclusive of all applicable taxes; VAT (15%) is shown separately for full transparency.",
