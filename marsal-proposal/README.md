@@ -36,7 +36,7 @@ at `/opt/pw-browsers` in this environment - do not run `playwright install`.
   and micro-labels, a 136mm main column. `.grid` gives you both; `.main-only`
   indents a single element to the main column. The recurring `.route` motif
   (node, orange leg, hairline, open node) sits under each section title.
-- **Commercials** are in the page 08 table. SAR 24,000 total, quoted without
+- **Commercials** are in the page 08 table. SAR 14,000 total, quoted without
   VAT. If VAT ever needs showing, add the row back to the table and adjust the
   `.grand` band.
 - **The schedule** is a CSS grid, 15 columns for 10-24 August. Bars are placed
