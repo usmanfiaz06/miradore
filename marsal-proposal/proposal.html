@@ -8,6 +8,11 @@
 /* ═══════════════════════════════════════════════════════════
    Marsal - Brand Evolution Proposal
    Miradore design language
+
+   Layout is an asymmetric rail grid: a 30mm rail carrying section
+   numbers and micro-labels, and a 136mm main column. The recurring
+   motif is a route line - a hairline with a node at each end and an
+   orange leg - which carries the logistics idea without illustrating it.
    ═══════════════════════════════════════════════════════════ */
 
 :root{
@@ -15,29 +20,28 @@
   --teal-d:#00615F;
   --teal-mid:#4E9E9E;
   --teal-soft:#BFDCDC;
-  --teal-tint:#EEF6F6;
+  --teal-tint:#EFF6F6;
   --orange:#E6641E;
   --orange-soft:#FBE7DB;
-  --ink:#1F2427;
-  --grey:#666F73;
-  --light:#A3ACB0;
-  --hair:#E4E9EB;
-  --paper:#F7F9FA;
+  --ink:#171C1F;
+  --grey:#5F686C;
+  --light:#9BA5A9;
+  --hair:#E2E7E9;
+  --paper:#F6F8F9;
 
-  --m: 20mm;            /* page margin */
-  --cw: 170mm;          /* content width */
+  --m:17mm;
+  --rail:30mm;
+  --gut:10mm;
+  --main:136mm;
 }
 
 *{box-sizing:border-box;margin:0;padding:0}
-
 @page{ size:A4; margin:0 }
-
 html{ -webkit-print-color-adjust:exact; print-color-adjust:exact }
 
 body{
   font-family:'Inter',sans-serif;
-  font-size:8.5pt;
-  line-height:1.55;
+  font-size:8.5pt; line-height:1.56;
   color:var(--grey);
   font-feature-settings:'kern' 1,'liga' 1,'calt' 1;
   -webkit-font-smoothing:antialiased;
@@ -45,650 +49,613 @@ body{
 }
 
 .page{
-  position:relative;
-  width:210mm; height:297mm;
-  padding:var(--m);
-  overflow:hidden;
-  background:#fff;
-  page-break-after:always;
-  counter-increment:pg;
+  position:relative; width:210mm; height:297mm; padding:var(--m);
+  overflow:hidden; background:#fff;
+  page-break-after:always; counter-increment:pg;
   display:flex; flex-direction:column;
 }
 .page:last-child{ page-break-after:auto }
 
 /* ── Running furniture ─────────────────────────────────── */
 .rh{
-  position:absolute; left:var(--m); right:var(--m); top:12mm;
-  display:flex; align-items:center; justify-content:space-between;
-  padding-bottom:3.5mm; border-bottom:.3pt solid var(--hair);
+  position:absolute; left:var(--m); right:var(--m); top:11mm;
+  display:flex; align-items:center; gap:5mm;
 }
-.rh img{ width:24mm; display:block }
+.rh img{ width:22mm; display:block }
+.rh .line{ flex:1; height:.3pt; background:var(--hair) }
 .rh span{
-  font-size:6pt; letter-spacing:.16em; text-transform:uppercase;
+  font-size:5.8pt; letter-spacing:.2em; text-transform:uppercase;
   color:var(--light); font-weight:500;
 }
 .rf{
-  position:absolute; left:var(--m); right:var(--m); bottom:11mm;
-  display:flex; align-items:center; justify-content:space-between;
-  padding-top:3mm; border-top:.3pt solid var(--hair);
-  font-size:6pt; letter-spacing:.13em; text-transform:uppercase;
+  position:absolute; left:var(--m); right:var(--m); bottom:10mm;
+  display:flex; align-items:center; gap:4mm;
+  font-size:5.8pt; letter-spacing:.16em; text-transform:uppercase;
   color:var(--light); font-weight:500;
 }
+.rf .line{ flex:1; height:.3pt; background:var(--hair) }
 .rf .num::after{ content:"0" counter(pg) }
 
 .body-area{
-  margin-top:15mm; flex:1 1 auto; min-height:0; padding-bottom:9mm;
+  margin-top:15mm; flex:1 1 auto; min-height:0; padding-bottom:8mm;
   display:flex; flex-direction:column;
 }
 .anchor-bottom{ margin-top:auto }
 
-/* ── Type scale ────────────────────────────────────────── */
-h1,h2,h3,h4{ font-family:'Inter Tight',sans-serif; color:var(--ink); font-weight:600 }
+/* ── The rail grid ─────────────────────────────────────── */
+.grid{ display:grid; grid-template-columns:var(--rail) var(--main); gap:0 var(--gut) }
+.main-only{ margin-left:calc(var(--rail) + var(--gut)); width:var(--main) }
 
+.rail-label{
+  font-family:'Archivo',sans-serif;
+  font-size:5.8pt; letter-spacing:.19em; text-transform:uppercase;
+  color:var(--light); font-weight:600; line-height:1.6;
+}
+
+/* ── Type ──────────────────────────────────────────────── */
+h1,h2,h3,h4{ font-family:'Archivo',sans-serif; color:var(--ink); font-weight:600 }
 .eyebrow{
-  font-size:6.2pt; letter-spacing:.2em; text-transform:uppercase;
+  font-family:'Archivo',sans-serif;
+  font-size:5.8pt; letter-spacing:.22em; text-transform:uppercase;
   font-weight:600; color:var(--light);
 }
 
-.sec{ display:flex; gap:6mm; align-items:flex-start; margin-bottom:3.4mm }
-.sec-num{
-  font-family:'Inter Tight',sans-serif; font-weight:700;
-  font-size:24pt; line-height:.9; color:var(--teal-soft);
-  letter-spacing:-.03em; flex:0 0 auto; width:15mm;
+.sec{ margin-bottom:0 }
+.sec .num{
+  font-family:'Archivo',sans-serif; font-weight:700; font-size:33pt;
+  line-height:.8; color:var(--teal-soft); letter-spacing:-.05em;
 }
-.sec h2{ font-size:14.5pt; letter-spacing:-.02em; line-height:1.15 }
-.sec .kicker{ font-size:8pt; color:var(--grey); margin-top:1.6mm; max-width:120mm }
-.sec-rule{ height:.9pt; background:var(--hair); margin-bottom:6mm; position:relative }
-.sec-rule::before{
-  content:""; position:absolute; left:0; top:0; width:16mm; height:.9pt;
-  background:var(--teal);
-}
+.sec h2{ font-size:17pt; letter-spacing:-.03em; line-height:1.08 }
+.sec .kicker{ font-size:8.2pt; color:var(--grey); margin-top:2.6mm }
 
-p{ margin-bottom:2.8mm }
+/* route line - the recurring motif */
+.route{ display:flex; align-items:center; margin-top:5mm }
+.route i{ width:1.7mm; height:1.7mm; border-radius:50%; background:var(--teal); flex:0 0 auto }
+.route b{ width:11mm; height:.9pt; background:var(--orange); flex:0 0 auto }
+.route s{ flex:1; height:.3pt; background:var(--hair) }
+.route u{ width:1.7mm; height:1.7mm; border-radius:50%; border:.35mm solid var(--teal-soft); flex:0 0 auto }
+
+p{ margin-bottom:2.9mm }
 p:last-child{ margin-bottom:0 }
-.lead{ font-size:9.6pt; line-height:1.6; color:var(--ink); font-weight:400 }
 .small{ font-size:7.2pt; line-height:1.55 }
 .muted{ color:var(--light) }
 strong{ font-weight:600; color:var(--ink) }
 
 /* ── Cover ─────────────────────────────────────────────── */
-.cover{ padding:0 }
-.cover-band{
-  position:relative; height:118mm; padding:18mm var(--m) 0;
+.cover{ padding:0; background:#0A1416 }
+.cover .shot{ position:absolute; inset:0; overflow:hidden }
+.cover .shot img{ width:100%; height:100%; object-fit:cover; display:block }
+.cover .wash{
+  position:absolute; inset:0;
   background:
-    radial-gradient(120% 90% at 78% -10%, #0B9C97 0%, rgba(11,156,151,0) 58%),
-    linear-gradient(160deg,#00807F 0%,#006E6E 55%,#005F60 100%);
-  overflow:hidden;
+    linear-gradient(180deg, rgba(0,72,74,.44) 0%, rgba(0,52,56,.10) 30%, rgba(2,20,22,.34) 56%, rgba(2,13,15,.86) 82%, rgba(2,10,12,.96) 100%),
+    linear-gradient(90deg, rgba(0,64,68,.38) 0%, rgba(0,64,68,0) 58%);
 }
-.cover-band::after{
-  content:""; position:absolute; right:-40mm; bottom:-92mm;
-  width:170mm; height:170mm; border-radius:50%;
-  border:1.6mm solid rgba(255,255,255,.075);
-}
-.cover-band::before{
-  content:""; position:absolute; right:14mm; top:20mm;
-  width:64mm; height:64mm; border-radius:50%;
-  border:.6mm solid rgba(255,255,255,.10);
-}
-.cover-band img{ width:40mm; position:relative; z-index:2 }
-.cover-rule{ height:2.4mm; background:var(--orange) }
+.cover .inner{ position:relative; z-index:2; height:100%; padding:19mm var(--m) 14mm; display:flex; flex-direction:column }
+.cover img.logo{ width:38mm }
 
-.cover-title{ position:relative; z-index:2; margin-top:16mm }
-.cover-title .eyebrow{ color:rgba(255,255,255,.62) }
-.cover-title h1{
-  font-size:44pt; line-height:1; letter-spacing:-.035em;
-  color:#fff; font-weight:700; margin-top:4mm;
+.cover .title{ margin-top:auto }
+.cover .title .eyebrow{ color:rgba(255,255,255,.6) }
+.cover h1{
+  font-family:'Archivo',sans-serif; font-size:47pt; font-weight:700;
+  color:#fff; letter-spacing:-.05em; line-height:.94; margin-top:4mm;
 }
-.cover-title .ar{
-  font-family:'IBM Plex Sans Arabic',sans-serif; font-weight:400;
-  font-size:21pt; color:rgba(255,255,255,.55); line-height:1;
-  margin-top:5mm; letter-spacing:0;
+.cover .ar{
+  font-family:'IBM Plex Sans Arabic',sans-serif; font-weight:400; font-size:20pt;
+  color:rgba(255,255,255,.5); line-height:1; margin-top:5mm;
 }
-.cover-title h2{
-  font-size:13pt; font-weight:400; color:rgba(255,255,255,.9);
-  margin-top:7mm; letter-spacing:-.005em; line-height:1.45; max-width:120mm;
+.cover h2{
+  font-family:'Inter',sans-serif; font-size:12.5pt; font-weight:400;
+  color:rgba(255,255,255,.88); margin-top:7mm; line-height:1.45; max-width:118mm;
+  letter-spacing:-.005em;
 }
+.cover .rule{ height:.9pt; background:rgba(255,255,255,.16); margin:9mm 0 7mm; position:relative }
+.cover .rule::before{ content:""; position:absolute; left:0; top:0; width:16mm; height:.9pt; background:var(--orange) }
 
-.cover-lower{ padding:16mm var(--m) 0; flex:1; display:flex; flex-direction:column }
-.meta{ width:118mm }
-.meta div{ display:flex; padding:2.4mm 0; border-bottom:.3pt solid var(--hair) }
-.meta div:last-child{ border-bottom:0 }
-.meta dt{
-  flex:0 0 34mm; font-size:6.2pt; letter-spacing:.16em; text-transform:uppercase;
-  color:var(--light); font-weight:600; padding-top:.7mm;
+.cover .meta{ display:grid; grid-template-columns:repeat(4,1fr); gap:6mm }
+.cover .meta dt{
+  font-family:'Archivo',sans-serif;
+  font-size:5.6pt; letter-spacing:.19em; text-transform:uppercase;
+  color:rgba(255,255,255,.45); font-weight:600; margin-bottom:1.6mm;
 }
-.meta dd{ font-size:8.8pt; color:var(--ink); font-weight:500 }
-
-.cover-quote{
-  margin-top:14mm; padding-top:7mm; border-top:.3pt solid var(--hair);
-  font-size:11pt; line-height:1.55; color:var(--ink); max-width:143mm;
-  font-weight:400; letter-spacing:-.01em;
+.cover .meta dd{ font-size:8.4pt; color:#fff; font-weight:500 }
+.cover .foot{
+  margin-top:9mm; padding-top:5mm; border-top:.3pt solid rgba(255,255,255,.13);
+  display:flex; justify-content:space-between;
+  font-size:5.8pt; letter-spacing:.16em; text-transform:uppercase; color:rgba(255,255,255,.4);
 }
-.cover-foot{
-  margin-top:auto; padding:0 0 15mm; display:flex; justify-content:space-between;
-  align-items:flex-end;
-}
-.cover-foot .l{ font-size:6.4pt; letter-spacing:.16em; text-transform:uppercase; font-weight:600; color:var(--teal) }
-.cover-foot .s{ font-size:6.4pt; letter-spacing:.1em; text-transform:uppercase; color:var(--light); margin-top:1.5mm }
-.cover-foot .r{ font-size:6.4pt; letter-spacing:.1em; text-transform:uppercase; color:var(--light); text-align:right }
 
 /* ── Letter ────────────────────────────────────────────── */
-.letter h1{ font-size:19.5pt; letter-spacing:-.025em; margin:6mm 0 6mm }
-.letter p{ font-size:9pt; line-height:1.7; max-width:150mm; margin-bottom:3.8mm }
-.sig{ margin-top:11mm }
-.sig .line{ width:44mm; height:.9pt; background:var(--teal); margin-bottom:2.5mm }
-.sig .n{ font-family:'Inter Tight',sans-serif; font-size:10pt; font-weight:600; color:var(--ink) }
-.sig .t{ font-size:7.4pt; color:var(--light); margin-top:.6mm }
+.letter h1{ font-size:20pt; letter-spacing:-.035em; margin:0 0 6mm }
+.letter p{ font-size:9pt; line-height:1.72; margin-bottom:3.8mm }
+.sig .line{ width:40mm; height:.9pt; background:var(--teal); margin-bottom:2.4mm }
+.sig .n{ font-family:'Archivo',sans-serif; font-size:10pt; font-weight:600; color:var(--ink) }
+.sig .t{ font-size:7.2pt; color:var(--light); margin-top:.6mm }
 
 /* ── Contents ──────────────────────────────────────────── */
-.toc{ margin-bottom:11mm }
-.toc .row{
-  display:flex; align-items:baseline; gap:4mm;
-  padding:2.1mm 0; border-bottom:.3pt solid var(--hair);
-}
+.toc .row{ display:flex; align-items:baseline; gap:4mm; padding:2mm 0; border-bottom:.3pt solid var(--hair) }
 .toc .row:first-of-type{ border-top:.3pt solid var(--hair) }
-.toc .n{ font-size:7pt; font-weight:700; color:var(--teal-soft); width:8mm; font-family:'Inter Tight',sans-serif }
+.toc .n{ font-family:'Archivo',sans-serif; font-size:6.8pt; font-weight:700; color:var(--teal-soft); width:7mm }
 .toc .t{ flex:1; font-size:8.2pt; color:var(--ink) }
-.toc .p{ font-size:7pt; color:var(--light); font-weight:500 }
+.toc .p{ font-size:6.8pt; color:var(--light); font-weight:500 }
 
-/* ── Numbered observations ─────────────────────────────── */
-.obs-set{ flex:1; display:flex; flex-direction:column; justify-content:space-between; padding-bottom:2mm }
-.obs{ display:flex; gap:6mm; margin-bottom:6mm }
-.obs-set .obs{ margin-bottom:0; border-top:.3pt solid var(--hair); padding-top:5mm }
-.obs .n{
-  flex:0 0 auto; font-size:6.4pt; font-weight:700; letter-spacing:.1em;
-  color:var(--orange); padding-top:1.4mm; width:8mm;
-}
-.obs h3{ font-size:9.8pt; letter-spacing:-.015em; margin-bottom:1.8mm }
-.obs p{ font-size:8pt; max-width:146mm }
+/* ── Observations ──────────────────────────────────────── */
+.obs-set{ display:flex; flex-direction:column; gap:7mm }
+.obs{ display:grid; grid-template-columns:var(--rail) var(--main); gap:0 var(--gut);
+      border-top:.3pt solid var(--hair); padding-top:5mm }
+.obs .n{ font-family:'Archivo',sans-serif; font-size:8pt; font-weight:700; letter-spacing:.05em; color:var(--orange) }
+.obs h3{ font-size:10pt; letter-spacing:-.025em; margin-bottom:1.8mm }
+.obs p{ font-size:8pt }
 
-/* ── Phase / move headers ──────────────────────────────── */
-.ph{
-  display:flex; align-items:center; gap:5mm;
-  background:var(--teal-tint); border-radius:1.2mm;
-  padding:1.7mm 4mm; margin-bottom:2.4mm;
-}
-.ph .tag{
-  font-size:6pt; font-weight:700; letter-spacing:.13em; color:var(--orange);
-  flex:0 0 auto; min-width:15mm;
-}
-.ph h3{ font-size:8.8pt; color:var(--teal-d); flex:1; letter-spacing:-.01em }
-.ph .days{ font-size:6.6pt; color:var(--teal-mid); font-weight:500; letter-spacing:.04em }
+/* ── Phase blocks ──────────────────────────────────────── */
+.ph{ display:flex; align-items:baseline; gap:4mm; margin-bottom:2.6mm;
+     border-bottom:.7pt solid var(--teal); padding-bottom:1.5mm }
+.ph .tag{ font-family:'Archivo',sans-serif; font-size:6pt; font-weight:700;
+          letter-spacing:.15em; color:var(--orange); flex:0 0 auto; width:15mm }
+.ph h3{ font-size:9.6pt; flex:1; letter-spacing:-.025em }
+.ph .days{ font-family:'Archivo',sans-serif; font-size:6.2pt; color:var(--light);
+           font-weight:600; letter-spacing:.11em; text-transform:uppercase }
 
-ul.d{ list-style:none; margin:0 0 4.6mm; padding:0 0 0 4mm }
-ul.d li{
-  position:relative; font-size:7.6pt; line-height:1.5;
-  padding:0 0 1.2mm 4.6mm;
-}
-ul.d li::before{
-  content:""; position:absolute; left:0; top:1.9mm;
-  width:1.4mm; height:1.4mm; background:var(--teal-mid); border-radius:.2mm;
-}
+ul.d{ list-style:none; margin:0 0 5mm; padding:0 }
+ul.d li{ position:relative; font-size:7.7pt; line-height:1.5; padding:0 0 1.3mm 6mm }
+ul.d li::before{ content:""; position:absolute; left:0; top:1.85mm; width:3mm; height:.5pt; background:var(--teal-mid) }
 ul.d.wide li{ font-size:8.2pt; padding-bottom:2.4mm }
 
-/* ── Lockup diagram ────────────────────────────────────── */
-.locks{ display:grid; grid-template-columns:repeat(3,1fr); gap:5mm; margin:4mm 0 3mm }
-.lock{
-  border:.3pt solid var(--hair); border-radius:1.8mm; padding:5mm;
-  display:flex; flex-direction:column;
-}
-.lock .stage{
-  height:20mm; display:flex; align-items:center; justify-content:center;
-  background:var(--paper); border-radius:1.2mm; margin-bottom:4mm;
-}
-.mk{
-  border:.4mm dashed var(--teal-mid); border-radius:1mm;
-  display:flex; align-items:center; justify-content:center;
-  color:var(--teal-mid); font-size:4.6pt; letter-spacing:.1em; font-weight:700;
-  flex:0 0 auto;
-}
-.wm{ font-family:'Inter Tight',sans-serif; font-weight:700; color:var(--ink); letter-spacing:.02em; line-height:1 }
+/* ── Lockups ───────────────────────────────────────────── */
+.locks{ display:grid; grid-template-columns:repeat(3,1fr); gap:4mm; margin:4mm 0 2.5mm }
+.lock{ border:.3pt solid var(--hair); padding:4mm; display:flex; flex-direction:column }
+.lock .stage{ height:19mm; display:flex; align-items:center; justify-content:center;
+              background:var(--paper); margin-bottom:3.5mm }
+.mk{ border:.35mm dashed var(--teal-mid); display:flex; align-items:center; justify-content:center;
+     color:var(--teal-mid); font-family:'Archivo',sans-serif;
+     font-size:4.4pt; letter-spacing:.12em; font-weight:700; flex:0 0 auto }
+.wm{ font-family:'Archivo',sans-serif; font-weight:700; color:var(--ink); letter-spacing:0; line-height:1 }
 .wm-ar{ font-family:'IBM Plex Sans Arabic',sans-serif; font-weight:500; color:var(--teal); line-height:1 }
 .rule-v{ width:.3pt; background:var(--hair); align-self:stretch }
-
-.lock h4{ font-size:8.6pt; margin-bottom:1.2mm }
-.lock p{ font-size:7pt; line-height:1.45; color:var(--grey) }
-.lock .min{
-  margin-top:auto; padding-top:3mm; font-size:5.8pt; font-weight:700;
-  letter-spacing:.12em; color:var(--orange); text-transform:uppercase;
-}
+.lock h4{ font-size:8.4pt; margin-bottom:1.2mm; letter-spacing:-.02em }
+.lock p{ font-size:6.8pt; line-height:1.45 }
+.lock .min{ margin-top:auto; padding-top:2.5mm; font-family:'Archivo',sans-serif;
+            font-size:5.8pt; font-weight:700; letter-spacing:.13em; color:var(--orange); text-transform:uppercase }
 
 /* ── Scale strip ───────────────────────────────────────── */
-.scale{ display:flex; align-items:flex-end; gap:7mm; margin:5mm 0 2mm }
-.scale .u{ text-align:center }
-.scale .sq{
-  background:var(--teal-tint); border:.3pt solid var(--teal-soft);
-  border-radius:1mm; margin:0 auto;
-}
-.scale .lb{ font-size:5.6pt; letter-spacing:.1em; color:var(--light); margin-top:2.4mm; font-weight:600 }
+.scale{ display:flex; align-items:flex-end; gap:6mm }
+.scale .sq{ background:var(--teal-tint); border:.3pt solid var(--teal-soft); margin:0 auto }
+.scale .lb{ font-family:'Archivo',sans-serif; font-size:5.4pt; letter-spacing:.1em;
+            color:var(--light); margin-top:2.2mm; font-weight:600; text-align:center }
 
-/* ── Three-up notes ────────────────────────────────────── */
-.three{ display:grid; grid-template-columns:repeat(3,1fr); gap:7mm }
-.three .c{ border-top:.9pt solid var(--orange); padding-top:3mm }
+/* ── Three-up ──────────────────────────────────────────── */
+.three{ display:grid; grid-template-columns:repeat(3,1fr); gap:6mm }
+.three .c{ border-top:.9pt solid var(--orange); padding-top:2.8mm }
 .three .c.teal{ border-top-color:var(--teal) }
-.three .c .k{ font-size:6.4pt; letter-spacing:.14em; text-transform:uppercase; font-weight:700; color:var(--orange); margin-bottom:1.6mm }
+.three .c .k{ font-family:'Archivo',sans-serif; font-size:6.2pt; letter-spacing:.15em;
+              text-transform:uppercase; font-weight:700; color:var(--orange); margin-bottom:1.5mm }
 .three .c.teal .k{ color:var(--teal) }
-.three .c h4{ font-size:9.6pt; margin-bottom:1.5mm; letter-spacing:-.01em }
-.three .c p{ font-size:7.6pt; line-height:1.5 }
+.three .c h4{ font-size:9.4pt; margin-bottom:1.4mm; letter-spacing:-.025em }
+.three .c p{ font-size:7.4pt; line-height:1.5 }
 
 /* ── Count tiles ───────────────────────────────────────── */
-.tiles{ display:grid; grid-template-columns:repeat(4,1fr); gap:11mm 6mm; margin-top:7mm }
-.tile{ border-top:.9pt solid var(--teal-soft); padding-top:2.6mm }
-.tile .n{
-  font-family:'Inter Tight',sans-serif; font-size:19pt; font-weight:700;
-  color:var(--teal); letter-spacing:-.03em; line-height:1;
-}
-.tile p{ font-size:7pt; line-height:1.42; margin-top:2mm }
+.tiles{ display:grid; grid-template-columns:repeat(4,1fr); gap:9mm 5mm; margin-top:6mm }
+.tile{ border-top:.9pt solid var(--teal-soft); padding-top:2.4mm }
+.tile .n{ font-family:'Archivo',sans-serif; font-size:19pt; font-weight:700;
+          color:var(--teal); letter-spacing:-.05em; line-height:1 }
+.tile p{ font-size:6.8pt; line-height:1.42; margin-top:2mm }
 
 /* ── Gantt ─────────────────────────────────────────────── */
-.gantt{ margin:6mm 0 0 }
-.g-head{
-  display:grid; grid-template-columns:56mm repeat(9,1fr);
-  border-bottom:.9pt solid var(--teal); padding-bottom:2mm;
-}
-.g-head .lb{ font-size:5.8pt; letter-spacing:.16em; text-transform:uppercase; color:var(--light); font-weight:600; align-self:end }
+.gantt{ margin-top:5mm }
+.g-head{ display:grid; grid-template-columns:48mm repeat(15,1fr);
+         border-bottom:.7pt solid var(--teal); padding-bottom:1.6mm }
+.g-head .lb{ font-family:'Archivo',sans-serif; font-size:5.6pt; letter-spacing:.17em;
+             text-transform:uppercase; color:var(--light); font-weight:600; align-self:end }
 .g-head .d{ text-align:center }
-.g-head .d .w{ font-size:5.4pt; letter-spacing:.12em; color:var(--teal-mid); font-weight:600 }
-.g-head .d .n{ font-family:'Inter Tight',sans-serif; font-size:9pt; font-weight:600; color:var(--ink); line-height:1.2 }
-.g-head .d.we .w{ color:var(--light) }
-.g-head .d.we .n{ color:var(--light) }
+.g-head .d .w{ font-family:'Archivo',sans-serif; font-size:4.6pt; letter-spacing:.05em;
+               color:var(--teal-mid); font-weight:600; text-transform:uppercase }
+.g-head .d .n{ font-family:'Archivo',sans-serif; font-size:7.6pt; font-weight:600; color:var(--ink); line-height:1.25 }
+.g-head .d.we .w, .g-head .d.we .n{ color:var(--light) }
 
 .g-body{ position:relative }
-.g-grid{
-  position:absolute; left:56mm; right:0; top:0; bottom:0;
-  display:grid; grid-template-columns:repeat(9,1fr);
-}
+.g-grid{ position:absolute; left:48mm; right:0; top:0; bottom:0; display:grid; grid-template-columns:repeat(15,1fr) }
 .g-grid div{ border-left:.3pt solid var(--hair) }
 .g-grid div.we{ background:var(--paper) }
 
-.g-row{
-  position:relative; display:grid; grid-template-columns:56mm repeat(9,1fr);
-  align-items:center; height:7.4mm; border-bottom:.3pt solid var(--hair);
-}
-.g-row .lb{ font-size:7.4pt; color:var(--ink); padding-right:4mm; z-index:2 }
+.g-row{ position:relative; display:grid; grid-template-columns:48mm repeat(15,1fr);
+        align-items:center; height:6.8mm; border-bottom:.3pt solid var(--hair) }
+.g-row .lb{ font-size:7.1pt; color:var(--ink); padding-right:3mm; z-index:2 }
 .g-row.gate .lb{ color:var(--orange); font-weight:600 }
 .g-row.final .lb{ color:var(--teal); font-weight:600 }
-.bar{ height:2.6mm; border-radius:1.3mm; background:var(--teal-soft); margin:0 1mm; z-index:2; position:relative }
-.bar::before{
-  content:""; position:absolute; left:0; top:0; bottom:0; width:2mm;
-  background:var(--teal); border-radius:1.3mm;
-}
+.bar{ height:2.4mm; background:var(--teal-soft); margin:0 .6mm; z-index:2; position:relative }
+.bar::before{ content:""; position:absolute; left:0; top:0; bottom:0; width:1.4mm; background:var(--teal) }
 .bar.final{ background:var(--teal) }
 .bar.final::before{ display:none }
-.bar.gate{
-  background:var(--orange-soft); display:flex; align-items:center; justify-content:center;
-  height:3.6mm; border-radius:1.8mm;
-}
+.bar.gate{ background:transparent; display:flex; align-items:center; justify-content:center; height:4mm }
 .bar.gate::before{ display:none }
-.dia{ width:2.6mm; height:2.6mm; background:var(--orange); transform:rotate(45deg); border-radius:.3mm }
+.dia{ width:2.4mm; height:2.4mm; background:var(--orange); transform:rotate(45deg) }
 
-.legend{ display:flex; gap:7mm; margin-top:4mm }
-.legend span{ display:flex; align-items:center; gap:2mm; font-size:6.2pt; color:var(--grey) }
-.legend i{ width:6mm; height:2.4mm; border-radius:1.2mm; display:block }
+.legend{ display:flex; gap:6mm; margin-top:3.5mm }
+.legend span{ display:flex; align-items:center; gap:1.8mm; font-size:6pt; color:var(--grey) }
+.legend i{ width:5mm; height:2.2mm; display:block }
 
 /* ── Cost table ────────────────────────────────────────── */
 table{ width:100%; border-collapse:collapse }
-thead th{
-  font-size:6.2pt; letter-spacing:.16em; text-transform:uppercase; color:var(--teal);
-  font-weight:700; text-align:left; padding:0 0 2.2mm; border-bottom:.9pt solid var(--teal);
-}
+thead th{ font-family:'Archivo',sans-serif; font-size:6pt; letter-spacing:.17em;
+          text-transform:uppercase; color:var(--teal); font-weight:700; text-align:left;
+          padding:0 0 2mm; border-bottom:.7pt solid var(--teal) }
 thead th.r{ text-align:right }
-tbody td{ padding:2.2mm 0; font-size:8.4pt; color:var(--ink); border-bottom:.3pt solid var(--hair) }
-tbody td.n{ width:11mm; font-size:7pt; font-weight:700; color:var(--teal-soft); font-family:'Inter Tight',sans-serif }
+tbody td{ padding:2.1mm 0; font-size:8.4pt; color:var(--ink); border-bottom:.3pt solid var(--hair) }
+tbody td.n{ width:10mm; font-family:'Archivo',sans-serif; font-size:6.8pt; font-weight:700; color:var(--teal-soft) }
 tbody td.r{ text-align:right; font-variant-numeric:tabular-nums }
-tbody tr.tot td{ border-bottom:0; padding-top:4mm; font-weight:600 }
-tbody tr.vat td{ border-bottom:0; padding-top:1mm; font-size:8pt; color:var(--grey); font-weight:400 }
 
-.grand{
-  margin-top:4mm; background:var(--teal); border-radius:1.4mm;
-  padding:4mm 5mm; display:flex; justify-content:space-between; align-items:center;
-}
-.grand .l{ font-size:7.6pt; letter-spacing:.14em; text-transform:uppercase; color:#fff; font-weight:600 }
-.grand .v{ font-family:'Inter Tight',sans-serif; font-size:14pt; font-weight:700; color:#fff; letter-spacing:-.02em }
+.grand{ margin-top:4mm; background:var(--teal); padding:4mm 5mm;
+        display:flex; justify-content:space-between; align-items:center }
+.grand .l{ font-family:'Archivo',sans-serif; font-size:7.4pt; letter-spacing:.15em;
+           text-transform:uppercase; color:#fff; font-weight:600 }
+.grand .v{ font-family:'Archivo',sans-serif; font-size:15pt; font-weight:700; color:#fff; letter-spacing:-.04em }
 
-.cols2{ display:grid; grid-template-columns:1fr 1fr; gap:10mm; margin-top:8mm }
-.cols2 h4{ font-size:6.4pt; letter-spacing:.16em; text-transform:uppercase; color:var(--teal); margin-bottom:2.5mm }
+.cols2{ display:grid; grid-template-columns:1fr 1fr; gap:9mm; margin-top:7mm }
+.cols2 h4{ font-family:'Archivo',sans-serif; font-size:6.2pt; letter-spacing:.17em;
+           text-transform:uppercase; color:var(--teal); margin-bottom:2.4mm }
 .cols2 .no h4{ color:var(--orange) }
 .cols2 ul{ list-style:none }
-.cols2 li{ position:relative; padding:0 0 1.6mm 5mm; font-size:7.3pt; line-height:1.5 }
-.cols2 li::before{ content:""; position:absolute; left:0; top:1.9mm; width:1.3mm; height:1.3mm; background:var(--teal-mid) }
-.cols2 .no li::before{ background:var(--orange-soft) }
+.cols2 li{ position:relative; padding:0 0 1.6mm 6mm; font-size:7.3pt; line-height:1.5 }
+.cols2 li::before{ content:""; position:absolute; left:0; top:1.7mm; width:3mm; height:.5pt; background:var(--teal-mid) }
+.cols2 .no li::before{ background:var(--orange) }
 
-/* ── Note lines ────────────────────────────────────────── */
-.notes{ margin-top:7mm; padding-top:5mm; border-top:.3pt solid var(--hair) }
-.note{ display:flex; gap:5mm; margin-bottom:2.8mm }
-.note .k{
-  flex:0 0 30mm; font-size:7.2pt; font-weight:600; color:var(--teal);
-}
-.note .v{ font-size:7.4pt; line-height:1.55; flex:1 }
+/* ── Notes ─────────────────────────────────────────────── */
+.notes{ margin-top:6mm; padding-top:4.5mm; border-top:.3pt solid var(--hair) }
+.note{ display:grid; grid-template-columns:var(--rail) 1fr; gap:0 var(--gut); margin-bottom:2.6mm }
+.note .k{ font-family:'Archivo',sans-serif; font-size:6.2pt; letter-spacing:.13em;
+          text-transform:uppercase; font-weight:700; color:var(--teal); padding-top:.6mm }
+.note .v{ font-size:7.4pt; line-height:1.55 }
 
 /* ── Sign-off ──────────────────────────────────────────── */
-.signbox{ border:.3pt solid var(--teal-soft); border-radius:2mm; padding:6mm; margin-top:8mm }
-.signbox .k{ font-size:6.4pt; letter-spacing:.16em; text-transform:uppercase; color:var(--teal); font-weight:700 }
-.signbox p{ font-size:7.8pt; margin:2.5mm 0 0; max-width:135mm }
-.sign-lines{ display:grid; grid-template-columns:1.5fr 1fr 1fr; gap:8mm; margin-top:16mm }
-.sign-lines div{ border-top:.3pt solid var(--light); padding-top:1.6mm }
-.sign-lines span{ font-size:5.8pt; letter-spacing:.12em; text-transform:uppercase; color:var(--light) }
+.signbox{ border:.3pt solid var(--teal-soft); padding:6mm; margin-top:7mm }
+.signbox .k{ font-family:'Archivo',sans-serif; font-size:6.2pt; letter-spacing:.17em;
+             text-transform:uppercase; color:var(--teal); font-weight:700 }
+.signbox p{ font-size:7.6pt; margin:2.4mm 0 0 }
+.sign-lines{ display:grid; grid-template-columns:1.5fr 1fr 1fr; gap:7mm; margin-top:15mm }
+.sign-lines div{ border-top:.3pt solid var(--light); padding-top:1.5mm }
+.sign-lines span{ font-size:5.6pt; letter-spacing:.13em; text-transform:uppercase; color:var(--light) }
 
-.endmark{ margin-top:auto; padding-top:8mm }
-.endmark .l{ font-size:6.6pt; letter-spacing:.16em; text-transform:uppercase; font-weight:700; color:var(--teal) }
-.endmark .s{ font-size:7pt; color:var(--light); margin-top:1.2mm }
+.endmark{ margin-top:auto; padding-top:7mm }
+.endmark .l{ font-family:'Archivo',sans-serif; font-size:6.4pt; letter-spacing:.17em;
+             text-transform:uppercase; font-weight:700; color:var(--teal) }
+.endmark .s{ font-size:6.8pt; color:var(--light); margin-top:1.2mm }
 </style>
 </head>
 <body>
 
 <!-- ════════════════════════════ 01 COVER ════════════════════════════ -->
 <section class="page cover">
-  <div class="cover-band">
-    <img src="assets/miradore-logo-white.png" alt="Miradore">
-    <div class="cover-title">
+  <div class="shot"><img src="assets/cover.jpg" alt=""></div>
+  <div class="wash"></div>
+  <div class="inner">
+    <img class="logo" src="assets/miradore-logo-white.png" alt="Miradore">
+
+    <div class="title">
       <div class="eyebrow">A proposal for</div>
       <h1>MARSAL</h1>
       <div class="ar">مرسال</div>
       <h2>Brand evolution, a consolidated bilingual identity,<br>and the collateral that carries it.</h2>
     </div>
-  </div>
-  <div class="cover-rule"></div>
 
-  <div class="cover-lower">
+    <div class="rule"></div>
+
     <div class="meta">
-      <div><dt>Prepared for</dt><dd>Marsal &nbsp;/&nbsp; Logistics &amp; Transport</dd></div>
-      <div><dt>Prepared by</dt><dd>Miradore Experiences, Riyadh</dd></div>
-      <div><dt>Date</dt><dd>14 August 2026</dd></div>
-      <div><dt>Delivery</dt><dd>Monday, 24 August 2026</dd></div>
+      <div><dt>Prepared by</dt><dd>Miradore Experiences</dd></div>
+      <div><dt>Date</dt><dd>6 August 2026</dd></div>
+      <div><dt>Delivery</dt><dd>24 August 2026</dd></div>
       <div><dt>Investment</dt><dd>SAR 24,000</dd></div>
-      <div><dt>Validity</dt><dd>30 days from date of issue</dd></div>
     </div>
 
-    <div class="cover-quote">
-      Marsal does not need a new logo. It needs the one it already owns to work at
-      32 pixels, in one colour, in two languages, and in the hands of people who are
-      not designers. That is the whole brief.
-    </div>
-
-    <div class="cover-foot">
-      <div>
-        <div class="l">Miradore Experiences</div>
-        <div class="s">Riyadh, Kingdom of Saudi Arabia &nbsp;/&nbsp; Confidential</div>
-      </div>
-      <div class="r">www.miradore.co<br>hello@miradore.co</div>
+    <div class="foot">
+      <span>Riyadh, Kingdom of Saudi Arabia &nbsp;/&nbsp; Confidential</span>
+      <span>miradore.co</span>
     </div>
   </div>
 </section>
 
 <!-- ════════════════════════════ 02 LETTER ═══════════════════════════ -->
 <section class="page letter">
-  <div class="rh"><img src="assets/miradore-logo.png" alt=""><span>Brand evolution / Marsal</span></div>
+  <div class="rh"><img src="assets/miradore-logo.png" alt=""><div class="line"></div><span>Brand evolution / Marsal</span></div>
   <div class="body-area">
-    <div class="eyebrow">Riyadh &nbsp;/&nbsp; 14 August 2026</div>
-    <h1>To the team at Marsal,</h1>
+    <div class="grid">
+      <div class="rail-label">Riyadh<br>6 Aug 2026</div>
+      <div>
+        <h1>To the team at Marsal,</h1>
 
-    <p>Thank you for the call last week, and for sending across the logo files. We have spent
-    a few days with them, put them through the places they actually have to live, and this
-    proposal is what came out of that.</p>
+        <p>Thank you for the call last week, and for sending across the logo files. We have spent
+        a few days with them, put them through the places they actually have to live, and this
+        proposal is what came out of that.</p>
 
-    <p>The short version: you do not need a new logo. The one you have is doing its job, and
-    there is real equity in it already sitting on your paperwork, your vehicles and your
-    invoices. Redrawing it would be an expensive way to solve a problem you do not have.</p>
+        <p>The short version: you do not need a new logo. The one you have is doing its job, and
+        there is real equity in it already sitting on your paperwork, your vehicles and your
+        invoices. Redrawing it would be an expensive way to solve a problem you do not have.</p>
 
-    <p>What you do need is for that logo to work harder in the places it currently struggles.
-    It has no short form, so there is nothing clean to put in a profile picture or an app icon.
-    And when the Arabic and the English sit together, the signature runs wide and low - which is
-    why it keeps getting shrunk into illegibility on cards, on nav bars, and on the side of a truck.</p>
+        <p>What you do need is for that logo to work harder in the places it currently struggles.
+        It has no short form, so there is nothing clean to put in a profile picture or an app icon.
+        And when the Arabic and the English sit together, the signature runs wide and low - which is
+        why it keeps getting shrunk into illegibility on cards, on nav bars, and on the side of a truck.</p>
 
-    <p>So the work here is evolution, not replacement. We pull a proper logomark out of the
-    identity you already own. We consolidate the bilingual signature so Arabic and Latin hold
-    equal weight in a footprint that fits. Then we build out the everyday pieces - cards,
-    letterhead, profile pictures, social templates, the website - so the next hundred things
-    Marsal produces look like they came from the same company, without anyone having to ask us first.</p>
+        <p>So the work here is evolution, not replacement. We pull a proper logomark out of the
+        identity you already own. We consolidate the bilingual signature so Arabic and Latin hold
+        equal weight in a footprint that fits. Then we build out the everyday pieces - cards,
+        letterhead, profile pictures, social templates, the website - so the next hundred things
+        Marsal produces look like they came from the same company.</p>
 
-    <p>We have scoped this to nine working days. Everything lands with you on Monday 24 August,
-    with two review points along the way so there are no surprises at the end.</p>
+        <p>One thing worth saying plainly, because it shapes both the price and the schedule: we are
+        not going to hand you a spread of logo options to pick from. We will do the thinking, commit
+        to one direction, and show it to you applied to real things - a card, a truck panel, a
+        profile picture - so you are judging a decision rather than a shape on a white page. If it
+        is wrong, we adjust it.</p>
 
-    <p>If any part of this reads as more, or less, than what you had in mind, tell us and we will
-    reshape it. We would much rather adjust the scope now than hand you something you have to
-    explain internally.</p>
+        <p>Work starts Monday 10 August and everything lands with you on Monday 24 August, with two
+        review points along the way so there are no surprises at the end.</p>
 
-    <p style="margin-top:8mm">Warm regards,</p>
+        <p>If any part of this reads as more, or less, than what you had in mind, tell us and we will
+        reshape it. We would much rather adjust the scope now than hand you something you have to
+        explain internally.</p>
 
-    <div class="sig">
-      <div class="line"></div>
-      <div class="n">Adeel Ahmed</div>
-      <div class="t">Director &nbsp;/&nbsp; Miradore Experiences</div>
+        <p style="margin-top:7mm">Warm regards,</p>
+
+        <div class="sig" style="margin-top:10mm">
+          <div class="line"></div>
+          <div class="n">Adeel Ahmed</div>
+          <div class="t">Director &nbsp;/&nbsp; Miradore Experiences</div>
+        </div>
+      </div>
     </div>
   </div>
-  <div class="rf"><span>Miradore Experiences &nbsp;/&nbsp; Riyadh</span><span class="num"></span></div>
+  <div class="rf"><span>Miradore Experiences</span><div class="line"></div><span class="num"></span></div>
 </section>
 
 <!-- ══════════════════ 03 CONTENTS + THE READ ════════════════════════ -->
 <section class="page">
-  <div class="rh"><img src="assets/miradore-logo.png" alt=""><span>Brand evolution / Marsal</span></div>
+  <div class="rh"><img src="assets/miradore-logo.png" alt=""><div class="line"></div><span>Brand evolution / Marsal</span></div>
   <div class="body-area">
 
-    <div class="toc">
-      <div class="eyebrow" style="margin-bottom:3mm">Contents</div>
-      <div class="row"><span class="n">01</span><span class="t">Where the identity stands today</span><span class="p">03</span></div>
-      <div class="row"><span class="n">02</span><span class="t">What we are proposing</span><span class="p">04</span></div>
-      <div class="row"><span class="n">03</span><span class="t">Scope of work, phase by phase</span><span class="p">05</span></div>
-      <div class="row"><span class="n">04</span><span class="t">Delivery schedule</span><span class="p">07</span></div>
-      <div class="row"><span class="n">05</span><span class="t">Investment and terms</span><span class="p">08</span></div>
-      <div class="row"><span class="n">06</span><span class="t">What we need from Marsal</span><span class="p">09</span></div>
+    <div class="grid" style="margin-bottom:11mm">
+      <div class="rail-label">Contents</div>
+      <div class="toc">
+        <div class="row"><span class="n">01</span><span class="t">Where the identity stands today</span><span class="p">03</span></div>
+        <div class="row"><span class="n">02</span><span class="t">What we are proposing</span><span class="p">04</span></div>
+        <div class="row"><span class="n">03</span><span class="t">Scope of work, phase by phase</span><span class="p">05</span></div>
+        <div class="row"><span class="n">04</span><span class="t">Delivery schedule</span><span class="p">07</span></div>
+        <div class="row"><span class="n">05</span><span class="t">Investment and terms</span><span class="p">08</span></div>
+        <div class="row"><span class="n">06</span><span class="t">What we need from Marsal</span><span class="p">09</span></div>
+      </div>
     </div>
 
-    <div class="sec">
-      <div class="sec-num">01</div>
+    <div class="grid sec">
+      <div><div class="num">01</div></div>
       <div>
-        <h2>Where the identity stands today</h2>
+        <h2>Where the identity<br>stands today</h2>
         <p class="kicker">An honest read of the current logo, and the three things holding it back.</p>
       </div>
     </div>
-    <div class="sec-rule"></div>
+    <div class="route"><i></i><b></b><s></s><u></u></div>
 
-    <p style="max-width:150mm;margin-bottom:7mm">This is not a criticism of the mark. It is a list of
+    <p class="main-only" style="margin:6mm 0 6mm">This is not a criticism of the mark. It is a list of
     the jobs it is being asked to do that it was never drawn to do. All three are fixable without
     losing anything you have already built.</p>
 
     <div class="obs-set">
-    <div class="obs">
-      <div class="n">01</div>
-      <div>
-        <h3>There is no short form</h3>
-        <p>Every strong logistics brand carries two assets: a full signature for documents and
-        letterhead, and a compact mark for everything else. Marsal has only the first. A profile
-        picture becomes a squeezed wordmark, an app icon is not possible, and there is nothing to
-        stitch onto a uniform, cut into vinyl for a vehicle door, or stamp onto a seal. Below
-        roughly 25 mm wide, it simply stops reading.</p>
+      <div class="obs">
+        <div class="n">01</div>
+        <div>
+          <h3>There is no short form</h3>
+          <p>Every strong logistics brand carries two assets: a full signature for documents and
+          letterhead, and a compact mark for everything else. Marsal has only the first. A profile
+          picture becomes a squeezed wordmark, an app icon is not possible, and there is nothing to
+          stitch onto a uniform, cut into vinyl for a vehicle door, or stamp onto a seal. Below
+          roughly 25 mm wide, it simply stops reading.</p>
+        </div>
       </div>
-    </div>
 
-    <div class="obs">
-      <div class="n">02</div>
-      <div>
-        <h3>The bilingual lockup runs too wide</h3>
-        <p>Placed side by side, the Arabic and English signature becomes long and shallow. In a
-        business card corner, a website navigation bar or a truck panel, the only way to fit it is
-        to scale it down until neither language is legible. The two scripts also carry different
-        optical weights, so one visually dominates the other depending on the size.</p>
+      <div class="obs">
+        <div class="n">02</div>
+        <div>
+          <h3>The bilingual lockup runs too wide</h3>
+          <p>Placed side by side, the Arabic and English signature becomes long and shallow. In a
+          business card corner, a website navigation bar or a truck panel, the only way to fit it is
+          to scale it down until neither language is legible. The two scripts also carry different
+          optical weights, so one visually dominates the other depending on the size.</p>
+        </div>
       </div>
-    </div>
 
-    <div class="obs">
-      <div class="n">03</div>
-      <div>
-        <h3>Collateral is being made one piece at a time</h3>
-        <p>Without an agreed system for colour, type and spacing, every new card, post or document
-        is a fresh set of decisions. It is slower, it costs more over a year, and the drift shows -
-        especially to the enterprise clients and government tenders where visual consistency is
-        read as operational discipline.</p>
+      <div class="obs">
+        <div class="n">03</div>
+        <div>
+          <h3>Collateral is being made one piece at a time</h3>
+          <p>Without an agreed system for colour, type and spacing, every new card, post or document
+          is a fresh set of decisions. It is slower, it costs more over a year, and the drift shows -
+          especially to the enterprise clients and government tenders where visual consistency is
+          read as operational discipline.</p>
+        </div>
       </div>
-    </div>
     </div>
 
   </div>
-  <div class="rf"><span>Miradore Experiences &nbsp;/&nbsp; Riyadh</span><span class="num"></span></div>
+  <div class="rf"><span>Miradore Experiences</span><div class="line"></div><span class="num"></span></div>
 </section>
 
 <!-- ══════════════════ 04 WHAT WE ARE PROPOSING ══════════════════════ -->
 <section class="page">
-  <div class="rh"><img src="assets/miradore-logo.png" alt=""><span>Brand evolution / Marsal</span></div>
+  <div class="rh"><img src="assets/miradore-logo.png" alt=""><div class="line"></div><span>Brand evolution / Marsal</span></div>
   <div class="body-area">
 
-    <div class="sec">
-      <div class="sec-num">02</div>
+    <div class="grid sec">
+      <div><div class="num">02</div></div>
       <div>
         <h2>What we are proposing</h2>
         <p class="kicker">Three moves. Everything else in this document follows from them.</p>
       </div>
     </div>
-    <div class="sec-rule"></div>
+    <div class="route"><i></i><b></b><s></s><u></u></div>
 
-    <div class="ph"><span class="tag">A</span><h3>A logomark drawn out of the logo you already own</h3></div>
-    <p style="max-width:158mm">We do not start with a blank page. We take the existing Marsal logo
-    apart, find the element carrying the most recognition, and develop it into a mark that stands
-    alone. It has to survive four tests before we present it: legible at 16 pixels, readable in a
-    single colour, cuttable in vinyl without detail loss, and distinct from the other logistics
-    marks operating in the Kingdom. You will see three routes; we develop the one you choose.</p>
+    <div class="grid" style="margin-top:7mm">
+      <div class="rail-label">A<br>The mark</div>
+      <div>
+        <h3 style="font-size:10pt;letter-spacing:-.025em;margin-bottom:2.4mm">A logomark drawn out of the logo you already own</h3>
+        <p>We do not start with a blank page. We take the existing Marsal logo apart, find the
+        element carrying the most recognition, and develop it into a mark that stands alone. It has
+        to survive four tests before we present it: legible at 16 pixels, readable in a single
+        colour, cuttable in vinyl without detail loss, and distinct from the other logistics marks
+        operating in the Kingdom.</p>
+        <p><strong>One direction, developed properly</strong> - not a spread of options to choose
+        between. We show it applied to real things, so you are judging a decision rather than a
+        shape on a white page.</p>
 
-    <div style="display:flex;align-items:flex-end;gap:14mm">
-      <div class="scale">
-        <div class="u"><div class="sq" style="width:19mm;height:19mm"></div><div class="lb">512</div></div>
-        <div class="u"><div class="sq" style="width:12mm;height:12mm"></div><div class="lb">128</div></div>
-        <div class="u"><div class="sq" style="width:8mm;height:8mm"></div><div class="lb">64</div></div>
-        <div class="u"><div class="sq" style="width:5mm;height:5mm"></div><div class="lb">32</div></div>
-        <div class="u"><div class="sq" style="width:3mm;height:3mm"></div><div class="lb">16</div></div>
+        <div style="display:flex;align-items:flex-end;gap:9mm;margin-top:5mm">
+          <div class="scale">
+            <div><div class="sq" style="width:17mm;height:17mm"></div><div class="lb">512</div></div>
+            <div><div class="sq" style="width:11mm;height:11mm"></div><div class="lb">128</div></div>
+            <div><div class="sq" style="width:7mm;height:7mm"></div><div class="lb">64</div></div>
+            <div><div class="sq" style="width:4.5mm;height:4.5mm"></div><div class="lb">32</div></div>
+            <div><div class="sq" style="width:2.8mm;height:2.8mm"></div><div class="lb">16</div></div>
+          </div>
+          <p class="small muted" style="max-width:44mm;padding-bottom:5mm">Tested at every size it
+          will actually be used at, not just the size it is drawn at.</p>
+        </div>
       </div>
-      <p class="small muted" style="max-width:52mm;padding-bottom:6mm">The mark is tested at every
-      size it will actually be used at, not just the size it is designed at.</p>
     </div>
 
-    <div class="ph" style="margin-top:7mm"><span class="tag">B</span><h3>One consolidated bilingual signature, in three footprints</h3></div>
-    <p style="max-width:158mm">Arabic and Latin are matched on a shared baseline, with optical
-    weights and heights tuned so neither script overpowers the other. The result is a single
-    signature that holds together at any size, delivered in three configurations - each with a
-    defined minimum size and clear-space rule, so nobody has to guess which version to use.</p>
+    <div class="grid" style="margin-top:8mm">
+      <div class="rail-label">B<br>The signature</div>
+      <div>
+        <h3 style="font-size:10pt;letter-spacing:-.025em;margin-bottom:2.4mm">One consolidated bilingual signature, in three footprints</h3>
+        <p>Arabic and Latin are matched on a shared baseline, with optical weights and heights tuned
+        so neither script overpowers the other. One signature that holds together at any size,
+        delivered in three configurations - each with a defined minimum size and clear-space rule,
+        so nobody has to guess which version to use.</p>
 
-    <div class="locks">
-      <div class="lock">
-        <div class="stage">
-          <div style="display:flex;align-items:center;gap:2.5mm">
-            <div class="mk" style="width:9mm;height:9mm">MARK</div>
-            <div class="rule-v" style="height:8mm"></div>
-            <div>
-              <div class="wm" style="font-size:11pt">MARSAL</div>
-              <div class="wm-ar" style="font-size:9pt;margin-top:1mm">مرسال</div>
+        <div class="locks">
+          <div class="lock">
+            <div class="stage">
+              <div style="display:flex;align-items:center;gap:2.2mm">
+                <div class="mk" style="width:8mm;height:8mm">MARK</div>
+                <div class="rule-v" style="height:7mm"></div>
+                <div>
+                  <div class="wm" style="font-size:10pt">MARSAL</div>
+                  <div class="wm-ar" style="font-size:8pt;margin-top:.9mm">مرسال</div>
+                </div>
+              </div>
             </div>
+            <h4>Horizontal</h4>
+            <p>Primary. Letterhead, website header, vehicle panels.</p>
+            <div class="min">Min. 30 mm</div>
+          </div>
+
+          <div class="lock">
+            <div class="stage">
+              <div style="text-align:center">
+                <div class="mk" style="width:7mm;height:7mm;margin:0 auto 1.8mm">MARK</div>
+                <div class="wm" style="font-size:8.5pt">MARSAL</div>
+                <div class="wm-ar" style="font-size:7pt;margin-top:.7mm">مرسال</div>
+              </div>
+            </div>
+            <h4>Stacked</h4>
+            <p>Secondary. Cards, signage, square formats, uniforms.</p>
+            <div class="min">Min. 18 mm</div>
+          </div>
+
+          <div class="lock">
+            <div class="stage"><div class="mk" style="width:11mm;height:11mm;font-size:4.8pt">MARK</div></div>
+            <h4>Mark only</h4>
+            <p>Tertiary. Profile pictures, favicon, app icon, stamps.</p>
+            <div class="min">Min. 8 mm</div>
           </div>
         </div>
-        <h4>Horizontal</h4>
-        <p>Primary. Letterhead, website header, vehicle panels, email signature.</p>
-        <div class="min">Min. 30 mm</div>
-      </div>
-
-      <div class="lock">
-        <div class="stage">
-          <div style="text-align:center">
-            <div class="mk" style="width:8mm;height:8mm;margin:0 auto 2mm">MARK</div>
-            <div class="wm" style="font-size:9pt">MARSAL</div>
-            <div class="wm-ar" style="font-size:7.5pt;margin-top:.8mm">مرسال</div>
-          </div>
-        </div>
-        <h4>Stacked</h4>
-        <p>Secondary. Business cards, signage, square formats, uniforms.</p>
-        <div class="min">Min. 18 mm</div>
-      </div>
-
-      <div class="lock">
-        <div class="stage">
-          <div class="mk" style="width:12mm;height:12mm;font-size:5pt">MARK</div>
-        </div>
-        <h4>Mark only</h4>
-        <p>Tertiary. Profile pictures, favicon, app icon, stamps, tracking labels.</p>
-        <div class="min">Min. 8 mm</div>
+        <p class="small muted">Indicative construction. The mark itself is Phase 02 work - the
+        placeholder above stands in for it.</p>
       </div>
     </div>
-    <p class="small muted">Indicative construction of the lockup system. The mark itself is developed
-    in Phase 02 once a route is selected - the placeholder above stands in for it.</p>
 
-    <div class="ph" style="margin-top:7mm"><span class="tag">C</span><h3>A system light enough that your team will actually use it</h3></div>
-    <p style="max-width:158mm">Colour, typography, a supporting graphic device and clear placement
-    rules - documented in a guidelines file people can read in fifteen minutes, not a 120-page
-    manual that gets opened once. Everything ships with editable working files, so your team can
-    produce day-to-day material without coming back to us for every post.</p>
+    <div class="grid" style="margin-top:8mm">
+      <div class="rail-label">C<br>The system</div>
+      <div>
+        <h3 style="font-size:10pt;letter-spacing:-.025em;margin-bottom:2.4mm">A system light enough that your team will actually use it</h3>
+        <p>Colour, typography, a supporting graphic device and clear placement rules - documented in
+        a guidelines file people can read in fifteen minutes, not a 120-page manual that gets opened
+        once. Everything ships with editable working files, so your team can produce day-to-day
+        material without coming back to us for every post.</p>
+      </div>
+    </div>
 
   </div>
-  <div class="rf"><span>Miradore Experiences &nbsp;/&nbsp; Riyadh</span><span class="num"></span></div>
+  <div class="rf"><span>Miradore Experiences</span><div class="line"></div><span class="num"></span></div>
 </section>
 
 <!-- ══════════════════ 05 SCOPE (1) ══════════════════════════════════ -->
 <section class="page">
-  <div class="rh"><img src="assets/miradore-logo.png" alt=""><span>Brand evolution / Marsal</span></div>
+  <div class="rh"><img src="assets/miradore-logo.png" alt=""><div class="line"></div><span>Brand evolution / Marsal</span></div>
   <div class="body-area">
 
-    <div class="sec">
-      <div class="sec-num">03</div>
+    <div class="grid sec">
+      <div><div class="num">03</div></div>
       <div>
-        <h2>Scope of work, phase by phase</h2>
-        <p class="kicker">Seven phases, all delivered inside the same nine-day window.</p>
+        <h2>Scope of work,<br>phase by phase</h2>
+        <p class="kicker">Seven phases, all delivered inside the same window.</p>
       </div>
     </div>
-    <div class="sec-rule"></div>
+    <div class="route"><i></i><b></b><s></s><u></u></div>
 
-    <div class="ph"><span class="tag">Phase 01</span><h3>Read and audit</h3><span class="days">Day 1 - 2</span></div>
-    <ul class="d">
-      <li>Review of the existing logo files, current collateral, and how the mark is being applied today</li>
-      <li>Benchmark of eight to ten logistics identities operating in KSA and the wider Gulf</li>
-      <li>A 60 to 90 minute working session with your team - what the brand needs to carry, and where it keeps failing</li>
-      <li>A one-page direction note, agreed before any design begins</li>
-    </ul>
+    <div style="margin-top:7mm">
+      <div class="ph"><span class="tag">Phase 01</span><h3>Read and audit</h3><span class="days">10 - 11 Aug</span></div>
+      <ul class="d">
+        <li>Review of the existing logo files, current collateral, and how the mark is being applied today</li>
+        <li>Benchmark of eight to ten logistics identities operating in KSA and the wider Gulf</li>
+        <li>A working session with your team - what the brand needs to carry, and where it keeps failing</li>
+        <li>A one-page direction note, agreed before any design begins</li>
+      </ul>
 
-    <div class="ph"><span class="tag">Phase 02</span><h3>Logomark and bilingual signature</h3><span class="days">Day 2 - 5</span></div>
-    <ul class="d">
-      <li>Three logomark routes, each derived from the existing Marsal logo</li>
-      <li>One selected route developed in full: construction grid, proportions, clear space, minimum sizes</li>
-      <li>Consolidated bilingual lockups - horizontal, stacked and mark-only</li>
-      <li>One-colour, reversed, mono and vinyl-cut versions for production</li>
-      <li>Icon renderings at 16, 32, 64, 128 and 512 px, plus favicon and app-icon files</li>
-      <li>Master artwork delivered as AI, EPS, SVG, PDF and PNG</li>
-    </ul>
+      <div class="ph"><span class="tag">Phase 02</span><h3>Logomark and bilingual signature</h3><span class="days">11 - 17 Aug</span></div>
+      <ul class="d">
+        <li>The logomark, developed from the existing Marsal logo and presented in application</li>
+        <li>Full construction: proportion grid, clear space, minimum sizes</li>
+        <li>Consolidated bilingual lockups - horizontal, stacked and mark-only</li>
+        <li>One-colour, reversed, mono and vinyl-cut versions for production</li>
+        <li>Icon renderings at 16, 32, 64, 128 and 512 px, plus favicon and app-icon files</li>
+        <li>Master artwork delivered as AI, EPS, SVG, PDF and PNG</li>
+      </ul>
 
-    <div class="ph"><span class="tag">Phase 03</span><h3>Core brand system</h3><span class="days">Day 5 - 6</span></div>
-    <ul class="d">
-      <li>Colour palette with print (CMYK, Pantone), screen (RGB, HEX) and fleet references (vinyl and paint codes)</li>
-      <li>Typography: a matched Arabic and Latin pairing with weights, hierarchy and usage rules</li>
-      <li>One supporting graphic device drawn from the mark, for backgrounds, edges and pattern</li>
-      <li>Iconography direction and photography art direction for fleet, facility and team imagery</li>
-    </ul>
+      <div class="ph"><span class="tag">Phase 03</span><h3>Core brand system</h3><span class="days">17 - 18 Aug</span></div>
+      <ul class="d">
+        <li>Colour palette with print (CMYK, Pantone), screen (RGB, HEX) and fleet references (vinyl and paint codes)</li>
+        <li>Typography: a matched Arabic and Latin pairing with weights, hierarchy and usage rules</li>
+        <li>One supporting graphic device drawn from the mark, for backgrounds, edges and pattern</li>
+        <li>Iconography direction and photography art direction for fleet, facility and team imagery</li>
+      </ul>
 
-    <div class="ph"><span class="tag">Phase 04</span><h3>Print and corporate collateral</h3><span class="days">Day 5 - 8</span></div>
-    <ul class="d">
-      <li>Business card, bilingual, both faces, print-ready with bleed and crop marks</li>
-      <li>Letterhead and continuation sheet - print version plus an editable Word template for daily use</li>
-      <li>Envelopes, DL and A4, and a document folder</li>
-      <li>HTML email signature, bilingual, tested in Outlook and Gmail</li>
-      <li>Operational document set: quotation, invoice, delivery note and waybill layouts</li>
-      <li>Staff ID card, lanyard and uniform placement guide</li>
-      <li>Fleet identity art direction - truck panel, van and container door placement</li>
-    </ul>
+      <div class="ph"><span class="tag">Phase 04</span><h3>Print and corporate collateral</h3><span class="days">18 - 20 Aug</span></div>
+      <ul class="d">
+        <li>Business card, bilingual, both faces, print-ready with bleed and crop marks</li>
+        <li>Letterhead and continuation sheet - print version plus an editable Word template for daily use</li>
+        <li>Envelopes, DL and A4, and a document folder</li>
+        <li>HTML email signature, bilingual, tested in Outlook and Gmail</li>
+        <li>Operational document set: quotation, invoice, delivery note and waybill layouts</li>
+        <li>Staff ID card, lanyard and uniform placement guide</li>
+        <li>Fleet identity art direction - truck panel, van and container door placement</li>
+      </ul>
 
-    <div class="ph"><span class="tag">Phase 05</span><h3>Digital and social</h3><span class="days">Day 6 - 8</span></div>
-    <ul class="d">
-      <li>Profile picture set, correctly cropped and sized for LinkedIn, Instagram, X, WhatsApp Business and Google Business</li>
-      <li>Cover and banner artwork for each platform</li>
-      <li>Nine social post masters - announcement, service, milestone, hiring, client quote, route and network, seasonal greeting, event, and a general-purpose layout</li>
-      <li>Each master supplied in feed and story format, bilingual, as editable files</li>
-      <li>A 16:9 presentation template, twelve master slides, for tenders and client meetings</li>
-    </ul>
+      <div class="ph"><span class="tag">Phase 05</span><h3>Digital and social</h3><span class="days">19 - 23 Aug</span></div>
+      <ul class="d">
+        <li>Profile picture set, correctly cropped and sized for LinkedIn, Instagram, X, WhatsApp Business and Google Business</li>
+        <li>Cover and banner artwork for each platform</li>
+        <li>Nine social post masters - announcement, service, milestone, hiring, client quote, route and network, seasonal greeting, event, and a general-purpose layout</li>
+        <li>Each master supplied in feed and story format, bilingual, as editable files</li>
+        <li>A 16:9 presentation template, twelve master slides, for tenders and client meetings</li>
+      </ul>
+    </div>
 
   </div>
-  <div class="rf"><span>Miradore Experiences &nbsp;/&nbsp; Riyadh</span><span class="num"></span></div>
+  <div class="rf"><span>Miradore Experiences</span><div class="line"></div><span class="num"></span></div>
 </section>
 
 <!-- ══════════════════ 06 SCOPE (2) + HANDOVER COUNT ═════════════════ -->
 <section class="page">
-  <div class="rh"><img src="assets/miradore-logo.png" alt=""><span>Brand evolution / Marsal</span></div>
+  <div class="rh"><img src="assets/miradore-logo.png" alt=""><div class="line"></div><span>Brand evolution / Marsal</span></div>
   <div class="body-area">
 
-    <div class="ph"><span class="tag">Phase 06</span><h3>Website design</h3><span class="days">Day 6 - 8</span></div>
+    <div class="ph"><span class="tag">Phase 06</span><h3>Website design</h3><span class="days">19 - 23 Aug</span></div>
     <ul class="d">
       <li>Sitemap and wireframes for five key pages: Home, Services, Fleet and Network, About, Contact and Quote Request</li>
       <li>Full visual design of the Home page and one inner page, desktop and mobile</li>
@@ -697,27 +664,29 @@ tbody tr.vat td{ border-bottom:0; padding-top:1mm; font-size:8pt; color:var(--gr
       <li>Developer-ready handoff in Figma, with specs and exported assets</li>
     </ul>
 
-    <div class="ph"><span class="tag">Phase 07</span><h3>Guidelines and handover</h3><span class="days">Day 8 - 9</span></div>
+    <div class="ph"><span class="tag">Phase 07</span><h3>Guidelines and handover</h3><span class="days">23 - 24 Aug</span></div>
     <ul class="d">
       <li>Brand guidelines document covering the mark, lockups, colour, type, collateral and digital application</li>
       <li>Organised master file library, named and structured so files can be found without us</li>
-      <li>A 30-minute handover walkthrough with your team</li>
+      <li>A handover walkthrough with your team</li>
       <li>14 days of post-handover support for file and format questions</li>
     </ul>
 
-    <div class="note" style="margin-top:6mm;padding-top:5mm;border-top:.3pt solid var(--hair)">
-      <div class="k">Revisions</div>
-      <div class="v">Two rounds of consolidated feedback are included at each review point. Further
-      rounds, or a change of direction after a route has been signed off, are quoted separately
-      before any work begins.</div>
+    <div class="notes" style="margin-top:5mm">
+      <div class="note">
+        <div class="k">Revisions</div>
+        <div class="v">Two rounds of consolidated feedback are included at each review point. Further
+        rounds, or a change of direction after the mark has been signed off, are quoted separately
+        before any work begins.</div>
+      </div>
     </div>
 
-    <h2 style="font-size:13pt;margin-top:11mm;letter-spacing:-.02em">What lands in your hands on 24 August</h2>
+    <h2 style="font-size:13pt;margin-top:10mm;letter-spacing:-.03em">What lands in your hands on 24 August</h2>
     <p class="small" style="margin-top:1.5mm">Counted out, so the scope above is easy to check against what actually arrives.</p>
 
     <div class="tiles">
       <div class="tile"><div class="n">01</div><p>logomark, developed and production ready</p></div>
-      <div class="tile"><div class="n">03</div><p>lockups, plus reversed and one-colour variants</p></div>
+      <div class="tile"><div class="n">03</div><p>lockup footprints, plus reversed and one-colour</p></div>
       <div class="tile"><div class="n">07</div><p>print and corporate collateral items</p></div>
       <div class="tile"><div class="n">05</div><p>profile picture sets, sized per platform</p></div>
       <div class="tile"><div class="n">09</div><p>social post masters, in feed and story</p></div>
@@ -730,31 +699,37 @@ tbody tr.vat td{ border-bottom:0; padding-top:1mm; font-size:8pt; color:var(--gr
     working file and a ready-to-use export, in the formats your printers and developers will ask for.</p>
 
   </div>
-  <div class="rf"><span>Miradore Experiences &nbsp;/&nbsp; Riyadh</span><span class="num"></span></div>
+  <div class="rf"><span>Miradore Experiences</span><div class="line"></div><span class="num"></span></div>
 </section>
 
 <!-- ══════════════════ 07 SCHEDULE ═══════════════════════════════════ -->
 <section class="page">
-  <div class="rh"><img src="assets/miradore-logo.png" alt=""><span>Brand evolution / Marsal</span></div>
+  <div class="rh"><img src="assets/miradore-logo.png" alt=""><div class="line"></div><span>Brand evolution / Marsal</span></div>
   <div class="body-area">
 
-    <div class="sec">
-      <div class="sec-num">04</div>
+    <div class="grid sec">
+      <div><div class="num">04</div></div>
       <div>
         <h2>Delivery schedule</h2>
-        <p class="kicker">Kick-off Sunday 16 August. Final handover Monday 24 August 2026.</p>
+        <p class="kicker">Kick-off Monday 10 August. Final handover Monday 24 August 2026.</p>
       </div>
     </div>
-    <div class="sec-rule"></div>
+    <div class="route"><i></i><b></b><s></s><u></u></div>
 
-    <p style="max-width:158mm">The plan runs nine consecutive days. Phases overlap deliberately -
-    collateral, social and website design all begin from the same approved signature, so they
-    progress in parallel rather than in a queue. Your input is only needed at the two review
+    <p class="main-only" style="margin-top:6mm">Eleven working days across two weeks. Phases overlap
+    deliberately - collateral, social and website design all begin from the same approved signature,
+    so they progress in parallel rather than in a queue. Your input is only needed at the two review
     points marked in orange.</p>
 
     <div class="gantt">
       <div class="g-head">
-        <div class="lb">August 2026</div>
+        <div class="lb">Aug 2026</div>
+        <div class="d"><div class="w">Mon</div><div class="n">10</div></div>
+        <div class="d"><div class="w">Tue</div><div class="n">11</div></div>
+        <div class="d"><div class="w">Wed</div><div class="n">12</div></div>
+        <div class="d"><div class="w">Thu</div><div class="n">13</div></div>
+        <div class="d we"><div class="w">Fri</div><div class="n">14</div></div>
+        <div class="d we"><div class="w">Sat</div><div class="n">15</div></div>
         <div class="d"><div class="w">Sun</div><div class="n">16</div></div>
         <div class="d"><div class="w">Mon</div><div class="n">17</div></div>
         <div class="d"><div class="w">Tue</div><div class="n">18</div></div>
@@ -768,32 +743,35 @@ tbody tr.vat td{ border-bottom:0; padding-top:1mm; font-size:8pt; color:var(--gr
 
       <div class="g-body">
         <div class="g-grid">
+          <div></div><div></div><div></div><div></div>
+          <div class="we"></div><div class="we"></div>
           <div></div><div></div><div></div><div></div><div></div>
-          <div class="we"></div><div class="we"></div><div></div><div></div>
+          <div class="we"></div><div class="we"></div>
+          <div></div><div></div>
         </div>
 
         <div class="g-row"><span class="lb">Kick-off, audit and direction</span>
           <div class="bar" style="grid-column:2 / span 2"></div></div>
-        <div class="g-row"><span class="lb">Logomark routes &nbsp;x3</span>
-          <div class="bar" style="grid-column:3 / span 2"></div></div>
-        <div class="g-row gate"><span class="lb">Review 01 &nbsp;/&nbsp; route selection</span>
-          <div class="bar gate" style="grid-column:5 / span 1"><i class="dia"></i></div></div>
-        <div class="g-row"><span class="lb">Refinement and bilingual signature</span>
-          <div class="bar" style="grid-column:5 / span 2"></div></div>
+        <div class="g-row"><span class="lb">Logomark development</span>
+          <div class="bar" style="grid-column:3 / span 3"></div></div>
+        <div class="g-row gate"><span class="lb">Review 01 &nbsp;/&nbsp; the mark, in application</span>
+          <div class="bar gate" style="grid-column:8 / span 1"><i class="dia"></i></div></div>
+        <div class="g-row"><span class="lb">Bilingual signature and construction</span>
+          <div class="bar" style="grid-column:8 / span 2"></div></div>
         <div class="g-row"><span class="lb">Colour, typography, core system</span>
-          <div class="bar" style="grid-column:6 / span 2"></div></div>
-        <div class="g-row"><span class="lb">Print and corporate collateral</span>
-          <div class="bar" style="grid-column:6 / span 3"></div></div>
-        <div class="g-row"><span class="lb">Digital, social and profile kit</span>
-          <div class="bar" style="grid-column:7 / span 3"></div></div>
-        <div class="g-row"><span class="lb">Website design and UI kit</span>
-          <div class="bar" style="grid-column:7 / span 3"></div></div>
-        <div class="g-row gate"><span class="lb">Review 02 &nbsp;/&nbsp; full system</span>
-          <div class="bar gate" style="grid-column:9 / span 1"><i class="dia"></i></div></div>
-        <div class="g-row"><span class="lb">Guidelines, packaging and QA</span>
           <div class="bar" style="grid-column:9 / span 2"></div></div>
+        <div class="g-row"><span class="lb">Print and corporate collateral</span>
+          <div class="bar" style="grid-column:10 / span 3"></div></div>
+        <div class="g-row"><span class="lb">Digital, social and profile kit</span>
+          <div class="bar" style="grid-column:11 / span 5"></div></div>
+        <div class="g-row"><span class="lb">Website design and UI kit</span>
+          <div class="bar" style="grid-column:11 / span 5"></div></div>
+        <div class="g-row gate"><span class="lb">Review 02 &nbsp;/&nbsp; full system</span>
+          <div class="bar gate" style="grid-column:15 / span 1"><i class="dia"></i></div></div>
+        <div class="g-row"><span class="lb">Guidelines, packaging and QA</span>
+          <div class="bar" style="grid-column:15 / span 2"></div></div>
         <div class="g-row final"><span class="lb">Final handover</span>
-          <div class="bar final" style="grid-column:10 / span 1"></div></div>
+          <div class="bar final" style="grid-column:16 / span 1"></div></div>
       </div>
 
       <div class="legend">
@@ -806,9 +784,9 @@ tbody tr.vat td{ border-bottom:0; padding-top:1mm; font-size:8pt; color:var(--gr
 
     <div class="three" style="margin-top:9mm">
       <div class="c">
-        <div class="k">Wed 19 Aug</div>
+        <div class="k">Sun 16 Aug</div>
         <h4>Review 01</h4>
-        <p>Three logomark routes presented. You select one direction.</p>
+        <p>The mark presented in application - on a card, a truck panel, a profile picture. You approve, or we adjust.</p>
       </div>
       <div class="c">
         <div class="k">Sun 23 Aug</div>
@@ -818,143 +796,145 @@ tbody tr.vat td{ border-bottom:0; padding-top:1mm; font-size:8pt; color:var(--gr
       <div class="c teal">
         <div class="k">Mon 24 Aug</div>
         <h4>Handover</h4>
-        <p>Every file delivered and organised, with a 30-minute walkthrough.</p>
+        <p>Every file delivered and organised, with a walkthrough for your team.</p>
       </div>
     </div>
 
     <div class="notes">
       <div class="note">
-        <div class="k">On the weekend</div>
-        <div class="v">Friday 21 and Saturday 22 August fall inside the window. Our studio keeps a
-        reduced working pass across both days so the schedule holds - no input is needed from your
-        side on those dates.</div>
+        <div class="k">Weekends</div>
+        <div class="v">Two Kingdom weekends fall inside the window - 14 to 15 and 21 to 22 August.
+        Our studio keeps a reduced working pass across them so the schedule holds, and no input is
+        needed from your side on those dates.</div>
       </div>
       <div class="note">
-        <div class="k">The one dependency</div>
+        <div class="k">Dependency</div>
         <div class="v">Phase 02 cannot start until the existing logo is supplied in vector format
         and a single approver is named. Everything downstream moves with that date.</div>
       </div>
     </div>
 
   </div>
-  <div class="rf"><span>Miradore Experiences &nbsp;/&nbsp; Riyadh</span><span class="num"></span></div>
+  <div class="rf"><span>Miradore Experiences</span><div class="line"></div><span class="num"></span></div>
 </section>
 
 <!-- ══════════════════ 08 INVESTMENT ═════════════════════════════════ -->
 <section class="page">
-  <div class="rh"><img src="assets/miradore-logo.png" alt=""><span>Brand evolution / Marsal</span></div>
+  <div class="rh"><img src="assets/miradore-logo.png" alt=""><div class="line"></div><span>Brand evolution / Marsal</span></div>
   <div class="body-area">
 
-    <div class="sec">
-      <div class="sec-num">05</div>
+    <div class="grid sec">
+      <div><div class="num">05</div></div>
       <div>
         <h2>Investment and terms</h2>
         <p class="kicker">One fee, broken down so you can see where the effort sits.</p>
       </div>
     </div>
-    <div class="sec-rule"></div>
+    <div class="route"><i></i><b></b><s></s><u></u></div>
 
-    <table>
-      <thead><tr><th></th><th>Phase</th><th class="r">SAR</th></tr></thead>
-      <tbody>
-        <tr><td class="n">01</td><td>Read and audit</td><td class="r">1,500</td></tr>
-        <tr><td class="n">02</td><td>Logomark and bilingual signature</td><td class="r">7,000</td></tr>
-        <tr><td class="n">03</td><td>Core brand system</td><td class="r">3,000</td></tr>
-        <tr><td class="n">04</td><td>Print and corporate collateral</td><td class="r">4,000</td></tr>
-        <tr><td class="n">05</td><td>Digital and social</td><td class="r">3,500</td></tr>
-        <tr><td class="n">06</td><td>Website design</td><td class="r">3,500</td></tr>
-        <tr><td class="n">07</td><td>Guidelines and handover</td><td class="r">1,500</td></tr>
-        <tr class="tot"><td></td><td>Total professional fee</td><td class="r">24,000</td></tr>
-        <tr class="vat"><td></td><td>VAT at 15%, as required in the Kingdom</td><td class="r">3,600</td></tr>
-      </tbody>
-    </table>
+    <div style="margin-top:7mm">
+      <table>
+        <thead><tr><th></th><th>Phase</th><th class="r">SAR</th></tr></thead>
+        <tbody>
+          <tr><td class="n">01</td><td>Read and audit</td><td class="r">1,500</td></tr>
+          <tr><td class="n">02</td><td>Logomark and bilingual signature</td><td class="r">7,000</td></tr>
+          <tr><td class="n">03</td><td>Core brand system</td><td class="r">3,000</td></tr>
+          <tr><td class="n">04</td><td>Print and corporate collateral</td><td class="r">4,000</td></tr>
+          <tr><td class="n">05</td><td>Digital and social</td><td class="r">3,500</td></tr>
+          <tr><td class="n">06</td><td>Website design</td><td class="r">3,500</td></tr>
+          <tr><td class="n">07</td><td>Guidelines and handover</td><td class="r">1,500</td></tr>
+        </tbody>
+      </table>
 
-    <div class="grand">
-      <div class="l">Total payable, inclusive of VAT</div>
-      <div class="v">SAR 27,600</div>
-    </div>
+      <div class="grand">
+        <div class="l">Total</div>
+        <div class="v">SAR 24,000</div>
+      </div>
 
-    <div class="cols2">
-      <div>
-        <h4>Included in the fee</h4>
-        <ul>
-          <li>All design, artwork and file preparation across the seven phases</li>
-          <li>Two rounds of consolidated revisions at each review point</li>
-          <li>Full ownership of the final approved artwork, transferred to Marsal on settlement</li>
-          <li>Editable working files and an organised master library</li>
-          <li>14 days of support after handover</li>
-        </ul>
+      <div class="cols2">
+        <div>
+          <h4>Included in the fee</h4>
+          <ul>
+            <li>All design, artwork and file preparation across the seven phases</li>
+            <li>Two rounds of consolidated revisions at each review point</li>
+            <li>Full ownership of the final approved artwork, transferred to Marsal on settlement</li>
+            <li>Editable working files and an organised master library</li>
+            <li>14 days of support after handover</li>
+          </ul>
+        </div>
+        <div class="no">
+          <h4>Not included</h4>
+          <ul>
+            <li>Printing and physical production of any item</li>
+            <li>Website development and hosting - design only at this stage</li>
+            <li>Photography and video production, should new imagery be required</li>
+            <li>Third-party font licences, if a commercial typeface is selected</li>
+            <li>Vehicle wrap production and fitting</li>
+            <li>Trademark filing and registration</li>
+          </ul>
+        </div>
       </div>
-      <div class="no">
-        <h4>Not included</h4>
-        <ul>
-          <li>Printing and physical production of any item</li>
-          <li>Website development and hosting - design only at this stage</li>
-          <li>Photography and video production, should new imagery be required</li>
-          <li>Third-party font licences, if a commercial typeface is selected</li>
-          <li>Vehicle wrap production and fitting</li>
-          <li>Trademark filing and registration</li>
-        </ul>
-      </div>
-    </div>
 
-    <div class="notes">
-      <div class="note">
-        <div class="k">Payment</div>
-        <div class="v">50% on written confirmation to proceed, 50% on final handover. Bank transfer
-        to Miradore Experiences, Riyadh. A tax invoice is issued against each stage.</div>
-      </div>
-      <div class="note">
-        <div class="k">Validity</div>
-        <div class="v">This proposal holds for 30 days from 14 August 2026. The 24 August delivery
-        date assumes confirmation by Saturday 15 August.</div>
-      </div>
-      <div class="note">
-        <div class="k">If it needs to flex</div>
-        <div class="v">Website design is the one block that can be deferred without weakening
-        anything else - the mark, the bilingual signature and the collateral all stand on their own,
-        and the fee reduces by SAR 3,500 if you would rather take it up later. Equally, if you want
-        fleet livery production artwork or a full tender document set added, say so and we will
-        price it against the same schedule.</div>
+      <div class="notes">
+        <div class="note">
+          <div class="k">Payment</div>
+          <div class="v">50% on written confirmation to proceed, 50% on final handover. Bank transfer
+          to Miradore Experiences, Riyadh.</div>
+        </div>
+        <div class="note">
+          <div class="k">Validity</div>
+          <div class="v">This proposal holds for 30 days from 6 August 2026. The 24 August delivery
+          date assumes confirmation by Sunday 9 August.</div>
+        </div>
+        <div class="note">
+          <div class="k">If it flexes</div>
+          <div class="v">Website design is the one block that can be deferred without weakening
+          anything else - the mark, the bilingual signature and the collateral all stand on their
+          own, and the fee reduces by SAR 3,500 if you would rather take it up later. Equally, if you
+          want fleet livery production artwork or a full tender document set added, say so and we
+          will price it against the same schedule.</div>
+        </div>
       </div>
     </div>
 
   </div>
-  <div class="rf"><span>Miradore Experiences &nbsp;/&nbsp; Riyadh</span><span class="num"></span></div>
+  <div class="rf"><span>Miradore Experiences</span><div class="line"></div><span class="num"></span></div>
 </section>
 
 <!-- ══════════════════ 09 WHAT WE NEED ═══════════════════════════════ -->
 <section class="page">
-  <div class="rh"><img src="assets/miradore-logo.png" alt=""><span>Brand evolution / Marsal</span></div>
+  <div class="rh"><img src="assets/miradore-logo.png" alt=""><div class="line"></div><span>Brand evolution / Marsal</span></div>
   <div class="body-area">
 
-    <div class="sec">
-      <div class="sec-num">06</div>
+    <div class="grid sec">
+      <div><div class="num">06</div></div>
       <div>
-        <h2>What we need from Marsal</h2>
+        <h2>What we need<br>from Marsal</h2>
         <p class="kicker">Five things. Nothing that should take more than an hour to gather.</p>
       </div>
     </div>
-    <div class="sec-rule"></div>
+    <div class="route"><i></i><b></b><s></s><u></u></div>
 
-    <ul class="d wide">
+    <ul class="d wide main-only" style="margin-top:7mm">
       <li>The existing logo in vector format - AI, EPS or SVG. A PNG or JPG will not carry us through print or vehicle production.</li>
-      <li>One named approver. Nine days does not survive design by committee, and this is the single biggest risk to the date.</li>
+      <li>One named approver. This schedule does not survive design by committee, and it is the single biggest risk to the date.</li>
       <li>Your Arabic legal name exactly as registered, plus CR number, VAT number and the address block for stationery.</li>
       <li>Contact details for cards and email signatures - names, titles in both languages, numbers.</li>
       <li>Two or three photographs of the current fleet and facility, so the art direction is built on what Marsal actually looks like.</li>
     </ul>
 
-    <div style="margin-top:8mm;padding-top:6mm;border-top:.3pt solid var(--hair)">
-      <h2 style="font-size:12pt;letter-spacing:-.02em;margin-bottom:2.5mm">How we work through it</h2>
-      <p style="max-width:158mm">You will hear from us at two points, not ten. The first is the
-      logomark route presentation, where you pick a direction. The second is the full system review,
-      where you see everything applied together - card, letterhead, social, website - before we
-      finalise. Between those points we work, and we do not send fragments for reaction. It keeps
-      the decisions clean, and it keeps the date.</p>
+    <div class="grid" style="margin-top:9mm;padding-top:6mm;border-top:.3pt solid var(--hair)">
+      <div class="rail-label">How it<br>runs</div>
+      <div>
+        <p>You will hear from us at two points, not ten. The first is the mark, shown in application,
+        where you approve a direction. The second is the full system review, where you see everything
+        together - card, letterhead, social, website - before we finalise. Between those points we
+        work, and we do not send fragments for reaction. It keeps the decisions clean, and it keeps
+        the date.</p>
+      </div>
     </div>
 
-    <div class="signbox">
+    <div class="signbox main-only">
       <div class="k">Confirmation to proceed</div>
       <p>Signing below confirms the scope, fee and schedule set out in this document, and authorises
       Miradore Experiences to begin work.</p>
@@ -965,17 +945,18 @@ tbody tr.vat td{ border-bottom:0; padding-top:1mm; font-size:8pt; color:var(--gr
       </div>
     </div>
 
-    <p style="margin-top:7mm;max-width:158mm">Any questions before you sign, call us. We would much
+    <p class="main-only" style="margin-top:6mm">Any questions before you sign, call us. We would much
     rather talk it through than have you agree to something on paper that does not match what you
     pictured.</p>
 
     <div class="endmark">
+      <div class="route" style="margin-bottom:5mm"><i></i><b></b><s></s><u></u></div>
       <div class="l">Miradore Experiences</div>
-      <div class="s">Riyadh, Kingdom of Saudi Arabia<br>hello@miradore.co &nbsp;/&nbsp; www.miradore.co</div>
+      <div class="s">Riyadh, Kingdom of Saudi Arabia &nbsp;/&nbsp; hello@miradore.co &nbsp;/&nbsp; miradore.co</div>
     </div>
 
   </div>
-  <div class="rf"><span>Miradore Experiences &nbsp;/&nbsp; Riyadh</span><span class="num"></span></div>
+  <div class="rf"><span>Miradore Experiences</span><div class="line"></div><span class="num"></span></div>
 </section>
 
 </body>
