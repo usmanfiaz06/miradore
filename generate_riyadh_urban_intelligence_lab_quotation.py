@@ -9,6 +9,9 @@ from fpdf import FPDF
 import csv
 import os
 
+CLIENT_CONTACT = "Anarah Dhaka"
+CLIENT_ORG = "atomcamp Arabia"
+
 PAX_CATERING = 90
 CATERING_RATE = 210            # SAR per person per day (client supplied, no uplift)
 VAT_RATE = 0.15
@@ -131,37 +134,28 @@ class QuotationPDF(FPDF):
                   align="C", new_x="LMARGIN", new_y="NEXT")
         self.accent_line()
 
-    def add_info_block(self):
-        y = self.get_y()
+    def _info_column(self, x, y, width, label, lines, align="L"):
+        self.set_xy(x, y)
         self.set_font("Helvetica", "B", 8)
         self.set_text_color(*self.TEAL)
-        self.cell(140, 5, "EVENT DETAILS:", new_x="LMARGIN", new_y="NEXT")
-        self.set_font("Helvetica", "", 8)
-        self.set_text_color(*self.DARK)
-        for line in [
+        self.cell(width, 5, label, align=align)
+        for i, line in enumerate(lines):
+            self.set_xy(x, y + 5 + i * 4.6)
+            self.set_font("Helvetica", "", 8)
+            self.set_text_color(*self.DARK)
+            self.cell(width, 4.6, line, align=align)
+
+    def add_info_block(self):
+        y = self.get_y()
+        self._info_column(10, y, 78, "TO:", [CLIENT_CONTACT, CLIENT_ORG])
+        self._info_column(92, y, 88, "EVENT DETAILS:", [
             "Event: Riyadh Urban Intelligence Lab",
             "Venue: Misk - Riyadh, Kingdom of Saudi Arabia",
             "Dates: 27 - 28 September 2026 (2 Days)",
             "Guest Capacity: Up to 100 Pax  |  Catering for 90 Pax",
-        ]:
-            self.cell(140, 4.6, line, new_x="LMARGIN", new_y="NEXT")
-
-        self.set_xy(180, y)
-        self.set_font("Helvetica", "B", 8)
-        self.set_text_color(*self.TEAL)
-        self.cell(107, 5, "FROM:", align="R", new_x="LMARGIN", new_y="NEXT")
-        self.set_xy(180, y + 5)
-        self.set_font("Helvetica", "", 8)
-        self.set_text_color(*self.DARK)
-        self.cell(107, 4.6, "Miradore Experiences, Riyadh", align="R", new_x="LMARGIN", new_y="NEXT")
-        self.set_xy(180, y + 12)
-        self.set_font("Helvetica", "B", 8)
-        self.set_text_color(*self.TEAL)
-        self.cell(107, 5, "QUOTATION DATE:", align="R", new_x="LMARGIN", new_y="NEXT")
-        self.set_xy(180, y + 17)
-        self.set_font("Helvetica", "", 8)
-        self.set_text_color(*self.DARK)
-        self.cell(107, 4.6, "15 August 2026", align="R", new_x="LMARGIN", new_y="NEXT")
+        ])
+        self._info_column(182, y, 105, "FROM:", ["Miradore Experiences, Riyadh"], align="R")
+        self._info_column(182, y + 12, 105, "QUOTATION DATE:", ["15 August 2026"], align="R")
         self.set_y(y + 24)
 
     def table_header(self):
@@ -393,6 +387,9 @@ def generate_csv(rows, totals):
         w.writerow(blank)
         w.writerow(["", "DETAILED BOQ - QUOTATION"])
         w.writerow(["", "RIYADH URBAN INTELLIGENCE LAB - 2-DAY EVENT SETUP"])
+        w.writerow(blank)
+        w.writerow(["", f"TO: {CLIENT_CONTACT}"])
+        w.writerow(["", f"CLIENT: {CLIENT_ORG}"])
         w.writerow(blank)
         w.writerow(["", "EVENT: Riyadh Urban Intelligence Lab"])
         w.writerow(["", "VENUE: Misk - Riyadh, Kingdom of Saudi Arabia"])
