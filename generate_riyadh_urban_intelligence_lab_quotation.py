@@ -345,17 +345,14 @@ def generate_pdf(rows, totals):
     pdf.set_text_color(*pdf.GRAY)
     for note in [
         "1.  All prices are in Saudi Riyals (SAR) and are quoted in whole riyals. VAT is 15%.",
-        "2.  Equipment rates reflect a 3% uplift on the supplied base BOQ rates, rounded to whole",
-        "     riyals (3.08% overall).",
-        "3.  Day 2 is charged at 50% of Day 1 for all equipment except Photography & Videography.",
-        "4.  Catering is charged at 210 SAR per person per day for 90 pax and carries no Day 2",
-        "     discount, as it is consumed in full on both days. This rate is quoted as supplied and",
-        "     has not been uplifted by 3%.",
-        "5.  Sound is quoted as Option A (Normal Sound System). A line array system can be quoted",
+        "2.  Day 2 is charged at 50% of Day 1 for all equipment except Photography & Videography.",
+        "3.  Catering is charged at 210 SAR per person per day for 90 pax and carries no Day 2",
+        "     discount, as it is consumed in full on both days.",
+        "4.  Sound is quoted as Option A (Normal Sound System). A line array system can be quoted",
         "     as an alternative on request.",
-        "6.  Venue hire, power supply and permits at Misk are assumed to be provided by the client.",
-        "7.  Any additional scope beyond this BOQ will be quoted separately.",
-        "8.  This quotation is valid for 30 days from the date of issue.",
+        "5.  Venue hire, power supply and permits at Misk are assumed to be provided by the client.",
+        "6.  Any additional scope beyond this BOQ will be quoted separately.",
+        "7.  This quotation is valid for 30 days from the date of issue.",
     ]:
         pdf.cell(150, 4, note, new_x="LMARGIN", new_y="NEXT")
 
@@ -444,15 +441,12 @@ def generate_csv(rows, totals):
         w.writerow(["", "NOTES"])
         for note in [
             "1. All prices are in Saudi Riyals (SAR), quoted in whole riyals. VAT is 15%.",
-            "2. Equipment rates reflect a 3% uplift on the supplied base BOQ rates, rounded to "
-            "whole riyals (3.08% overall).",
-            "3. Day 2 is charged at 50% of Day 1 for all equipment except Photography & Videography.",
-            "4. Catering is 210 SAR per person per day for 90 pax, no Day 2 discount, quoted as "
-            "supplied without the 3% uplift.",
-            "5. Sound is quoted as Option A (Normal Sound System); line array available on request.",
-            "6. Venue hire, power supply and permits at Misk assumed provided by the client.",
-            "7. Any additional scope beyond this BOQ will be quoted separately.",
-            "8. This quotation is valid for 30 days from the date of issue.",
+            "2. Day 2 is charged at 50% of Day 1 for all equipment except Photography & Videography.",
+            "3. Catering is 210 SAR per person per day for 90 pax, with no Day 2 discount.",
+            "4. Sound is quoted as Option A (Normal Sound System); line array available on request.",
+            "5. Venue hire, power supply and permits at Misk assumed provided by the client.",
+            "6. Any additional scope beyond this BOQ will be quoted separately.",
+            "7. This quotation is valid for 30 days from the date of issue.",
         ]:
             w.writerow(["", note])
         w.writerow(blank)
