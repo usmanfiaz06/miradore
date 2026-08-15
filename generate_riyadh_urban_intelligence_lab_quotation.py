@@ -78,11 +78,12 @@ def money(value):
 
 
 class QuotationPDF(FPDF):
-    """Single-page landscape A4 quotation.
+    """Single-page portrait A4 quotation.
 
-    Every vertical metric below is sized so the whole document lands on one
-    page; PAGE_LIMIT is asserted after rendering so a future edit that
-    overflows fails loudly instead of silently spilling onto a second page.
+    Widths total the 190mm of usable page, and the vertical metrics are sized
+    so the whole document lands on one page; PAGE_LIMIT is asserted after
+    rendering so a future edit that overflows fails loudly instead of silently
+    spilling onto a second page.
     """
 
     TEAL = (0, 128, 128)
@@ -94,19 +95,20 @@ class QuotationPDF(FPDF):
     SECTION_BG = (230, 243, 243)
     RULE = (225, 232, 235)
 
-    PAGE_LIMIT = 193.0          # last usable y before the footer band
+    L, R = 10.0, 200.0          # left / right page edges
+    W = R - L                   # 190mm of usable width
+    PAGE_LIMIT = 283.0          # last usable y before the footer band
 
-    # column widths (landscape A4, 10mm margins -> 277mm usable)
-    W_SN, W_DESC, W_QTY, W_UNIT = 9, 114, 12, 18
-    W_D1R, W_D1T, W_D2R, W_D2T, W_TOT = 22, 25, 22, 25, 30
+    W_SN, W_DESC, W_QTY, W_UNIT = 8, 68, 10, 14
+    W_D1R, W_D1T, W_D2R, W_D2T, W_TOT = 17, 19, 17, 19, 18
     W_LEAD = W_SN + W_DESC + W_QTY + W_UNIT
 
-    FS_ROW = 6.2
-    ROW_MIN_H = 5.6
-    LINE_H = 3.0
+    FS_ROW = 6.5
+    ROW_MIN_H = 6.4
+    LINE_H = 3.3
 
     def footer(self):
-        self.set_y(-11)
+        self.set_y(-12)
         self.set_font("Helvetica", "I", 6.5)
         self.set_text_color(*self.GRAY)
         self.cell(0, 6, "Miradore Experiences, Riyadh  |  Riyadh Urban Intelligence Lab  |  "
@@ -115,67 +117,68 @@ class QuotationPDF(FPDF):
     def add_logo_header(self):
         logo = os.path.join(BASE_DIR, "Miradore Logo Color.png")
         if os.path.exists(logo):
-            self.image(logo, x=10, y=8, w=46)
-        self.set_xy(180, 9)
-        self.set_font("Helvetica", "B", 8.5)
+            self.image(logo, x=self.L, y=8, w=44)
+        self.set_xy(110, 9)
+        self.set_font("Helvetica", "B", 8)
         self.set_text_color(*self.DARK)
-        self.cell(107, 4.5, "MIRADORE EXPERIENCES, RIYADH", align="R")
-        self.set_xy(180, 13.5)
-        self.set_font("Helvetica", "", 7)
+        self.cell(90, 4.5, "MIRADORE EXPERIENCES, RIYADH", align="R")
+        self.set_xy(110, 13.5)
+        self.set_font("Helvetica", "", 6.6)
         self.set_text_color(*self.GRAY)
-        self.cell(107, 4.5, "Event Production  |  Branding  |  Technical Delivery", align="R")
+        self.cell(90, 4.5, "Event Production  |  Branding  |  Technical Delivery", align="R")
 
     def rule(self, y, weight=0.7, color=None):
         self.set_draw_color(*(color or self.TEAL))
         self.set_line_width(weight)
-        self.line(10, y, 287, y)
+        self.line(self.L, y, self.R, y)
 
     def add_title_block(self):
-        self.rule(19)
-        self.set_xy(10, 21)
-        self.set_font("Helvetica", "B", 15)
+        self.rule(21)
+        self.set_xy(self.L, 23)
+        self.set_font("Helvetica", "B", 14)
         self.set_text_color(*self.TEAL)
-        self.cell(277, 7.5, "DETAILED BOQ  -  QUOTATION", align="C")
-        self.set_xy(10, 28.5)
-        self.set_font("Helvetica", "B", 9.5)
+        self.cell(self.W, 7, "DETAILED BOQ  -  QUOTATION", align="C")
+        self.set_xy(self.L, 30)
+        self.set_font("Helvetica", "B", 8.8)
         self.set_text_color(*self.ORANGE)
-        self.cell(277, 5, "RIYADH URBAN INTELLIGENCE LAB  -  2-DAY EVENT SETUP", align="C")
-        self.set_xy(10, 33.5)
-        self.set_font("Helvetica", "", 7)
+        self.cell(self.W, 5, "RIYADH URBAN INTELLIGENCE LAB  -  2-DAY EVENT SETUP", align="C")
+        self.set_xy(self.L, 35)
+        self.set_font("Helvetica", "", 6.8)
         self.set_text_color(*self.GRAY)
-        self.cell(277, 4.5, "Misk, Riyadh  |  27 - 28 September 2026  |  Up to 100 Pax  |  "
-                            "Currency: SAR", align="C")
-        self.rule(39.5)
-        self.set_y(42)
+        self.cell(self.W, 4.5, "Misk, Riyadh  |  27 - 28 September 2026  |  Up to 100 Pax  |  "
+                               "Currency: SAR", align="C")
+        self.rule(41)
+        self.set_y(43.5)
 
     def _info_column(self, x, y, width, label, lines, align="L"):
         self.set_xy(x, y)
-        self.set_font("Helvetica", "B", 7.5)
+        self.set_font("Helvetica", "B", 7.4)
         self.set_text_color(*self.TEAL)
         self.cell(width, 4.4, label, align=align)
         for i, line in enumerate(lines):
             self.set_xy(x, y + 4.4 + i * 4.0)
-            self.set_font("Helvetica", "", 7.5)
+            self.set_font("Helvetica", "", 7.4)
             self.set_text_color(*self.DARK)
             self.cell(width, 4.0, line, align=align)
 
     def add_info_block(self):
+        """Two columns: recipient over event details on the left, us on the right."""
         y = self.get_y()
-        self._info_column(10, y, 78, "TO:", [CLIENT_CONTACT, CLIENT_ORG])
-        self._info_column(92, y, 88, "EVENT DETAILS:", [
+        self._info_column(self.L, y, 92, "TO:", [CLIENT_CONTACT, CLIENT_ORG])
+        self._info_column(108, y, 92, "FROM:", ["Miradore Experiences, Riyadh"], align="R")
+        self._info_column(108, y + 10, 92, "QUOTATION DATE:", ["15 August 2026"], align="R")
+        self._info_column(self.L, y + 15, 130, "EVENT DETAILS:", [
             "Event: Riyadh Urban Intelligence Lab",
             "Venue: Misk - Riyadh, Kingdom of Saudi Arabia",
             "Dates: 27 - 28 September 2026 (2 Days)",
             "Guest Capacity: Up to 100 Pax  |  Catering for 90 Pax",
         ])
-        self._info_column(182, y, 105, "FROM:", ["Miradore Experiences, Riyadh"], align="R")
-        self._info_column(182, y + 10, 105, "QUOTATION DATE:", ["15 August 2026"], align="R")
-        self.set_y(y + 21)
+        self.set_y(y + 36)
 
     def table_header(self):
         self.set_fill_color(*self.TEAL)
         self.set_text_color(*self.WHITE)
-        self.set_font("Helvetica", "B", 6.4)
+        self.set_font("Helvetica", "B", 6.0)
         self.cell(self.W_LEAD, 5, "", fill=True)
         self.cell(self.W_D1R + self.W_D1T, 5, "DAY 1  (FULL RATE)", align="C", fill=True)
         self.cell(self.W_D2R + self.W_D2T, 5, "DAY 2  (50% DISCOUNT)", align="C", fill=True)
@@ -195,8 +198,8 @@ class QuotationPDF(FPDF):
     def section_header(self, title):
         self.set_fill_color(*self.SECTION_BG)
         self.set_text_color(*self.TEAL)
-        self.set_font("Helvetica", "B", 6.8)
-        self.cell(277, 5.4, f"   {title}", fill=True, new_x="LMARGIN", new_y="NEXT")
+        self.set_font("Helvetica", "B", 6.6)
+        self.cell(self.W, 5.6, f"   {title}", fill=True, new_x="LMARGIN", new_y="NEXT")
 
     def item_row(self, row, alt=False):
         self.set_font("Helvetica", "", self.FS_ROW)
@@ -228,7 +231,9 @@ class QuotationPDF(FPDF):
             self.cell(self.W_D2R, h, money(row["d2_rate"]), align="R", fill=True)
         else:
             self.set_text_color(*self.ORANGE)
+            self.set_font("Helvetica", "", 5.6)
             self.cell(self.W_D2R, h, "no discount", align="R", fill=True)
+            self.set_font("Helvetica", "", self.FS_ROW)
             self.set_text_color(*self.DARK)
         self.set_font("Helvetica", "B", self.FS_ROW)
         self.cell(self.W_D2T, h, money(row["d2_total"]), align="R", fill=True)
@@ -243,18 +248,18 @@ class QuotationPDF(FPDF):
         self.set_fill_color(*self.SECTION_BG)
         self.set_text_color(*self.TEAL)
         self.set_font("Helvetica", "B", 6.6)
-        self.cell(self.W_LEAD, 5.8, f"   {label}", fill=True)
-        self.cell(self.W_D1R, 5.8, "", fill=True)
-        self.cell(self.W_D1T, 5.8, money(d1), align="R", fill=True)
-        self.cell(self.W_D2R, 5.8, "", fill=True)
-        self.cell(self.W_D2T, 5.8, money(d2), align="R", fill=True)
-        self.cell(self.W_TOT, 5.8, money(two_day), align="R", fill=True)
+        self.cell(self.W_LEAD, 6.2, f"   {label}", fill=True)
+        self.cell(self.W_D1R, 6.2, "", fill=True)
+        self.cell(self.W_D1T, 6.2, money(d1), align="R", fill=True)
+        self.cell(self.W_D2R, 6.2, "", fill=True)
+        self.cell(self.W_D2T, 6.2, money(d2), align="R", fill=True)
+        self.cell(self.W_TOT, 6.2, money(two_day), align="R", fill=True)
         self.ln()
 
     def grand_row(self, label, d1, d2, two_day):
         self.set_fill_color(*self.TEAL)
         self.set_text_color(*self.WHITE)
-        self.set_font("Helvetica", "B", 7.6)
+        self.set_font("Helvetica", "B", 7.0)
         self.cell(self.W_LEAD, 7.2, f"   {label}", fill=True)
         self.cell(self.W_D1R, 7.2, "", fill=True)
         self.cell(self.W_D1T, 7.2, money(d1), align="R", fill=True)
@@ -264,16 +269,45 @@ class QuotationPDF(FPDF):
         self.cell(self.W_TOT, 7.2, money(two_day), align="R", fill=True)
         self.ln()
 
+    def summary_block(self, totals):
+        """Full-width right-aligned cost summary."""
+        w_amt, w_lbl = 30.0, 50.0
+        pad = self.W - w_amt - w_lbl
+        self.set_font("Helvetica", "B", 8)
+        self.set_text_color(*self.TEAL)
+        self.cell(self.W, 5.5, "COST SUMMARY", new_x="LMARGIN", new_y="NEXT")
+
+        for i, (label, amount) in enumerate([("Subtotal before VAT:", totals["net"]),
+                                             ("VAT (15%):", totals["vat"])]):
+            self.set_fill_color(*self.LIGHT_BG)
+            self.set_text_color(*self.DARK)
+            self.set_font("Helvetica", "", 7.5)
+            self.cell(pad, 5.8, "", fill=(i == 0))
+            self.cell(w_lbl, 5.8, label, align="R", fill=(i == 0))
+            self.set_font("Helvetica", "B", 7.5)
+            self.cell(w_amt, 5.8, money(amount), align="R", fill=(i == 0))
+            self.ln()
+
+        self.ln(1.2)
+        self.set_fill_color(*self.TEAL)
+        self.set_text_color(*self.WHITE)
+        self.set_font("Helvetica", "B", 9)
+        self.cell(pad, 8.5, "", fill=True)
+        self.cell(w_lbl, 8.5, "GRAND TOTAL (INC. VAT):", align="R", fill=True)
+        self.set_fill_color(*self.ORANGE)
+        self.cell(w_amt, 8.5, money(totals["gross"]), align="R", fill=True)
+        self.ln()
+
     def notes_column(self, x, y, width, notes):
         self.set_xy(x, y)
         self.set_font("Helvetica", "B", 8)
         self.set_text_color(*self.TEAL)
         self.cell(width, 5, "NOTES & ASSUMPTIONS")
-        self.set_font("Helvetica", "", 5.9)
+        self.set_font("Helvetica", "", 6.0)
         self.set_text_color(*self.GRAY)
         for i, note in enumerate(notes):
-            self.set_xy(x, y + 5.5 + i * 3.4)
-            self.cell(width, 3.4, f"{i + 1}.  {note}")
+            self.set_xy(x, y + 5.5 + i * 3.9)
+            self.cell(width, 3.9, f"{i + 1}.  {note}")
 
     def terms_column(self, x, y, width):
         self.set_xy(x, y)
@@ -281,54 +315,28 @@ class QuotationPDF(FPDF):
         self.set_text_color(*self.TEAL)
         self.cell(width, 5, "PAYMENT TERMS")
         self.set_xy(x, y + 5.5)
-        self.set_font("Helvetica", "", 7)
+        self.set_font("Helvetica", "", 6.8)
         self.set_text_color(*self.DARK)
         self.cell(width, 4, "80% Advance Payment  -  20% After the Event")
 
         self.set_draw_color(*self.TEAL)
         self.set_line_width(0.3)
-        self.line(x, y + 20, x + 55, y + 20)
-        self.set_xy(x, y + 21)
-        self.set_font("Helvetica", "B", 7.5)
+        self.line(x, y + 19, x + 48, y + 19)
+        self.set_xy(x, y + 20)
+        self.set_font("Helvetica", "B", 7.4)
         self.set_text_color(*self.DARK)
         self.cell(width, 4.2, "ADEEL AHMED  -  DIRECTOR")
-        self.set_xy(x, y + 25.2)
-        self.set_font("Helvetica", "", 6.5)
+        self.set_xy(x, y + 24.2)
+        self.set_font("Helvetica", "", 6.4)
         self.set_text_color(*self.GRAY)
         self.cell(width, 3.6, "Miradore Experiences, Riyadh")
-
-    def summary_column(self, x, y, width, totals):
-        w_amt = 32
-        w_lbl = width - w_amt
-        self.set_xy(x, y)
-        self.set_font("Helvetica", "B", 8)
-        self.set_text_color(*self.TEAL)
-        self.cell(width, 5, "COST SUMMARY", align="R")
-
-        rows = [("Subtotal before VAT:", totals["net"]), ("VAT (15%):", totals["vat"])]
-        for i, (label, amount) in enumerate(rows):
-            self.set_xy(x, y + 5.5 + i * 6.0)
-            self.set_fill_color(*self.LIGHT_BG)
-            self.set_font("Helvetica", "", 7.5)
-            self.set_text_color(*self.DARK)
-            self.cell(w_lbl, 5.6, label, align="R", fill=(i == 0))
-            self.set_font("Helvetica", "B", 7.5)
-            self.cell(w_amt, 5.6, money(amount), align="R", fill=(i == 0))
-
-        self.set_xy(x, y + 19)
-        self.set_fill_color(*self.TEAL)
-        self.set_text_color(*self.WHITE)
-        self.set_font("Helvetica", "B", 9.5)
-        self.cell(w_lbl, 8.5, "GRAND TOTAL (INC. VAT):", align="R", fill=True)
-        self.set_fill_color(*self.ORANGE)
-        self.cell(w_amt, 8.5, money(totals["gross"]), align="R", fill=True)
 
 
 NOTES = [
     "All prices are in Saudi Riyals (SAR), quoted in whole riyals. VAT is charged at 15%.",
     "Day 2 is charged at 50% of Day 1 for all equipment except Photography & Videography.",
     "Catering is charged at 210 SAR per person per day for 90 pax, with no Day 2 discount.",
-    "Sound is quoted as Option A (Normal Sound System); a line array system is available on request.",
+    "Sound is quoted as Option A (Normal Sound System); line array available on request.",
     "Venue hire, power supply and permits at Misk are assumed to be provided by the client.",
     "Any additional scope beyond this BOQ will be quoted separately.",
     "This quotation is valid for 30 days from the date of issue.",
@@ -336,8 +344,8 @@ NOTES = [
 
 
 def generate_pdf(rows, totals):
-    pdf = QuotationPDF(orientation="L", unit="mm", format="A4")
-    pdf.set_margins(10, 10, 10)
+    pdf = QuotationPDF(orientation="P", unit="mm", format="A4")
+    pdf.set_margins(QuotationPDF.L, 10, QuotationPDF.L)
     pdf.set_auto_page_break(auto=False)     # the layout is sized to one page
     pdf.add_page()
 
@@ -346,7 +354,7 @@ def generate_pdf(rows, totals):
     pdf.add_info_block()
     pdf.table_header()
 
-    pdf.section_header("SECTION A: EVENT INFRASTRUCTURE & TECHNICAL PRODUCTION  "
+    pdf.section_header("SECTION A: EVENT INFRASTRUCTURE & TECHNICAL PRODUCTION "
                        "(OPTION A - NORMAL SOUND SYSTEM)")
     for i, row in enumerate(rows):
         pdf.item_row(row, alt=(i % 2 == 1))
@@ -363,13 +371,15 @@ def generate_pdf(rows, totals):
     pdf.grand_row("TOTAL - SECTIONS A + B (EXCLUSIVE OF VAT)",
                   totals["d1"], totals["d2"], totals["net"])
 
-    # bottom band: notes / payment terms / cost summary, side by side
-    y = pdf.get_y() + 3.5
-    pdf.notes_column(10, y, 120, NOTES)
-    pdf.terms_column(136, y, 68)
-    pdf.summary_column(207, y, 80, totals)
+    pdf.ln(4)
+    pdf.summary_block(totals)
 
-    bottom = max(y + 5.5 + len(NOTES) * 3.4, y + 28.8, y + 27.5)
+    # bottom band: notes alongside payment terms and signature
+    y = pdf.get_y() + 5
+    pdf.notes_column(pdf.L, y, 112, NOTES)
+    pdf.terms_column(128, y, 72)
+
+    bottom = max(y + 5.5 + len(NOTES) * 3.9, y + 27.8)
     assert bottom <= pdf.PAGE_LIMIT, f"layout overflows the page: {bottom:.1f}mm"
     assert pdf.page_no() == 1, f"quotation spilled onto {pdf.page_no()} pages"
 
