@@ -78,6 +78,13 @@ def money(value):
 
 
 class QuotationPDF(FPDF):
+    """Single-page landscape A4 quotation.
+
+    Every vertical metric below is sized so the whole document lands on one
+    page; PAGE_LIMIT is asserted after rendering so a future edit that
+    overflows fails loudly instead of silently spilling onto a second page.
+    """
+
     TEAL = (0, 128, 128)
     ORANGE = (230, 100, 30)
     DARK = (40, 40, 40)
@@ -85,65 +92,72 @@ class QuotationPDF(FPDF):
     LIGHT_BG = (245, 248, 250)
     WHITE = (255, 255, 255)
     SECTION_BG = (230, 243, 243)
-    NOTE_BG = (252, 244, 236)
+    RULE = (225, 232, 235)
+
+    PAGE_LIMIT = 193.0          # last usable y before the footer band
 
     # column widths (landscape A4, 10mm margins -> 277mm usable)
-    W_SN, W_DESC, W_QTY, W_UNIT = 10, 97, 14, 20
-    W_D1R, W_D1T, W_D2R, W_D2T, W_TOT = 24, 27, 24, 27, 32
+    W_SN, W_DESC, W_QTY, W_UNIT = 9, 114, 12, 18
+    W_D1R, W_D1T, W_D2R, W_D2T, W_TOT = 22, 25, 22, 25, 30
+    W_LEAD = W_SN + W_DESC + W_QTY + W_UNIT
+
+    FS_ROW = 6.2
+    ROW_MIN_H = 5.6
+    LINE_H = 3.0
 
     def footer(self):
-        self.set_y(-14)
-        self.set_font("Helvetica", "I", 7)
+        self.set_y(-11)
+        self.set_font("Helvetica", "I", 6.5)
         self.set_text_color(*self.GRAY)
-        self.cell(0, 8, f"Page {self.page_no()}/{{nb}}  |  Miradore Experiences, Riyadh  |  "
-                        f"Riyadh Urban Intelligence Lab  |  Confidential", align="C")
+        self.cell(0, 6, "Miradore Experiences, Riyadh  |  Riyadh Urban Intelligence Lab  |  "
+                        "atomcamp Arabia  |  Confidential", align="C")
 
     def add_logo_header(self):
         logo = os.path.join(BASE_DIR, "Miradore Logo Color.png")
         if os.path.exists(logo):
-            self.image(logo, x=10, y=10, w=52)
-        self.set_xy(180, 11)
-        self.set_font("Helvetica", "B", 9)
+            self.image(logo, x=10, y=8, w=46)
+        self.set_xy(180, 9)
+        self.set_font("Helvetica", "B", 8.5)
         self.set_text_color(*self.DARK)
-        self.cell(107, 5, "MIRADORE EXPERIENCES, RIYADH", align="R", new_x="LMARGIN", new_y="NEXT")
-        self.set_xy(180, 16)
-        self.set_font("Helvetica", "", 7.5)
+        self.cell(107, 4.5, "MIRADORE EXPERIENCES, RIYADH", align="R")
+        self.set_xy(180, 13.5)
+        self.set_font("Helvetica", "", 7)
         self.set_text_color(*self.GRAY)
-        self.cell(107, 5, "Event Production  |  Branding  |  Technical Delivery",
-                  align="R", new_x="LMARGIN", new_y="NEXT")
+        self.cell(107, 4.5, "Event Production  |  Branding  |  Technical Delivery", align="R")
 
-    def accent_line(self, gap=2):
-        self.set_draw_color(*self.TEAL)
-        self.set_line_width(0.8)
-        self.line(10, self.get_y() + gap, 287, self.get_y() + gap)
-        self.ln(gap + 4)
+    def rule(self, y, weight=0.7, color=None):
+        self.set_draw_color(*(color or self.TEAL))
+        self.set_line_width(weight)
+        self.line(10, y, 287, y)
 
     def add_title_block(self):
-        self.set_y(30)
-        self.accent_line()
-        self.set_font("Helvetica", "B", 18)
+        self.rule(19)
+        self.set_xy(10, 21)
+        self.set_font("Helvetica", "B", 15)
         self.set_text_color(*self.TEAL)
-        self.cell(0, 9, "DETAILED BOQ  -  QUOTATION", align="C", new_x="LMARGIN", new_y="NEXT")
-        self.set_font("Helvetica", "B", 11)
+        self.cell(277, 7.5, "DETAILED BOQ  -  QUOTATION", align="C")
+        self.set_xy(10, 28.5)
+        self.set_font("Helvetica", "B", 9.5)
         self.set_text_color(*self.ORANGE)
-        self.cell(0, 6, "RIYADH URBAN INTELLIGENCE LAB  -  2-DAY EVENT SETUP",
-                  align="C", new_x="LMARGIN", new_y="NEXT")
-        self.set_font("Helvetica", "", 8)
+        self.cell(277, 5, "RIYADH URBAN INTELLIGENCE LAB  -  2-DAY EVENT SETUP", align="C")
+        self.set_xy(10, 33.5)
+        self.set_font("Helvetica", "", 7)
         self.set_text_color(*self.GRAY)
-        self.cell(0, 5, "Misk, Riyadh  |  27 - 28 September 2026  |  Up to 100 Pax  |  Currency: SAR",
-                  align="C", new_x="LMARGIN", new_y="NEXT")
-        self.accent_line()
+        self.cell(277, 4.5, "Misk, Riyadh  |  27 - 28 September 2026  |  Up to 100 Pax  |  "
+                            "Currency: SAR", align="C")
+        self.rule(39.5)
+        self.set_y(42)
 
     def _info_column(self, x, y, width, label, lines, align="L"):
         self.set_xy(x, y)
-        self.set_font("Helvetica", "B", 8)
+        self.set_font("Helvetica", "B", 7.5)
         self.set_text_color(*self.TEAL)
-        self.cell(width, 5, label, align=align)
+        self.cell(width, 4.4, label, align=align)
         for i, line in enumerate(lines):
-            self.set_xy(x, y + 5 + i * 4.6)
-            self.set_font("Helvetica", "", 8)
+            self.set_xy(x, y + 4.4 + i * 4.0)
+            self.set_font("Helvetica", "", 7.5)
             self.set_text_color(*self.DARK)
-            self.cell(width, 4.6, line, align=align)
+            self.cell(width, 4.0, line, align=align)
 
     def add_info_block(self):
         y = self.get_y()
@@ -155,141 +169,176 @@ class QuotationPDF(FPDF):
             "Guest Capacity: Up to 100 Pax  |  Catering for 90 Pax",
         ])
         self._info_column(182, y, 105, "FROM:", ["Miradore Experiences, Riyadh"], align="R")
-        self._info_column(182, y + 12, 105, "QUOTATION DATE:", ["15 August 2026"], align="R")
-        self.set_y(y + 24)
+        self._info_column(182, y + 10, 105, "QUOTATION DATE:", ["15 August 2026"], align="R")
+        self.set_y(y + 21)
 
     def table_header(self):
         self.set_fill_color(*self.TEAL)
         self.set_text_color(*self.WHITE)
-        self.set_font("Helvetica", "B", 6.8)
-        y = self.get_y()
-        # top band: grouped day headers
-        self.cell(self.W_SN + self.W_DESC + self.W_QTY + self.W_UNIT, 5.5, "", fill=True)
-        self.cell(self.W_D1R + self.W_D1T, 5.5, "DAY 1  (FULL RATE)", align="C", fill=True)
-        self.cell(self.W_D2R + self.W_D2T, 5.5, "DAY 2  (50% DISCOUNT)", align="C", fill=True)
-        self.cell(self.W_TOT, 5.5, "", fill=True)
+        self.set_font("Helvetica", "B", 6.4)
+        self.cell(self.W_LEAD, 5, "", fill=True)
+        self.cell(self.W_D1R + self.W_D1T, 5, "DAY 1  (FULL RATE)", align="C", fill=True)
+        self.cell(self.W_D2R + self.W_D2T, 5, "DAY 2  (50% DISCOUNT)", align="C", fill=True)
+        self.cell(self.W_TOT, 5, "", fill=True)
         self.ln()
-        self.set_font("Helvetica", "B", 6.8)
-        self.cell(self.W_SN, 6, "No.", align="C", fill=True)
-        self.cell(self.W_DESC, 6, "  DESCRIPTION", align="L", fill=True)
-        self.cell(self.W_QTY, 6, "QTY", align="C", fill=True)
-        self.cell(self.W_UNIT, 6, "UNIT", align="C", fill=True)
-        self.cell(self.W_D1R, 6, "UNIT RATE", align="R", fill=True)
-        self.cell(self.W_D1T, 6, "TOTAL (SAR)", align="R", fill=True)
-        self.cell(self.W_D2R, 6, "UNIT RATE", align="R", fill=True)
-        self.cell(self.W_D2T, 6, "TOTAL (SAR)", align="R", fill=True)
-        self.cell(self.W_TOT, 6, "2-DAY TOTAL", align="R", fill=True)
+        self.cell(self.W_SN, 5.5, "No.", align="C", fill=True)
+        self.cell(self.W_DESC, 5.5, "  DESCRIPTION", align="L", fill=True)
+        self.cell(self.W_QTY, 5.5, "QTY", align="C", fill=True)
+        self.cell(self.W_UNIT, 5.5, "UNIT", align="C", fill=True)
+        self.cell(self.W_D1R, 5.5, "UNIT RATE", align="R", fill=True)
+        self.cell(self.W_D1T, 5.5, "TOTAL (SAR)", align="R", fill=True)
+        self.cell(self.W_D2R, 5.5, "UNIT RATE", align="R", fill=True)
+        self.cell(self.W_D2T, 5.5, "TOTAL (SAR)", align="R", fill=True)
+        self.cell(self.W_TOT, 5.5, "2-DAY TOTAL", align="R", fill=True)
         self.ln()
-        # thin separator between the two header rows and the body
-        self.set_draw_color(*self.WHITE)
-        self.set_line_width(0.2)
-        self.line(10 + self.W_SN + self.W_DESC + self.W_QTY + self.W_UNIT, y + 5.5,
-                  10 + self.W_SN + self.W_DESC + self.W_QTY + self.W_UNIT, y + 5.5)
 
     def section_header(self, title):
         self.set_fill_color(*self.SECTION_BG)
         self.set_text_color(*self.TEAL)
-        self.set_font("Helvetica", "B", 7.5)
-        self.cell(277, 6, f"   {title}", fill=True, new_x="LMARGIN", new_y="NEXT")
+        self.set_font("Helvetica", "B", 6.8)
+        self.cell(277, 5.4, f"   {title}", fill=True, new_x="LMARGIN", new_y="NEXT")
 
     def item_row(self, row, alt=False):
-        # wrap long descriptions to a fixed 2-line budget
-        self.set_font("Helvetica", "", 6.8)
-        lines = self.multi_cell(self.W_DESC - 3, 3.4, row["desc"], dry_run=True,
+        self.set_font("Helvetica", "", self.FS_ROW)
+        lines = self.multi_cell(self.W_DESC - 3, self.LINE_H, row["desc"], dry_run=True,
                                 output="LINES", align="L")
-        h = max(6.5, 3.4 * len(lines) + 2.2)
+        h = max(self.ROW_MIN_H, self.LINE_H * len(lines) + 2.0)
 
         self.set_fill_color(*(self.LIGHT_BG if alt else self.WHITE))
         self.set_text_color(*self.DARK)
         x0, y0 = self.get_x(), self.get_y()
 
         self.cell(self.W_SN, h, str(row["sn"]), align="C", fill=True)
-        # description drawn as a wrapped block inside its own cell box
         xd = self.get_x()
         self.cell(self.W_DESC, h, "", fill=True)
-        self.set_xy(xd + 1.5, y0 + (h - 3.4 * len(lines)) / 2)
-        self.set_font("Helvetica", "", 6.8)
+        self.set_xy(xd + 1.5, y0 + (h - self.LINE_H * len(lines)) / 2)
         for ln in lines:
-            self.cell(self.W_DESC - 3, 3.4, ln, align="L", new_x="LEFT", new_y="NEXT")
+            self.cell(self.W_DESC - 3, self.LINE_H, ln, align="L", new_x="LEFT", new_y="NEXT")
             self.set_x(xd + 1.5)
         self.set_xy(x0 + self.W_SN + self.W_DESC, y0)
 
-        self.set_font("Helvetica", "", 6.8)
         self.cell(self.W_QTY, h, str(row["qty"]), align="C", fill=True)
         self.cell(self.W_UNIT, h, row["unit"], align="C", fill=True)
         self.cell(self.W_D1R, h, money(row["d1_rate"]), align="R", fill=True)
-        self.set_font("Helvetica", "B", 6.8)
+        self.set_font("Helvetica", "B", self.FS_ROW)
         self.cell(self.W_D1T, h, money(row["d1_total"]), align="R", fill=True)
 
-        self.set_font("Helvetica", "", 6.8)
+        self.set_font("Helvetica", "", self.FS_ROW)
         if row["discounted"]:
             self.cell(self.W_D2R, h, money(row["d2_rate"]), align="R", fill=True)
         else:
             self.set_text_color(*self.ORANGE)
             self.cell(self.W_D2R, h, "no discount", align="R", fill=True)
             self.set_text_color(*self.DARK)
-        self.set_font("Helvetica", "B", 6.8)
+        self.set_font("Helvetica", "B", self.FS_ROW)
         self.cell(self.W_D2T, h, money(row["d2_total"]), align="R", fill=True)
 
         self.set_text_color(*self.TEAL)
         self.cell(self.W_TOT, h, money(row["two_day"]), align="R", fill=True)
         self.set_text_color(*self.DARK)
         self.ln(h)
-
-        self.set_draw_color(225, 232, 235)
-        self.set_line_width(0.1)
-        self.line(10, self.get_y(), 287, self.get_y())
+        self.rule(self.get_y(), 0.1, self.RULE)
 
     def subtotal_row(self, label, d1, d2, two_day):
         self.set_fill_color(*self.SECTION_BG)
         self.set_text_color(*self.TEAL)
-        self.set_font("Helvetica", "B", 7.2)
-        self.cell(self.W_SN + self.W_DESC + self.W_QTY + self.W_UNIT, 6.5, f"   {label}", fill=True)
-        self.cell(self.W_D1R, 6.5, "", fill=True)
-        self.cell(self.W_D1T, 6.5, money(d1), align="R", fill=True)
-        self.cell(self.W_D2R, 6.5, "", fill=True)
-        self.cell(self.W_D2T, 6.5, money(d2), align="R", fill=True)
-        self.cell(self.W_TOT, 6.5, money(two_day), align="R", fill=True)
+        self.set_font("Helvetica", "B", 6.6)
+        self.cell(self.W_LEAD, 5.8, f"   {label}", fill=True)
+        self.cell(self.W_D1R, 5.8, "", fill=True)
+        self.cell(self.W_D1T, 5.8, money(d1), align="R", fill=True)
+        self.cell(self.W_D2R, 5.8, "", fill=True)
+        self.cell(self.W_D2T, 5.8, money(d2), align="R", fill=True)
+        self.cell(self.W_TOT, 5.8, money(two_day), align="R", fill=True)
         self.ln()
 
     def grand_row(self, label, d1, d2, two_day):
         self.set_fill_color(*self.TEAL)
         self.set_text_color(*self.WHITE)
-        self.set_font("Helvetica", "B", 8.5)
-        self.cell(self.W_SN + self.W_DESC + self.W_QTY + self.W_UNIT, 8, f"   {label}", fill=True)
-        self.cell(self.W_D1R, 8, "", fill=True)
-        self.cell(self.W_D1T, 8, money(d1), align="R", fill=True)
-        self.cell(self.W_D2R, 8, "", fill=True)
-        self.cell(self.W_D2T, 8, money(d2), align="R", fill=True)
+        self.set_font("Helvetica", "B", 7.6)
+        self.cell(self.W_LEAD, 7.2, f"   {label}", fill=True)
+        self.cell(self.W_D1R, 7.2, "", fill=True)
+        self.cell(self.W_D1T, 7.2, money(d1), align="R", fill=True)
+        self.cell(self.W_D2R, 7.2, "", fill=True)
+        self.cell(self.W_D2T, 7.2, money(d2), align="R", fill=True)
         self.set_fill_color(*self.ORANGE)
-        self.cell(self.W_TOT, 8, money(two_day), align="R", fill=True)
+        self.cell(self.W_TOT, 7.2, money(two_day), align="R", fill=True)
         self.ln()
 
-    def summary_line(self, label, amount, bold=False, highlight=False):
-        left = 277 - 72
-        if highlight:
-            self.set_fill_color(*self.TEAL)
-            self.set_text_color(*self.WHITE)
-            self.set_font("Helvetica", "B", 10)
-            self.cell(left, 9, "", fill=True)
-            self.cell(40, 9, label, align="R", fill=True)
-            self.cell(32, 9, money(amount), align="R", fill=True)
-        else:
-            self.set_fill_color(*(self.LIGHT_BG if bold else self.WHITE))
+    def notes_column(self, x, y, width, notes):
+        self.set_xy(x, y)
+        self.set_font("Helvetica", "B", 8)
+        self.set_text_color(*self.TEAL)
+        self.cell(width, 5, "NOTES & ASSUMPTIONS")
+        self.set_font("Helvetica", "", 5.9)
+        self.set_text_color(*self.GRAY)
+        for i, note in enumerate(notes):
+            self.set_xy(x, y + 5.5 + i * 3.4)
+            self.cell(width, 3.4, f"{i + 1}.  {note}")
+
+    def terms_column(self, x, y, width):
+        self.set_xy(x, y)
+        self.set_font("Helvetica", "B", 8)
+        self.set_text_color(*self.TEAL)
+        self.cell(width, 5, "PAYMENT TERMS")
+        self.set_xy(x, y + 5.5)
+        self.set_font("Helvetica", "", 7)
+        self.set_text_color(*self.DARK)
+        self.cell(width, 4, "80% Advance Payment  -  20% After the Event")
+
+        self.set_draw_color(*self.TEAL)
+        self.set_line_width(0.3)
+        self.line(x, y + 20, x + 55, y + 20)
+        self.set_xy(x, y + 21)
+        self.set_font("Helvetica", "B", 7.5)
+        self.set_text_color(*self.DARK)
+        self.cell(width, 4.2, "ADEEL AHMED  -  DIRECTOR")
+        self.set_xy(x, y + 25.2)
+        self.set_font("Helvetica", "", 6.5)
+        self.set_text_color(*self.GRAY)
+        self.cell(width, 3.6, "Miradore Experiences, Riyadh")
+
+    def summary_column(self, x, y, width, totals):
+        w_amt = 32
+        w_lbl = width - w_amt
+        self.set_xy(x, y)
+        self.set_font("Helvetica", "B", 8)
+        self.set_text_color(*self.TEAL)
+        self.cell(width, 5, "COST SUMMARY", align="R")
+
+        rows = [("Subtotal before VAT:", totals["net"]), ("VAT (15%):", totals["vat"])]
+        for i, (label, amount) in enumerate(rows):
+            self.set_xy(x, y + 5.5 + i * 6.0)
+            self.set_fill_color(*self.LIGHT_BG)
+            self.set_font("Helvetica", "", 7.5)
             self.set_text_color(*self.DARK)
-            self.set_font("Helvetica", "B" if bold else "", 8)
-            self.cell(left, 6.5, "", fill=bold)
-            self.cell(40, 6.5, label, align="R", fill=bold)
-            self.set_font("Helvetica", "B", 8)
-            self.cell(32, 6.5, money(amount), align="R", fill=bold)
-        self.ln()
+            self.cell(w_lbl, 5.6, label, align="R", fill=(i == 0))
+            self.set_font("Helvetica", "B", 7.5)
+            self.cell(w_amt, 5.6, money(amount), align="R", fill=(i == 0))
+
+        self.set_xy(x, y + 19)
+        self.set_fill_color(*self.TEAL)
+        self.set_text_color(*self.WHITE)
+        self.set_font("Helvetica", "B", 9.5)
+        self.cell(w_lbl, 8.5, "GRAND TOTAL (INC. VAT):", align="R", fill=True)
+        self.set_fill_color(*self.ORANGE)
+        self.cell(w_amt, 8.5, money(totals["gross"]), align="R", fill=True)
+
+
+NOTES = [
+    "All prices are in Saudi Riyals (SAR), quoted in whole riyals. VAT is charged at 15%.",
+    "Day 2 is charged at 50% of Day 1 for all equipment except Photography & Videography.",
+    "Catering is charged at 210 SAR per person per day for 90 pax, with no Day 2 discount.",
+    "Sound is quoted as Option A (Normal Sound System); a line array system is available on request.",
+    "Venue hire, power supply and permits at Misk are assumed to be provided by the client.",
+    "Any additional scope beyond this BOQ will be quoted separately.",
+    "This quotation is valid for 30 days from the date of issue.",
+]
 
 
 def generate_pdf(rows, totals):
     pdf = QuotationPDF(orientation="L", unit="mm", format="A4")
     pdf.set_margins(10, 10, 10)
-    pdf.alias_nb_pages()
-    pdf.set_auto_page_break(auto=True, margin=18)
+    pdf.set_auto_page_break(auto=False)     # the layout is sized to one page
     pdf.add_page()
 
     pdf.add_logo_header()
@@ -304,73 +353,25 @@ def generate_pdf(rows, totals):
     pdf.subtotal_row("SUBTOTAL - SECTION A (EQUIPMENT & PRODUCTION)",
                      totals["eq_d1"], totals["eq_d2"], totals["eq_2day"])
 
-    # Keep Section B + the grand total together; repeat the column header if it moves
-    if pdf.get_y() > 150:
-        pdf.add_page()
-        pdf.table_header()
-    pdf.ln(1.5)
+    pdf.ln(1.2)
     pdf.section_header("SECTION B: CATERING & HOSPITALITY")
     pdf.item_row(CATERING)
     pdf.subtotal_row("SUBTOTAL - SECTION B (CATERING)",
                      CATERING["d1_total"], CATERING["d2_total"], CATERING["two_day"])
 
-    pdf.ln(1.5)
+    pdf.ln(1.2)
     pdf.grand_row("TOTAL - SECTIONS A + B (EXCLUSIVE OF VAT)",
                   totals["d1"], totals["d2"], totals["net"])
 
-    pdf.ln(5)
-    pdf.set_font("Helvetica", "B", 9)
-    pdf.set_text_color(*pdf.TEAL)
-    pdf.cell(0, 6, "COST SUMMARY", new_x="LMARGIN", new_y="NEXT")
-    pdf.ln(1)
-    pdf.summary_line("Section A - Equipment & Production:", totals["eq_2day"])
-    pdf.summary_line("Section B - Catering (90 pax x 2 days):", CATERING["two_day"])
-    pdf.summary_line("Subtotal before VAT:", totals["net"], bold=True)
-    pdf.summary_line("VAT (15%):", totals["vat"])
-    pdf.ln(1)
-    pdf.summary_line("GRAND TOTAL (INC. VAT):", totals["gross"], highlight=True)
+    # bottom band: notes / payment terms / cost summary, side by side
+    y = pdf.get_y() + 3.5
+    pdf.notes_column(10, y, 120, NOTES)
+    pdf.terms_column(136, y, 68)
+    pdf.summary_column(207, y, 80, totals)
 
-    pdf.ln(6)
-    y = pdf.get_y()
-    pdf.set_font("Helvetica", "B", 9)
-    pdf.set_text_color(*pdf.TEAL)
-    pdf.cell(150, 6, "NOTES & ASSUMPTIONS", new_x="LMARGIN", new_y="NEXT")
-    pdf.set_font("Helvetica", "", 7)
-    pdf.set_text_color(*pdf.GRAY)
-    for note in [
-        "1.  All prices are in Saudi Riyals (SAR) and are quoted in whole riyals. VAT is 15%.",
-        "2.  Day 2 is charged at 50% of Day 1 for all equipment except Photography & Videography.",
-        "3.  Catering is charged at 210 SAR per person per day for 90 pax and carries no Day 2",
-        "     discount, as it is consumed in full on both days.",
-        "4.  Sound is quoted as Option A (Normal Sound System). A line array system can be quoted",
-        "     as an alternative on request.",
-        "5.  Venue hire, power supply and permits at Misk are assumed to be provided by the client.",
-        "6.  Any additional scope beyond this BOQ will be quoted separately.",
-        "7.  This quotation is valid for 30 days from the date of issue.",
-    ]:
-        pdf.cell(150, 4, note, new_x="LMARGIN", new_y="NEXT")
-
-    pdf.set_xy(175, y)
-    pdf.set_font("Helvetica", "B", 9)
-    pdf.set_text_color(*pdf.TEAL)
-    pdf.cell(112, 6, "PAYMENT TERMS", new_x="LMARGIN", new_y="NEXT")
-    pdf.set_xy(175, y + 6)
-    pdf.set_font("Helvetica", "", 8)
-    pdf.set_text_color(*pdf.DARK)
-    pdf.cell(112, 5, "80% Advance Payment  -  20% After the Event", new_x="LMARGIN", new_y="NEXT")
-
-    pdf.set_xy(175, y + 20)
-    pdf.set_draw_color(*pdf.TEAL)
-    pdf.set_line_width(0.3)
-    pdf.line(175, pdf.get_y(), 240, pdf.get_y())
-    pdf.set_xy(175, y + 22)
-    pdf.set_font("Helvetica", "B", 8)
-    pdf.set_text_color(*pdf.DARK)
-    pdf.cell(112, 5, "ADEEL AHMED  -  DIRECTOR", new_x="LMARGIN", new_y="NEXT")
-    pdf.set_xy(175, y + 27)
-    pdf.set_font("Helvetica", "", 7)
-    pdf.set_text_color(*pdf.GRAY)
-    pdf.cell(112, 4, "Miradore Experiences, Riyadh", new_x="LMARGIN", new_y="NEXT")
+    bottom = max(y + 5.5 + len(NOTES) * 3.4, y + 28.8, y + 27.5)
+    assert bottom <= pdf.PAGE_LIMIT, f"layout overflows the page: {bottom:.1f}mm"
+    assert pdf.page_no() == 1, f"quotation spilled onto {pdf.page_no()} pages"
 
     out = os.path.join(BASE_DIR, "Riyadh_Urban_Intelligence_Lab_Quotation.pdf")
     pdf.output(out)
