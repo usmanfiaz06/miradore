@@ -1,6 +1,6 @@
 """Riyadh Urban Intelligence Lab - 2-Day Event Quotation (Misk, 27-28 September 2026).
 
-Base BOQ rates supplied by the client, uplifted by 3%. Day 2 carries a 50%
+Base BOQ rates supplied by the client, uplifted by 3% and rounded to whole riyals. Day 2 carries a 50%
 reduction on all equipment lines except Photography & Videography. Catering
 (lunch + coffee break) is charged per person per day with no Day 2 discount.
 """
@@ -9,53 +9,51 @@ from fpdf import FPDF
 import csv
 import os
 
-UPLIFT = 1.03
 PAX_CATERING = 90
-CATERING_RATE = 210.0          # SAR per person per day (client supplied, no uplift)
+CATERING_RATE = 210            # SAR per person per day (client supplied, no uplift)
 VAT_RATE = 0.15
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-
-def r2(value):
-    return round(value + 1e-9, 2)
-
-
-# (S#, description, qty, unit, base day-1 unit rate, day-2 discounted?)
+# Day-1 unit rates: the supplied base BOQ rate plus ~3%, then settled on a whole
+# riyal that also halves to a whole riyal, so every figure in the quotation is a
+# round number. Overall this lands at 3.08% over the base BOQ.
+# (S#, description, qty, unit, base rate, quoted day-1 rate, day-2 discounted?)
 EQUIPMENT = [
-    (1, "Round Tables - suitable for group activity setup", 10, "Table", 85, True),
-    (2, "Chairs - banquet / event chairs (8 pax per table)", 80, "Chair", 45, True),
+    (1, "Round Tables - suitable for group activity setup", 10, "Table", 85, 88, True),
+    (2, "Chairs - banquet / event chairs (8 pax per table)", 80, "Chair", 45, 46, True),
     (3, "Professional Normal Sound System - complete package up to 100 pax "
-        "(speakers, mixer, microphones, amplifiers, cabling, stands, technician)", 1, "Lot", 4500, True),
+        "(speakers, mixer, microphones, amplifiers, cabling, stands, technician)",
+        1, "Lot", 4500, 4650, True),
     (4, "Stage Platform - 6.0m (W) x 3.0m (D) x 0.60m (H), black carpet, "
-        "skirting and 2 steps (each side)", 18, "m2 (6x3)", 180, True),
+        "skirting and 2 steps (each side)", 18, "m2 (6x3)", 180, 186, True),
     (5, "SMD LED Screen - 5.0m (W) x 3.0m (H) P2.6 indoor, with supporting "
-        "structure, processor and technician", 15, "m2 (5x3)", 300, True),
+        "structure, processor and technician", 15, "m2 (5x3)", 300, 310, True),
     (6, "Branded Media Wall - 3.6m x 2.4m, complete with production, "
-        "structure and installation", 1, "Lot", 5500, True),
+        "structure and installation", 1, "Lot", 5500, 5670, True),
     (7, "Registration Desk with Branded Back Wall - complete branded "
-        "registration setup", 1, "Lot", 7500, True),
-    (8, "Professional Photography & Videography Coverage", 1, "Day", 3500, False),
+        "registration setup", 1, "Lot", 7500, 7730, True),
+    (8, "Professional Photography & Videography Coverage", 1, "Day", 3500, 3605, False),
 ]
 
 
 def build_rows():
-    """Return equipment rows with uplifted rates and both-day totals."""
+    """Return equipment rows with quoted rates and both-day totals."""
     rows = []
-    for sn, desc, qty, unit, base_rate, discounted in EQUIPMENT:
-        d1_rate = r2(base_rate * UPLIFT)
-        d1_total = r2(d1_rate * qty)
+    for sn, desc, qty, unit, base_rate, d1_rate, discounted in EQUIPMENT:
+        d1_total = d1_rate * qty
         if discounted:
-            d2_rate = r2(d1_rate / 2)
-            d2_total = r2(d1_total / 2)   # exactly 50% of Day 1 total
+            d2_rate, d2_total = d1_rate // 2, d1_total // 2
+            # every quoted rate must halve cleanly, or the printed figures would
+            # not add up to the printed totals
+            assert d1_rate % 2 == 0 and d1_total % 2 == 0, f"line {sn} does not halve evenly"
         else:
-            d2_rate = d1_rate
-            d2_total = d1_total
+            d2_rate, d2_total = d1_rate, d1_total
         rows.append({
-            "sn": sn, "desc": desc, "qty": qty, "unit": unit,
+            "sn": sn, "desc": desc, "qty": qty, "unit": unit, "base_rate": base_rate,
             "d1_rate": d1_rate, "d1_total": d1_total,
             "d2_rate": d2_rate, "d2_total": d2_total,
-            "two_day": r2(d1_total + d2_total),
+            "two_day": d1_total + d2_total,
             "discounted": discounted,
         })
     return rows
@@ -65,15 +63,15 @@ CATERING = {
     "sn": 9,
     "desc": "Lunch & Coffee Break - full-day catering package per delegate",
     "qty": PAX_CATERING, "unit": "Pax",
-    "d1_rate": CATERING_RATE, "d1_total": r2(CATERING_RATE * PAX_CATERING),
-    "d2_rate": CATERING_RATE, "d2_total": r2(CATERING_RATE * PAX_CATERING),
-    "two_day": r2(CATERING_RATE * PAX_CATERING * 2),
+    "d1_rate": CATERING_RATE, "d1_total": CATERING_RATE * PAX_CATERING,
+    "d2_rate": CATERING_RATE, "d2_total": CATERING_RATE * PAX_CATERING,
+    "two_day": CATERING_RATE * PAX_CATERING * 2,
     "discounted": False,
 }
 
 
 def money(value):
-    return f"{value:,.2f}"
+    return f"{value:,.0f}"
 
 
 class QuotationPDF(FPDF):
@@ -165,32 +163,6 @@ class QuotationPDF(FPDF):
         self.set_text_color(*self.DARK)
         self.cell(107, 4.6, "15 August 2026", align="R", new_x="LMARGIN", new_y="NEXT")
         self.set_y(y + 24)
-
-    def add_basis_bar(self):
-        self.set_fill_color(*self.NOTE_BG)
-        self.set_draw_color(*self.ORANGE)
-        self.set_line_width(0.3)
-        y = self.get_y()
-        self.rect(10, y, 277, 13, style="DF")
-        self.set_xy(13, y + 1.5)
-        self.set_font("Helvetica", "B", 7)
-        self.set_text_color(*self.ORANGE)
-        self.cell(60, 4, "BASIS OF THIS QUOTATION", new_x="LMARGIN", new_y="NEXT")
-        self.set_xy(13, y + 5.5)
-        self.set_font("Helvetica", "", 6.8)
-        self.set_text_color(*self.DARK)
-        self.cell(135, 3.6, "-  Rates are based on 1 day of event operation, uplifted by 3% "
-                            "over the supplied base BOQ.", new_x="LMARGIN", new_y="NEXT")
-        self.set_x(13)
-        self.cell(135, 3.6, "-  Day 2: 50% reduction on all items except Photography & "
-                            "Videography and catering.", new_x="LMARGIN", new_y="NEXT")
-        self.set_xy(150, y + 5.5)
-        self.cell(135, 3.6, "-  Sound system quoted as Option A (Normal Sound System). "
-                            "Line array available on request.", new_x="LMARGIN", new_y="NEXT")
-        self.set_x(150)
-        self.cell(135, 3.6, "-  Prices are in Saudi Riyals (SAR) and exclusive of VAT.",
-                  new_x="LMARGIN", new_y="NEXT")
-        self.set_y(y + 16)
 
     def table_header(self):
         self.set_fill_color(*self.TEAL)
@@ -329,7 +301,6 @@ def generate_pdf(rows, totals):
     pdf.add_logo_header()
     pdf.add_title_block()
     pdf.add_info_block()
-    pdf.add_basis_bar()
     pdf.table_header()
 
     pdf.section_header("SECTION A: EVENT INFRASTRUCTURE & TECHNICAL PRODUCTION  "
@@ -373,19 +344,18 @@ def generate_pdf(rows, totals):
     pdf.set_font("Helvetica", "", 7)
     pdf.set_text_color(*pdf.GRAY)
     for note in [
-        "1.  All prices are in Saudi Riyals (SAR). VAT is charged at 15%.",
-        "2.  Equipment rates reflect a 3% uplift on the supplied base BOQ rates.",
+        "1.  All prices are in Saudi Riyals (SAR) and are quoted in whole riyals. VAT is 15%.",
+        "2.  Equipment rates reflect a 3% uplift on the supplied base BOQ rates, rounded to whole",
+        "     riyals (3.08% overall).",
         "3.  Day 2 is charged at 50% of Day 1 for all equipment except Photography & Videography.",
-        "4.  Catering is charged at 210.00 SAR per person per day for 90 pax and carries no Day 2",
+        "4.  Catering is charged at 210 SAR per person per day for 90 pax and carries no Day 2",
         "     discount, as it is consumed in full on both days. This rate is quoted as supplied and",
         "     has not been uplifted by 3%.",
-        "5.  Day 2 unit rates are shown rounded to two decimals; Day 2 line totals are calculated",
-        "     as exactly 50% of the corresponding Day 1 line total.",
-        "6.  Sound is quoted as Option A (Normal Sound System). A line array system can be quoted",
+        "5.  Sound is quoted as Option A (Normal Sound System). A line array system can be quoted",
         "     as an alternative on request.",
-        "7.  Venue hire, power supply and permits at Misk are assumed to be provided by the client.",
-        "8.  Any additional scope beyond this BOQ will be quoted separately.",
-        "9.  This quotation is valid for 30 days from the date of issue.",
+        "6.  Venue hire, power supply and permits at Misk are assumed to be provided by the client.",
+        "7.  Any additional scope beyond this BOQ will be quoted separately.",
+        "8.  This quotation is valid for 30 days from the date of issue.",
     ]:
         pdf.cell(150, 4, note, new_x="LMARGIN", new_y="NEXT")
 
@@ -473,17 +443,16 @@ def generate_csv(rows, totals):
         w.writerow(blank)
         w.writerow(["", "NOTES"])
         for note in [
-            "1. All prices are in Saudi Riyals (SAR). VAT is charged at 15%.",
-            "2. Equipment rates reflect a 3% uplift on the supplied base BOQ rates.",
+            "1. All prices are in Saudi Riyals (SAR), quoted in whole riyals. VAT is 15%.",
+            "2. Equipment rates reflect a 3% uplift on the supplied base BOQ rates, rounded to "
+            "whole riyals (3.08% overall).",
             "3. Day 2 is charged at 50% of Day 1 for all equipment except Photography & Videography.",
-            "4. Catering is 210.00 SAR per person per day for 90 pax, no Day 2 discount, quoted as "
+            "4. Catering is 210 SAR per person per day for 90 pax, no Day 2 discount, quoted as "
             "supplied without the 3% uplift.",
-            "5. Day 2 unit rates are rounded to two decimals; Day 2 line totals are exactly 50% of "
-            "the Day 1 line total.",
-            "6. Sound is quoted as Option A (Normal Sound System); line array available on request.",
-            "7. Venue hire, power supply and permits at Misk assumed provided by the client.",
-            "8. Any additional scope beyond this BOQ will be quoted separately.",
-            "9. This quotation is valid for 30 days from the date of issue.",
+            "5. Sound is quoted as Option A (Normal Sound System); line array available on request.",
+            "6. Venue hire, power supply and permits at Misk assumed provided by the client.",
+            "7. Any additional scope beyond this BOQ will be quoted separately.",
+            "8. This quotation is valid for 30 days from the date of issue.",
         ]:
             w.writerow(["", note])
         w.writerow(blank)
@@ -494,18 +463,18 @@ def generate_csv(rows, totals):
 
 def main():
     rows = build_rows()
-    eq_d1 = r2(sum(r["d1_total"] for r in rows))
-    eq_d2 = r2(sum(r["d2_total"] for r in rows))
+    eq_d1 = sum(r["d1_total"] for r in rows)
+    eq_d2 = sum(r["d2_total"] for r in rows)
     totals = {
         "eq_d1": eq_d1,
         "eq_d2": eq_d2,
-        "eq_2day": r2(eq_d1 + eq_d2),
-        "d1": r2(eq_d1 + CATERING["d1_total"]),
-        "d2": r2(eq_d2 + CATERING["d2_total"]),
+        "eq_2day": eq_d1 + eq_d2,
+        "d1": eq_d1 + CATERING["d1_total"],
+        "d2": eq_d2 + CATERING["d2_total"],
     }
-    totals["net"] = r2(totals["d1"] + totals["d2"])
-    totals["vat"] = r2(totals["net"] * VAT_RATE)
-    totals["gross"] = r2(totals["net"] + totals["vat"])
+    totals["net"] = totals["d1"] + totals["d2"]
+    totals["vat"] = round(totals["net"] * VAT_RATE)   # to the nearest riyal
+    totals["gross"] = totals["net"] + totals["vat"]
 
     pdf_path = generate_pdf(rows, totals)
     csv_path = generate_csv(rows, totals)
