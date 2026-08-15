@@ -17,6 +17,8 @@ CATERING_RATE = 210            # SAR per person per day (client supplied, no upl
 VAT_RATE = 0.15
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+STAMP_FILE = os.path.join(BASE_DIR, "Miradore_Stamp_Riyadh.png")
+SIGNATURE_FILE = os.path.join(BASE_DIR, "Adeel_Ahmed_Signature.png")
 
 # Day-1 unit rates: the supplied base BOQ rate plus ~3%, then settled on a whole
 # riyal that also halves to a whole riyal, so every figure in the quotation is a
@@ -310,6 +312,7 @@ class QuotationPDF(FPDF):
             self.cell(width, 3.9, f"{i + 1}.  {note}")
 
     def terms_column(self, x, y, width):
+        """Payment terms above the signed-and-stamped execution block."""
         self.set_xy(x, y)
         self.set_font("Helvetica", "B", 8)
         self.set_text_color(*self.TEAL)
@@ -319,17 +322,25 @@ class QuotationPDF(FPDF):
         self.set_text_color(*self.DARK)
         self.cell(width, 4, "80% Advance Payment  -  20% After the Event")
 
+        # wet signature, sitting on the rule
+        if os.path.exists(SIGNATURE_FILE):
+            self.image(SIGNATURE_FILE, x=x, y=y + 13.5, w=38)
+
         self.set_draw_color(*self.TEAL)
         self.set_line_width(0.3)
-        self.line(x, y + 19, x + 48, y + 19)
-        self.set_xy(x, y + 20)
+        self.line(x, y + 30, x + 48, y + 30)
+        self.set_xy(x, y + 31)
         self.set_font("Helvetica", "B", 7.4)
         self.set_text_color(*self.DARK)
         self.cell(width, 4.2, "ADEEL AHMED  -  DIRECTOR")
-        self.set_xy(x, y + 24.2)
+        self.set_xy(x, y + 35.2)
         self.set_font("Helvetica", "", 6.4)
         self.set_text_color(*self.GRAY)
         self.cell(width, 3.6, "Miradore Experiences, Riyadh")
+
+        # company stamp, alongside the signature
+        if os.path.exists(STAMP_FILE):
+            self.image(STAMP_FILE, x=x + 42, y=y + 11, w=37)
 
 
 NOTES = [
@@ -376,10 +387,10 @@ def generate_pdf(rows, totals):
 
     # bottom band: notes alongside payment terms and signature
     y = pdf.get_y() + 5
-    pdf.notes_column(pdf.L, y, 112, NOTES)
-    pdf.terms_column(128, y, 72)
+    pdf.notes_column(pdf.L, y, 105, NOTES)
+    pdf.terms_column(120, y, 80)
 
-    bottom = max(y + 5.5 + len(NOTES) * 3.9, y + 27.8)
+    bottom = max(y + 5.5 + len(NOTES) * 3.9, y + 39.0)
     assert bottom <= pdf.PAGE_LIMIT, f"layout overflows the page: {bottom:.1f}mm"
     assert pdf.page_no() == 1, f"quotation spilled onto {pdf.page_no()} pages"
 
@@ -487,6 +498,8 @@ def main():
     print(f"Net (excl VAT):   {money(totals['net'])}")
     print(f"VAT (15%):        {money(totals['vat'])}")
     print(f"GRAND TOTAL:      {money(totals['gross'])}")
+    if not os.path.exists(SIGNATURE_FILE):
+        print(f"WARNING: no signature at {SIGNATURE_FILE} - document rendered unsigned")
     print(f"PDF: {pdf_path}")
     print(f"CSV: {csv_path}")
 
