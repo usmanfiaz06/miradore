@@ -36,8 +36,11 @@ at `/opt/pw-browsers` in this environment - do not run `playwright install`.
   and micro-labels, a 136mm main column. `.grid` gives you both; `.main-only`
   indents a single element to the main column. The recurring `.route` motif
   (node, orange leg, hairline, open node) sits under each section title.
-- **Commercials** are in the page 08 table. SAR 14,000 total, quoted without
-  VAT. If VAT ever needs showing, add the row back to the table and adjust the
+- **Scope** is the identity core only - logomark, bilingual signature, colour,
+  typography and the brand guide PDF. Collateral, social and website are named
+  as a separate later phase and must not creep back into the deliverables.
+- **Commercials** are in the page 07 table. SAR 9,500 total, quoted without
+  VAT. If VAT ever needs showing, add a row to the table and adjust the
   `.grand` band.
 - **The schedule** is a CSS grid, 15 columns for 10-24 August. Bars are placed
   with inline `grid-column: <start> / span <n>`, where column 2 is Monday 10
