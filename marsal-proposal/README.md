@@ -39,14 +39,19 @@ at `/opt/pw-browsers` in this environment - do not run `playwright install`.
 - **Scope** is the identity core only - logomark, bilingual signature, colour,
   typography and the brand guide PDF. Collateral, social and website are named
   as a separate later phase and must not creep back into the deliverables.
-- **Commercials** are in the page 07 table. SAR 9,500 total, quoted without
-  VAT. If VAT ever needs showing, add a row to the table and adjust the
-  `.grand` band.
-- **The schedule** is a CSS grid, 15 columns for 10-24 August. Bars are placed
+- **Commercials** are on page 07: a `.fee` block showing the standard fee
+  (13,500, struck through) and the agreed discount, then the `.grand` band with
+  the payable total (9,400). Deliverables are listed but deliberately not
+  priced individually - do not reintroduce a per-phase cost table. Quoted
+  without VAT.
+- **The schedule** is a CSS grid, 18 columns for 10-27 August. Bars are placed
   with inline `grid-column: <start> / span <n>`, where column 2 is Monday 10
-  and column 16 is Monday 24. The two Kingdom weekends (14-15 and 21-22 Aug)
+  and column 19 is Thursday 27. The two Kingdom weekends (14-15 and 21-22 Aug)
   are columns 6, 7 and 13, 14 - marked `class="we"` in both the header row and
-  the `.g-grid` backing layer.
+  the `.g-grid` backing layer. The 22 August direction presentation is shown as
+  a completed milestone, so the document reads as a mid-engagement proposal:
+  the letter, the key-date cards and the "how it runs" note all refer to it in
+  the past tense and must stay consistent if the dates move.
 - **The cover image** is `assets/cover.jpg`, a generated night-highway scene
   (no third-party branding, no licence obligations). It is a placeholder:
   drop in a Marsal fleet photograph at the same path, portrait, at least
