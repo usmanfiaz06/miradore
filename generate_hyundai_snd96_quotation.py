@@ -62,7 +62,14 @@ def merge_text(row, text, font_, align="left", height=None, c1=1, c2=NC, fill_he
 
 
 def section(row, text):
-    merge_text(row, text, f(11.5, True, WHITE), height=22, fill_hex=TEAL, indent=1)
+    ws.cell(row=row, column=1).fill = fill(ORANGE)
+    ws.merge_cells(start_row=row, start_column=2, end_row=row, end_column=NC)
+    c = ws.cell(row=row, column=2, value=text)
+    c.font = f(11.5, True, WHITE)
+    c.alignment = Alignment(vertical="center", indent=1)
+    for col in range(2, NC + 1):
+        ws.cell(row=row, column=col).fill = fill(TEAL)
+    ws.row_dimensions[row].height = 22
 
 
 def th(row, labels, aligns=None):
@@ -95,36 +102,57 @@ ws.row_dimensions[7].height = 3
 for col in range(1, NC + 1):
     ws.cell(row=7, column=col).fill = fill(ORANGE)
 
-merge_text(9, "SAUDI NATIONAL DAY 96 — CITY-COLOR LIGHTING", f(15, True, INK), height=22)
-merge_text(10, "Detailed BOQ & Commercial Quotation — Hyundai Showrooms, Kingdom of Saudi Arabia", f(10.5, False, MUTED), height=16)
+merge_text(9, "SAUDI NATIONAL DAY 96 — CITY-COLOR LIGHTING", f(15, True, WHITE), height=28, fill_hex=TEAL, indent=1)
+merge_text(10, "Detailed BOQ & Commercial Quotation — Hyundai Showrooms, Kingdom of Saudi Arabia", f(9.5, False, WHITE), height=16, fill_hex=TEAL_DARK, indent=1)
 
-info = [
-    ("Client",              "Hyundai — Showrooms Network, KSA",  "Quotation Ref",   "MIR-HYN-SND96-001"),
-    ("Installation Date",   "16 September 2026",                 "Quotation Date",  "04 September 2026"),
-    ("Dismantling Date",    "30 September 2026",                 "Currency",        "Saudi Riyal (SAR)"),
-    ("Rental Duration",     "15 Days",                           "Prices",          "Excluding 15% VAT"),
-]
+# client / ref line
 r = 12
-for a, b, cc, d in info:
-    ws.cell(row=r, column=1).border = box
-    ws.merge_cells(start_row=r, start_column=1, end_row=r, end_column=2)
-    lc = ws.cell(row=r, column=1, value=a + ":  " + b)
-    lc.font = f(10)
-    lc.alignment = Alignment(vertical="center", indent=1)
-    ws.merge_cells(start_row=r, start_column=3, end_row=r, end_column=4)
-    mc = ws.cell(row=r, column=3, value=cc + ":")
-    mc.font = f(10, True, TEAL)
-    mc.alignment = Alignment(horizontal="right", vertical="center")
-    ws.merge_cells(start_row=r, start_column=5, end_row=r, end_column=6)
-    rc = ws.cell(row=r, column=5, value=d)
-    rc.font = f(10)
-    rc.alignment = Alignment(vertical="center", indent=1)
-    for col in range(1, NC + 1):
-        ws.cell(row=r, column=col).border = box
-        if (r - 12) % 2 == 0:
-            ws.cell(row=r, column=col).fill = fill(TEAL_XLIGHT)
-    ws.row_dimensions[r].height = 17
-    r += 1
+ws.merge_cells(start_row=r, start_column=1, end_row=r, end_column=3)
+c = ws.cell(row=r, column=1, value="Client:  Hyundai — Showrooms Network, KSA")
+c.font = f(10.5, True)
+c.alignment = Alignment(vertical="center", indent=1)
+ws.merge_cells(start_row=r, start_column=4, end_row=r, end_column=6)
+c = ws.cell(row=r, column=4, value="Quotation Ref: MIR-HYN-SND96-001   ·   04 September 2026")
+c.font = f(10)
+c.alignment = Alignment(horizontal="right", vertical="center", indent=1)
+for col in range(1, NC + 1):
+    ws.cell(row=r, column=col).fill = fill(TEAL_XLIGHT)
+    ws.cell(row=r, column=col).border = box
+ws.row_dimensions[r].height = 20
+
+# date chips
+r = 13
+chips = [
+    ((1, 2), "INSTALLATION DATE", "16 September 2026"),
+    ((3, 4), "DISMANTLING DATE", "30 September 2026"),
+    ((5, 6), "RENTAL DURATION", "15 Days"),
+]
+ws.row_dimensions[r].height = 15
+ws.row_dimensions[r + 1].height = 18
+for (c1, c2), lab, val in chips:
+    ws.merge_cells(start_row=r, start_column=c1, end_row=r, end_column=c2)
+    lc = ws.cell(row=r, column=c1, value=lab)
+    lc.font = f(8, True, TEAL)
+    lc.alignment = Alignment(horizontal="center", vertical="bottom")
+    ws.merge_cells(start_row=r + 1, start_column=c1, end_row=r + 1, end_column=c2)
+    vc = ws.cell(row=r + 1, column=c1, value=val)
+    vc.font = f(11, True)
+    vc.alignment = Alignment(horizontal="center", vertical="top")
+    for rr_ in (r, r + 1):
+        for col in range(c1, c2 + 1):
+            ws.cell(row=rr_, column=col).fill = fill(TEAL_LIGHT)
+    # outer border of the chip
+    for col in range(c1, c2 + 1):
+        ws.cell(row=r, column=col).border = Border(top=thin, left=thin if col == c1 else None,
+                                                   right=thin if col == c2 else None)
+        ws.cell(row=r + 1, column=col).border = Border(bottom=thin, left=thin if col == c1 else None,
+                                                       right=thin if col == c2 else None)
+
+# currency note
+r = 15
+merge_text(r, "Currency: Saudi Riyal (SAR)   ·   Prices exclude 15% VAT, shown separately in the commercial summary",
+           f(8.5, False, MUTED, True), align="center", height=14)
+r = 16
 
 # ---------------------------------------------------------------- section 1: location-wise BOQ
 r += 1
@@ -241,7 +269,7 @@ summary = [
     ("Daily Rate (per City-Color)", f"=E{loc_first}", "#,##0", 0),
     ("Rate per City-Color for 15 Days", f"=E{loc_first}*15", "#,##0", 0),
     ("Cost per Showroom", f"=F{loc_first}", "#,##0", 0),
-    ("TOTAL PROJECT VALUE — All 9 Showrooms (excl. VAT)", f"=F{loc_total_row}", "#,##0", 1),
+    ("TOTAL PROJECT VALUE — All 9 Showrooms (excl. VAT)", f"=F{loc_total_row}", "#,##0", 4),
     ("VAT (15%)", None, "#,##0.00", 0),
     ("GRAND TOTAL (incl. VAT)", None, "#,##0.00", 3),
 ]
@@ -259,10 +287,16 @@ for label, val, fmt, emph in summary:
     vc.alignment = Alignment(horizontal="right", vertical="center", indent=1)
     if emph == 3:
         for col in range(1, NC + 1):
-            ws.cell(row=r, column=col).fill = fill(TEAL)
+            ws.cell(row=r, column=col).fill = fill(ORANGE)
         lc.font = f(11, True, WHITE)
-        vc.font = f(11, True, WHITE)
-        ws.row_dimensions[r].height = 22
+        vc.font = f(12, True, WHITE)
+        ws.row_dimensions[r].height = 24
+    elif emph == 4:
+        for col in range(1, NC + 1):
+            ws.cell(row=r, column=col).fill = fill(TEAL_DARK)
+        lc.font = f(11.5, True, WHITE)
+        vc.font = f(14, True, WHITE)
+        ws.row_dimensions[r].height = 28
     elif emph == 1:
         for col in range(1, NC + 1):
             ws.cell(row=r, column=col).fill = fill(TEAL_LIGHT)
@@ -294,7 +328,9 @@ section(r, "4.  SCOPE OF SUPPLY & SERVICES (INCLUDED)")
 r += 1
 merge_text(r, "Equipment Rental   ·   Transportation   ·   Installation   ·   Cabling & Connections   ·   Testing & "
               "Commissioning   ·   Technical Support   ·   Dismantling & Removal",
-           f(9.5, True, TEAL), align="center", height=20)
+           f(9.5, True, TEAL), align="center", height=24, fill_hex=TEAL_XLIGHT)
+for col in range(1, NC + 1):
+    ws.cell(row=r, column=col).border = box
 r += 2
 
 # ---------------------------------------------------------------- section 5: notes
@@ -344,13 +380,13 @@ def place(path, px_w, px_h, col, col_off_px, row, row_off_px):
     ws.add_image(im)
 
 place("/home/user/miradore/miradore_signature.png", 215, 76, col=1, col_off_px=8, row=sig_top - 1, row_off_px=18)
-place("/home/user/miradore/miradore_stamp.png", 104, 104, col=1, col_off_px=150, row=sig_top - 1, row_off_px=2)
+place("/home/user/miradore/miradore_stamp.png", 133, 103, col=1, col_off_px=140, row=sig_top - 1, row_off_px=2)
 
 r = sig_top + 6
 top_line = Border(top=Side(style="thin", color=MUTED))
 ws.merge_cells(start_row=r, start_column=1, end_row=r, end_column=2)
-c = ws.cell(row=r, column=1, value="Authorized Signatory")
-c.font = f(9, False, MUTED)
+c = ws.cell(row=r, column=1, value="Adeel Ahmad — Director")
+c.font = f(9.5, True)
 c.alignment = Alignment(vertical="center", indent=1)
 ws.merge_cells(start_row=r, start_column=4, end_row=r, end_column=6)
 c = ws.cell(row=r, column=4, value="Signature, Company Stamp & Date")
@@ -359,6 +395,12 @@ c.alignment = Alignment(vertical="center", indent=1)
 for col in (1, 2, 4, 5, 6):
     ws.cell(row=r, column=col).border = top_line
 ws.row_dimensions[r].height = 16
+r += 1
+ws.merge_cells(start_row=r, start_column=1, end_row=r, end_column=2)
+c = ws.cell(row=r, column=1, value="Authorized Signatory")
+c.font = f(8.5, False, MUTED)
+c.alignment = Alignment(vertical="top", indent=1)
+ws.row_dimensions[r].height = 14
 
 r += 2
 for col in range(1, NC + 1):
