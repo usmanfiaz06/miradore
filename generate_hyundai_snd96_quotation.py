@@ -427,6 +427,11 @@ ws.oddFooter.center.font = FONT
 ws.oddFooter.center.color = MUTED
 ws.print_area = f"A1:F{end}"
 
+# hide all unused columns so the sheet visually ends at the table edge
+from openpyxl.worksheet.dimensions import ColumnDimension
+hidden_cols = ColumnDimension(ws, min=NC + 1, max=16384, hidden=True)
+ws.column_dimensions[get_column_letter(NC + 1)] = hidden_cols
+
 wb.properties.title = "Hyundai SND96 City-Color Lighting — Quotation — Miradore Experiences"
 wb.properties.creator = "Miradore Experiences"
 out = "/home/user/miradore/Hyundai_SND96_CityColor_Quotation.xlsx"
