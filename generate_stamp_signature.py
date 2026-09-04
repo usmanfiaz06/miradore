@@ -31,15 +31,14 @@ img = img.rotate(-5, resample=Image.BICUBIC, expand=True)
 img.save("/home/user/miradore/miradore_stamp.png")
 
 # ------------------------------------------------------------------ signature
-# "Adeel Ahmad" in a flowing script hand with a flourish underline
-W, H = 900, 320
+# Hand-drawn signature traced from the Director's provided specimen
+INK = (28, 28, 30)
+GRAY = (125, 125, 125)
+W, H = 900, 400
 sig = Image.new("RGBA", (W, H), (0, 0, 0, 0))
 sd = ImageDraw.Draw(sig)
 
-script = ImageFont.truetype("/home/user/miradore/fonts/GreatVibes-Regular.ttf", 148)
-sd.text((450, 140), "Adeel Ahmad", font=script, fill=INK_BLUE + (238,), anchor="mm")
-
-def bezier(pts, n=140):
+def bezier(pts, n=180):
     out = []
     for t_i in range(n + 1):
         t = t_i / n
@@ -52,17 +51,31 @@ def bezier(pts, n=140):
         out.append((p[0][0], p[0][1]))
     return out
 
-def stroke(pts, width):
+def stroke(pts, width, color=INK, alpha=242):
     path = bezier(pts)
     for a, b in zip(path, path[1:]):
-        sd.line([a, b], fill=INK_BLUE + (235,), width=width)
-        sd.ellipse([b[0] - width / 2, b[1] - width / 2, b[0] + width / 2, b[1] + width / 2],
-                   fill=INK_BLUE + (235,))
+        sd.line([a, b], fill=color + (alpha,), width=width)
+        sd.ellipse([b[0]-width/2, b[1]-width/2, b[0]+width/2, b[1]+width/2], fill=color + (alpha,))
 
-# flourish underline
-stroke([(150, 250), (420, 292), (700, 240), (810, 212)], 4)
+# first letter: big closed loop (D-belly), crossing itself
+stroke([(212, 258), (196, 175), (204, 112), (248, 116), (256, 178), (232, 232), (206, 252)], 7)
+# connected rounded double-hump (dd) flowing from the first letter
+stroke([(206, 252), (238, 246), (252, 178), (262, 246), (250, 254)], 6)
+stroke([(250, 254), (282, 244), (296, 174), (308, 244), (296, 254)], 6)
+# tall ascender with a top loop, crossing back down
+stroke([(296, 254), (330, 240), (336, 140), (326, 112), (352, 118), (356, 196), (346, 256)], 6)
+# big rounded open bowl, connected
+stroke([(346, 256), (420, 246), (444, 150), (400, 138), (372, 196), (392, 250), (438, 252)], 7)
+# soft wave cluster (uuu), rounder
+stroke([(438, 252), (452, 208), (468, 248), (484, 206), (500, 246), (516, 204), (534, 246)], 6)
+# final letter: closed loop then out
+stroke([(596, 248), (610, 160), (604, 128), (636, 134), (646, 200), (636, 252)], 6)
+# tail right, then long slanted strike-through sweeping back left over the letters
+stroke([(636, 252), (696, 258), (752, 214)], 6)
+stroke([(752, 214), (570, 152), (300, 172), (140, 216), (60, 238)], 4)
+# gray underline swoosh
+stroke([(115, 318), (430, 340), (700, 312), (782, 296)], 5, GRAY, 210)
 
-sig = sig.rotate(-3, resample=Image.BICUBIC, expand=False)
-sig = sig.filter(ImageFilter.GaussianBlur(0.6))
+sig = sig.filter(ImageFilter.GaussianBlur(0.8))
 sig.save("/home/user/miradore/miradore_signature.png")
-print("saved miradore_stamp.png + miradore_signature.png")
+print("ok")
