@@ -379,13 +379,13 @@ def place(path, px_w, px_h, col, col_off_px, row, row_off_px):
                               ext=XDRPositiveSize2D(pixels_to_EMU(px_w), pixels_to_EMU(px_h)))
     ws.add_image(im)
 
-place("/home/user/miradore/miradore_signature.png", 215, 76, col=1, col_off_px=8, row=sig_top - 1, row_off_px=18)
+place("/home/user/miradore/miradore_signature.png", 215, 60, col=1, col_off_px=8, row=sig_top - 1, row_off_px=26)
 place("/home/user/miradore/miradore_stamp.png", 133, 103, col=1, col_off_px=140, row=sig_top - 1, row_off_px=2)
 
 r = sig_top + 6
 top_line = Border(top=Side(style="thin", color=MUTED))
 ws.merge_cells(start_row=r, start_column=1, end_row=r, end_column=2)
-c = ws.cell(row=r, column=1, value="Adeel Ahmad — Director")
+c = ws.cell(row=r, column=1, value="Adeel Ahmed — Director")
 c.font = f(9.5, True)
 c.alignment = Alignment(vertical="center", indent=1)
 ws.merge_cells(start_row=r, start_column=4, end_row=r, end_column=6)
