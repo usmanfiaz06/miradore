@@ -316,7 +316,51 @@ for t in notes:
     ws.row_dimensions[r].height = lines * 12 + 5
     r += 1
 
+# ---------------------------------------------------------------- signature & stamp
+from openpyxl.drawing.spreadsheet_drawing import AnchorMarker, OneCellAnchor
+from openpyxl.drawing.xdr import XDRPositiveSize2D
+from openpyxl.utils.units import pixels_to_EMU
+
 r += 1
+ws.merge_cells(start_row=r, start_column=1, end_row=r, end_column=3)
+c = ws.cell(row=r, column=1, value="For & on behalf of — MIRADORE EXPERIENCES")
+c.font = f(10, True, TEAL)
+c.alignment = Alignment(vertical="center", indent=1)
+ws.merge_cells(start_row=r, start_column=4, end_row=r, end_column=6)
+c = ws.cell(row=r, column=4, value="CLIENT ACCEPTANCE — HYUNDAI")
+c.font = f(10, True, TEAL)
+c.alignment = Alignment(vertical="center", indent=1)
+ws.row_dimensions[r].height = 18
+sig_top = r + 1
+for rr in range(sig_top, sig_top + 6):
+    ws.row_dimensions[rr].height = 17
+
+def place(path, px_w, px_h, col, col_off_px, row, row_off_px):
+    im = XLImage(path)
+    marker = AnchorMarker(col=col, colOff=pixels_to_EMU(col_off_px),
+                          row=row, rowOff=pixels_to_EMU(row_off_px))
+    im.anchor = OneCellAnchor(_from=marker,
+                              ext=XDRPositiveSize2D(pixels_to_EMU(px_w), pixels_to_EMU(px_h)))
+    ws.add_image(im)
+
+place("/home/user/miradore/miradore_signature.png", 215, 76, col=1, col_off_px=8, row=sig_top - 1, row_off_px=18)
+place("/home/user/miradore/miradore_stamp.png", 104, 104, col=1, col_off_px=150, row=sig_top - 1, row_off_px=2)
+
+r = sig_top + 6
+top_line = Border(top=Side(style="thin", color=MUTED))
+ws.merge_cells(start_row=r, start_column=1, end_row=r, end_column=2)
+c = ws.cell(row=r, column=1, value="Authorized Signatory")
+c.font = f(9, False, MUTED)
+c.alignment = Alignment(vertical="center", indent=1)
+ws.merge_cells(start_row=r, start_column=4, end_row=r, end_column=6)
+c = ws.cell(row=r, column=4, value="Signature, Company Stamp & Date")
+c.font = f(9, False, MUTED)
+c.alignment = Alignment(vertical="center", indent=1)
+for col in (1, 2, 4, 5, 6):
+    ws.cell(row=r, column=col).border = top_line
+ws.row_dimensions[r].height = 16
+
+r += 2
 for col in range(1, NC + 1):
     ws.cell(row=r, column=col).fill = fill(TEAL)
     ws.cell(row=r + 1, column=col).fill = fill(TEAL)
