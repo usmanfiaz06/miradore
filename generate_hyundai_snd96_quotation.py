@@ -179,7 +179,7 @@ for i, loc in enumerate(locs):
     ws.cell(row=r, column=2).alignment = Alignment(vertical="center", indent=1)
     q = ws.cell(row=r, column=3, value=10)
     d = ws.cell(row=r, column=4, value=15)
-    rt = ws.cell(row=r, column=5, value=160)
+    rt = ws.cell(row=r, column=5, value=156)
     for cell in (q, d, rt):
         cell.font = Font(name=FONT, size=9.5, color="0000FF")
         cell.alignment = Alignment(horizontal="center", vertical="center")
@@ -223,7 +223,7 @@ th(r, ["#", "Description", "Qty", "Unit", "Remarks", ""], aligns=["center", "lef
 ws.merge_cells(start_row=r, start_column=5, end_row=r, end_column=6)
 r += 1
 boq = [
-    ("City-Color LED Lighting Fixture (Saudi National Day Green)", 10, "Nos", "Rental for 15 days @ SAR 160 per unit per day"),
+    ("City-Color LED Lighting Fixture (Saudi National Day Green)", 10, "Nos", "Rental for 15 days @ SAR 156 per unit per day"),
     ("Transportation to Site", 1, "LS", "Included"),
     ("Loading & Unloading", 1, "LS", "Included"),
     ("Installation of City-Color Fixtures", 10, "Nos", "Included"),
@@ -337,7 +337,7 @@ r += 2
 section(r, "5.  IMPORTANT NOTES & TERMS")
 r += 1
 notes = [
-    "The rate of SAR 160 per City-Color per day is all-inclusive, covering rental, transportation, installation, accessories, testing, commissioning, technical support, dismantling and removal.",
+    "The rate of SAR 156 per City-Color per day is all-inclusive, covering rental, transportation, installation, accessories, testing, commissioning, technical support, dismantling and removal.",
     "Pricing is based on standard installation conditions. Any special access requirements (crane, boom lift, scaffolding, special permits, major electrical works, etc.) will be quoted separately after site assessment.",
     "Preferred Payment Terms (negotiable): 50% advance upon confirmation / purchase order; 50% upon completion of installation across all showrooms.",
     "Quotation is valid for the rental period stated (16 – 30 September 2026).",
