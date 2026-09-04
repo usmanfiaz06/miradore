@@ -151,7 +151,7 @@ for i, loc in enumerate(locs):
     ws.cell(row=r, column=2).alignment = Alignment(vertical="center", indent=1)
     q = ws.cell(row=r, column=3, value=10)
     d = ws.cell(row=r, column=4, value=15)
-    rt = ws.cell(row=r, column=5, value=125)
+    rt = ws.cell(row=r, column=5, value=160)
     for cell in (q, d, rt):
         cell.font = Font(name=FONT, size=9.5, color="0000FF")
         cell.alignment = Alignment(horizontal="center", vertical="center")
@@ -195,7 +195,7 @@ th(r, ["#", "Description", "Qty", "Unit", "Remarks", ""], aligns=["center", "lef
 ws.merge_cells(start_row=r, start_column=5, end_row=r, end_column=6)
 r += 1
 boq = [
-    ("City-Color LED Lighting Fixture (Saudi National Day Green)", 10, "Nos", "Rental for 15 days @ SAR 125 per unit per day"),
+    ("City-Color LED Lighting Fixture (Saudi National Day Green)", 10, "Nos", "Rental for 15 days @ SAR 160 per unit per day"),
     ("Transportation to Site", 1, "LS", "Included"),
     ("Loading & Unloading", 1, "LS", "Included"),
     ("Installation of City-Color Fixtures", 10, "Nos", "Included"),
@@ -241,9 +241,7 @@ summary = [
     ("Daily Rate (per City-Color)", f"=E{loc_first}", "#,##0", 0),
     ("Rate per City-Color for 15 Days", f"=E{loc_first}*15", "#,##0", 0),
     ("Cost per Showroom", f"=F{loc_first}", "#,##0", 0),
-    ("Subtotal — All 9 Showrooms", f"=F{loc_total_row}", "#,##0", 1),
-    ("Saudi National Day 96 Goodwill Discount", -750, "#,##0;(#,##0)", 2),
-    ("NET TOTAL (excl. VAT)", None, "#,##0", 1),
+    ("TOTAL PROJECT VALUE — All 9 Showrooms (excl. VAT)", f"=F{loc_total_row}", "#,##0", 1),
     ("VAT (15%)", None, "#,##0.00", 0),
     ("GRAND TOTAL (incl. VAT)", None, "#,##0.00", 3),
 ]
@@ -283,14 +281,12 @@ for label, val, fmt, emph in summary:
     for col in range(1, NC + 1):
         ws.cell(row=r, column=col).border = box
     r += 1
-# formulas for net / VAT / grand
-disc_row = sum_first + 8
-net_row = sum_first + 9
-vat_row = sum_first + 10
-grand_row = sum_first + 11
-ws.cell(row=net_row, column=5, value=f"=F{loc_total_row}+E{disc_row}")
-ws.cell(row=vat_row, column=5, value=f"=ROUND(E{net_row}*0.15,2)")
-ws.cell(row=grand_row, column=5, value=f"=E{net_row}+E{vat_row}")
+# formulas for VAT / grand
+total_row = sum_first + 7
+vat_row = sum_first + 8
+grand_row = sum_first + 9
+ws.cell(row=vat_row, column=5, value=f"=ROUND(E{total_row}*0.15,2)")
+ws.cell(row=grand_row, column=5, value=f"=E{total_row}+E{vat_row}")
 
 # ---------------------------------------------------------------- section 4: scope
 r += 1
@@ -305,7 +301,7 @@ r += 2
 section(r, "5.  IMPORTANT NOTES & TERMS")
 r += 1
 notes = [
-    "The rate of SAR 125 per City-Color per day is all-inclusive, covering rental, transportation, installation, accessories, testing, commissioning, technical support, dismantling and removal.",
+    "The rate of SAR 160 per City-Color per day is all-inclusive, covering rental, transportation, installation, accessories, testing, commissioning, technical support, dismantling and removal.",
     "Pricing is based on standard installation conditions. Any special access requirements (crane, boom lift, scaffolding, special permits, major electrical works, etc.) will be quoted separately after site assessment.",
     "Preferred Payment Terms (negotiable): 50% advance upon confirmation / purchase order; 50% upon completion of installation across all showrooms.",
     "Quotation is valid for the rental period stated (16 – 30 September 2026).",
