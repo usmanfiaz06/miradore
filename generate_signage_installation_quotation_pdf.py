@@ -37,18 +37,18 @@ class QuotationPDF(FPDF):
         self.ln(6)
 
     def add_title_block(self):
-        self.set_y(35)
+        self.set_y(31)
         self.draw_accent_line()
-        self.set_font("Helvetica", "B", 18)
+        self.set_font("Helvetica", "B", 17)
         self.set_text_color(*self.TEAL)
-        self.cell(0, 10, "QUOTATION", align="C", new_x="LMARGIN", new_y="NEXT")
+        self.cell(0, 9, "QUOTATION", align="C", new_x="LMARGIN", new_y="NEXT")
         self.set_font("Helvetica", "B", 10)
         self.set_text_color(*self.ORANGE)
-        self.cell(0, 7, "EVENT SIGNAGE - INSTALLATION SERVICES", align="C", new_x="LMARGIN", new_y="NEXT")
+        self.cell(0, 6, "EVENT SIGNAGE - INSTALLATION SERVICES", align="C", new_x="LMARGIN", new_y="NEXT")
         self.set_font("Helvetica", "", 8)
         self.set_text_color(*self.GRAY)
-        self.cell(0, 5, "DIRECTIONAL & WELCOME SIGNAGE BOARDS  -  INSTALLATION ONLY", align="C", new_x="LMARGIN", new_y="NEXT")
-        self.ln(2)
+        self.cell(0, 4.5, "DIRECTIONAL & WELCOME SIGNAGE BOARDS  -  INSTALLATION ONLY", align="C", new_x="LMARGIN", new_y="NEXT")
+        self.ln(1)
         self.draw_accent_line()
 
     def add_info_block(self):
@@ -71,6 +71,7 @@ class QuotationPDF(FPDF):
             "Boards: 11 nos.  |  Total Area: 106 sqm",
         ]:
             self.cell(90, 5, item, new_x="LMARGIN", new_y="NEXT")
+        left_end = self.get_y()
 
         right_y = y
         self.set_xy(120, right_y)
@@ -89,7 +90,9 @@ class QuotationPDF(FPDF):
         self.set_font("Helvetica", "", 8)
         self.set_text_color(*self.DARK)
         self.cell(75, 5, "07 September 2026", align="R", new_x="LMARGIN", new_y="NEXT")
-        self.ln(8)
+        # both columns are drawn independently - continue below the taller one
+        self.set_y(max(left_end, self.get_y()))
+        self.ln(1)
 
     def table_header(self):
         self.set_fill_color(*self.HEADER_BG)
@@ -145,22 +148,48 @@ class QuotationPDF(FPDF):
         self.line(150, self.get_y(), 195, self.get_y())
         self.ln(1)
 
+    def add_signature_block(self):
+        """Signature above the line with the company stamp alongside - same
+        layout as the signed Miradore invoices."""
+        base_dir = os.path.dirname(__file__)
+        sig_path = os.path.join(base_dir, "adeel_signature-removebg-preview.png")
+        stamp_path = os.path.join(base_dir, "Miradore_Stamp_Riyadh.png")
+
+        top = self.get_y()
+        if os.path.exists(sig_path):
+            self.image(sig_path, x=18, y=top, w=38)
+        if os.path.exists(stamp_path):
+            self.image(stamp_path, x=68, y=top - 2, w=38)
+
+        line_y = top + 15
+        self.set_draw_color(*self.TEAL)
+        self.set_line_width(0.3)
+        self.line(15, line_y, 80, line_y)
+
+        self.set_xy(15, line_y + 1)
+        self.set_font("Helvetica", "B", 8)
+        self.set_text_color(*self.DARK)
+        self.cell(0, 5, "ADEEL AHMED - DIRECTOR", new_x="LMARGIN", new_y="NEXT")
+        self.set_font("Helvetica", "", 7)
+        self.set_text_color(*self.GRAY)
+        self.cell(0, 4, "Miradore Experiences, Riyadh", new_x="LMARGIN", new_y="NEXT")
+
     def summary_row(self, label, amount_sar, bold=False, highlight=False):
         if highlight:
             self.set_fill_color(*self.TEAL)
             self.set_text_color(*self.WHITE)
             self.set_font("Helvetica", "B", 8.5)
-            self.cell(120, 8, "", border=0, fill=True)
-            self.cell(30, 8, label, border=0, align="R", fill=True)
-            self.cell(35, 8, f"{amount_sar:,.2f}" if isinstance(amount_sar, float) else f"{amount_sar:,}", border=0, align="R", fill=True)
+            self.cell(120, 7.5, "", border=0, fill=True)
+            self.cell(30, 7.5, label, border=0, align="R", fill=True)
+            self.cell(35, 7.5, f"{amount_sar:,.2f}" if isinstance(amount_sar, float) else f"{amount_sar:,}", border=0, align="R", fill=True)
         else:
             self.set_fill_color(*(self.LIGHT_BG if bold else self.WHITE))
             self.set_text_color(*self.DARK)
             self.set_font("Helvetica", "B" if bold else "", 7.5)
-            self.cell(120, 7, "", border=0, fill=bold)
-            self.cell(30, 7, label, border=0, align="R", fill=bold)
+            self.cell(120, 6, "", border=0, fill=bold)
+            self.cell(30, 6, label, border=0, align="R", fill=bold)
             self.set_font("Helvetica", "B", 7.5)
-            self.cell(35, 7, f"{amount_sar:,.2f}" if isinstance(amount_sar, float) else f"{amount_sar:,}", border=0, align="R", fill=bold)
+            self.cell(35, 6, f"{amount_sar:,.2f}" if isinstance(amount_sar, float) else f"{amount_sar:,}", border=0, align="R", fill=bold)
         self.ln()
 
 
@@ -170,7 +199,7 @@ RATE = 80  # SAR per sqm - installation
 def generate():
     pdf = QuotationPDF(orientation="P", unit="mm", format="A4")
     pdf.alias_nb_pages()
-    pdf.set_auto_page_break(auto=True, margin=20)
+    pdf.set_auto_page_break(auto=True, margin=15)
     pdf.add_page()
 
     pdf.add_logo_header()
@@ -185,17 +214,14 @@ def generate():
     a2 = 7 * 8 * RATE    # 4,480
     a3 = 1 * 20 * RATE   # 1,600
 
-    pdf.item_row(1, "Directional & Welcome Signage Board - 2m x 5m", 3, 30, RATE, a1)
-    pdf.detail_row("- 10 sqm per board  |  base height: 50 cm")
-    pdf.item_row(2, "Directional & Welcome Signage Board - 2m x 4m", 7, 56, RATE, a2, alt=True)
-    pdf.detail_row("- 8 sqm per board  |  base height: 50 cm")
-    pdf.item_row(3, "Directional & Welcome Signage Board - 2m x 10m", 1, 20, RATE, a3)
-    pdf.detail_row("- 20 sqm per board  |  base height: 50 cm")
+    pdf.item_row(1, "Directional & Welcome Board - 2m x 5m (10 sqm ea., base 50 cm)", 3, 30, RATE, a1)
+    pdf.item_row(2, "Directional & Welcome Board - 2m x 4m (8 sqm ea., base 50 cm)", 7, 56, RATE, a2, alt=True)
+    pdf.item_row(3, "Directional & Welcome Board - 2m x 10m (20 sqm, base 50 cm)", 1, 20, RATE, a3)
 
     installation_total = a1 + a2 + a3  # 8,480
     pdf.subtotal_row("Subtotal:", installation_total)
 
-    pdf.ln(4)
+    pdf.ln(2)
 
     pdf.set_draw_color(*pdf.TEAL)
     pdf.set_line_width(0.5)
@@ -204,83 +230,68 @@ def generate():
 
     pdf.set_font("Helvetica", "B", 9)
     pdf.set_text_color(*pdf.TEAL)
-    pdf.cell(0, 7, "COST SUMMARY", new_x="LMARGIN", new_y="NEXT")
+    pdf.cell(0, 6, "COST SUMMARY", new_x="LMARGIN", new_y="NEXT")
 
-    agency_commission = installation_total * 0.12          # 1,017.60
-    subtotal_before_vat = installation_total + agency_commission  # 9,497.60
-    vat = subtotal_before_vat * 0.15                        # 1,424.64
-    grand_total = subtotal_before_vat + vat                 # 10,922.24
+    # All figures rounded to the nearest Saudi Riyal
+    agency_commission = round(installation_total * 0.12)          # 1,018
+    subtotal_before_vat = installation_total + agency_commission  # 9,498
+    vat = round(subtotal_before_vat * 0.15)                       # 1,425
+    grand_total = subtotal_before_vat + vat                       # 10,923
 
     pdf.summary_row("Installation Total (106 sqm @ 80 SAR):", installation_total, bold=True)
-    pdf.summary_row("Agency Commission (12%):", round(agency_commission, 2))
+    pdf.summary_row("Agency Commission (12%):", agency_commission)
     pdf.ln(1)
-    pdf.summary_row("Subtotal before VAT:", round(subtotal_before_vat, 2), bold=True)
-    pdf.summary_row("VAT (15%):", round(vat, 2))
+    pdf.summary_row("Subtotal before VAT:", subtotal_before_vat, bold=True)
+    pdf.summary_row("VAT (15%):", vat)
     pdf.ln(1)
-    pdf.summary_row("*  GRAND TOTAL (INC. VAT):", round(grand_total, 2), highlight=True)
+    pdf.summary_row("*  GRAND TOTAL (INC. VAT):", grand_total, highlight=True)
 
-    pdf.ln(6)
+    pdf.ln(4)
 
     pdf.set_font("Helvetica", "B", 9)
     pdf.set_text_color(*pdf.TEAL)
-    pdf.cell(0, 6, "PAYMENT TERMS", new_x="LMARGIN", new_y="NEXT")
+    pdf.cell(0, 5, "PAYMENT TERMS", new_x="LMARGIN", new_y="NEXT")
     pdf.set_font("Helvetica", "", 8)
     pdf.set_text_color(*pdf.DARK)
     pdf.cell(0, 5, "80% Advance Payment  -  20% After the Event", new_x="LMARGIN", new_y="NEXT")
 
-    pdf.ln(4)
+    pdf.ln(2)
 
     pdf.set_font("Helvetica", "B", 9)
     pdf.set_text_color(*pdf.TEAL)
-    pdf.cell(0, 6, "SCOPE OF WORK", new_x="LMARGIN", new_y="NEXT")
+    pdf.cell(0, 5, "SCOPE OF WORK", new_x="LMARGIN", new_y="NEXT")
     pdf.set_font("Helvetica", "", 7)
     pdf.set_text_color(*pdf.GRAY)
     for line in [
-        "-  Receiving and handling of client-supplied banners and frames at the venue.",
-        "-  Assembly and erection of 11 signage boards on 50 cm bases at designated venue locations.",
-        "-  Levelling, alignment, fixing and weighting/anchoring of all structures.",
-        "-  Installation labour, tools, access equipment and on-site supervision.",
-        "-  On-site touch-up / re-tensioning of banners during installation.",
-        "-  Dismantling and removal of structures after the event, and site clearance.",
+        "-  Receiving and handling of client-supplied banners and frames, and assembly and erection of the",
+        "    11 signage boards on 50 cm bases at the designated venue locations.",
+        "-  Levelling, alignment, fixing and anchoring of all structures, plus on-site banner re-tensioning.",
+        "-  Installation labour, tools, access equipment, on-site supervision, post-event dismantling,",
+        "    removal of structures and site clearance.",
     ]:
-        pdf.cell(0, 4.5, line, new_x="LMARGIN", new_y="NEXT")
+        pdf.cell(0, 4, line, new_x="LMARGIN", new_y="NEXT")
 
-    pdf.ln(4)
+    pdf.ln(2)
 
     pdf.set_font("Helvetica", "B", 9)
     pdf.set_text_color(*pdf.TEAL)
-    pdf.cell(0, 6, "NOTES", new_x="LMARGIN", new_y="NEXT")
+    pdf.cell(0, 5, "NOTES", new_x="LMARGIN", new_y="NEXT")
     pdf.set_font("Helvetica", "", 7)
     pdf.set_text_color(*pdf.GRAY)
     notes = [
-        "1.  All prices are in Saudi Riyals (SAR).",
-        "2.  Installation charges are calculated at 80 SAR per square meter of signage face area.",
-        "3.  Total billable area: 106 sqm (3 x 10 sqm + 7 x 8 sqm + 1 x 20 sqm). The 50 cm base is included in the",
-        "     installation scope and is not charged as additional area.",
-        "4.  Banners and frames are supplied by the client and are available at the venue. Printing, fabrication",
-        "     and supply of materials are NOT included in this quotation.",
-        "5.  Client to provide clear site access, storage for materials, and power where required at no cost.",
-        "6.  Rate assumes ground-level installation during a single mobilisation. Additional mobilisations,",
-        "     night shifts, or elevated / structural fixing will be quoted separately.",
-        "7.  Any damage to client-supplied banners or frames prior to handover is not the responsibility of Miradore.",
-        "8.  Any additional requirements beyond this scope will be quoted separately.",
-        "9.  This quotation is valid for 30 days from the date of issue.",
+        "1.  All prices are in Saudi Riyals (SAR) and rounded to the nearest Riyal.",
+        "2.  Installation charged at 80 SAR per sqm of signage face area - total billable area 106 sqm",
+        "     (3 x 10 sqm + 7 x 8 sqm + 1 x 20 sqm). The 50 cm base is included, not charged as extra area.",
+        "3.  Banners and frames are client-supplied and available at the venue. Printing, fabrication and",
+        "     supply of materials are NOT included. Client to provide site access, storage and power at no cost.",
+        "4.  Rate assumes ground-level installation in a single mobilisation. Additional mobilisations, night",
+        "     shifts, elevated fixing or any other requirement will be quoted separately. Validity: 30 days.",
     ]
     for note in notes:
-        pdf.cell(0, 4.5, note, new_x="LMARGIN", new_y="NEXT")
+        pdf.cell(0, 4, note, new_x="LMARGIN", new_y="NEXT")
 
-    pdf.ln(8)
-
-    pdf.set_draw_color(*pdf.TEAL)
-    pdf.set_line_width(0.3)
-    pdf.line(15, pdf.get_y(), 80, pdf.get_y())
-    pdf.ln(3)
-    pdf.set_font("Helvetica", "B", 8)
-    pdf.set_text_color(*pdf.DARK)
-    pdf.cell(0, 5, "ADEEL AHMED - DIRECTOR", new_x="LMARGIN", new_y="NEXT")
-    pdf.set_font("Helvetica", "", 7)
-    pdf.set_text_color(*pdf.GRAY)
-    pdf.cell(0, 4, "Miradore Experiences, Riyadh", new_x="LMARGIN", new_y="NEXT")
+    pdf.ln(2)
+    pdf.add_signature_block()
 
     out_path = os.path.join(os.path.dirname(__file__), "Event_Signage_Installation_Quotation.pdf")
     pdf.output(out_path)
