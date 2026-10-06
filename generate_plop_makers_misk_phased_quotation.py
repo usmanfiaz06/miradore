@@ -20,22 +20,24 @@ QUOTE_DATE = "06 October 2026"
 
 # ---- commercial inputs ----
 CONTENT_DEVELOPMENT = 34000
-TUNNEL_BUILD = 64000
-SUPPORT_DAY_RATE = 3300
+TUNNEL_BUILD = 80000
+SUPPORT_DAY_RATE = 7500
 ART_WEEK_DAYS = 6                     # Misk Art Week 2026: 5 - 10 December
 DISMANTLE_RATE = 0.05                 # 5% of the tunnel build cost
+ROOM_CONTENT_REMASTER = 18000         # rescale and restitch tunnel content to the room canvas
 IMMERSIVE_ROOM = 68000                # unchanged from MRD-QT-2026-0914
 VAT_RATE = 0.15
 
-SUPPORT_TOTAL = SUPPORT_DAY_RATE * ART_WEEK_DAYS          # 19,800
-DISMANTLE_TOTAL = int(TUNNEL_BUILD * DISMANTLE_RATE)      # 3,200
+SUPPORT_TOTAL = SUPPORT_DAY_RATE * ART_WEEK_DAYS          # 45,000
+DISMANTLE_TOTAL = int(TUNNEL_BUILD * DISMANTLE_RATE)      # 4,000
 
 PHASES = [
     (
         "Content development  -  immersive content around MISK City",
         "Creative development and production of the immersive content programme presented around MISK City: "
         "concept and art direction, 3D scene build, motion production, rendering and delivery mastered to the "
-        "tunnel canvas.",
+        "tunnel canvas. Does not include re-working the content for the immersive room, which is quoted at "
+        "item 5 below.",
         CONTENT_DEVELOPMENT,
     ),
     (
@@ -47,7 +49,7 @@ PHASES = [
     (
         f"Technical support during Art Week  -  {ART_WEEK_DAYS} days at SAR {SUPPORT_DAY_RATE:,} per day",
         "On-site technical crew for the run of Misk Art Week, 5 - 10 December 2026: daily pre-show checks, show "
-        "operation, in-run maintenance and spares handling.",
+        "operation, in-run maintenance and spares handling. Based on a ten hour day; additional hours pro rata.",
         SUPPORT_TOTAL,
     ),
     (
@@ -55,6 +57,13 @@ PHASES = [
         "Controlled dismantle of the screen cabinets and supporting structure, condition report on each cabinet, "
         "packing and handover for transfer to the immersive room build. Priced at 5% of the tunnel build cost.",
         DISMANTLE_TOTAL,
+    ),
+    (
+        "Content re-master for the immersive room",
+        "Re-working the Art Week content for the five-surface room canvas: re-scaling to the room resolution, "
+        "re-stitching across the wall, corner and floor surfaces, re-blending the seams and re-rendering. The "
+        "tunnel and room canvases differ in geometry and resolution, so the content cannot be transferred as is.",
+        ROOM_CONTENT_REMASTER,
     ),
     (
         "Immersive room build  -  MISK",
@@ -313,8 +322,8 @@ def generate():
     subtotal = sum(amount for _, _, amount in PHASES)
     vat = subtotal * VAT_RATE
     grand_total = subtotal + vat
-    assert subtotal == 189000, subtotal
-    assert grand_total == 217350, grand_total
+    assert subtotal == 249000, subtotal
+    assert grand_total == 286350, grand_total
 
     pdf = QuotationPDF(orientation="P", unit="mm", format="A4")
     pdf.alias_nb_pages()
@@ -350,7 +359,7 @@ def generate():
     pdf.cell(
         180,
         4.5,
-        "Amount in words: Two Hundred and Seventeen Thousand Three Hundred and Fifty Saudi Riyals Only",
+        "Amount in words: Two Hundred and Eighty Six Thousand Three Hundred and Fifty Saudi Riyals Only",
         align="R",
         new_x="LMARGIN",
         new_y="NEXT",
@@ -404,8 +413,8 @@ def generate():
         142,
         4.5,
         "All equipment and materials above are to be arranged and supplied by the client, or quoted by Miradore "
-        "separately on request. Where Miradore is asked to supply them, they are priced once the site survey is "
-        "signed off and invoiced at cost against the approved schedule.",
+        "separately on request. Where Miradore supplies them, they are priced once the survey is signed off and "
+        "invoiced at cost.",
         align="L",
         new_x="LMARGIN",
         new_y="NEXT",
@@ -419,7 +428,7 @@ def generate():
     pdf.set_font("Helvetica", "", 8)
     pdf.set_text_color(*pdf.DARK)
     pdf.cell(0, 5, "80% Advance Payment  -  20% On Completion and Handover of each phase", new_x="LMARGIN", new_y="NEXT")
-    pdf.ln(3)
+    pdf.ln(2)
 
     # ---- notes ----
     pdf.set_font("Helvetica", "B", 9)
@@ -433,19 +442,22 @@ def generate():
         "3.  The same screens serve both builds. The room build follows the dismantle and cannot run concurrently.",
         "4.  Tunnel length and geometry are limited by the screen inventory, confirmed at survey.",
         "5.  Pricing assumes the tunnel is sited indoors. Outdoor siting requires weather protection, quoted separately.",
-        "6.  Technical support is charged at SAR 3,300 per day for the six days of Art Week. Additional days at the same rate.",
+        "6.  Technical support is charged at SAR 7,500 per day for the six days of Art Week, based on a ten hour "
+        "day. Additional days are charged at the same daily rate and additional hours pro rata.",
         "7.  Dismantling is priced at 5% of the tunnel build cost and covers a controlled dismantle and condition "
         "report. Cabinets found damaged on condition check are replaced at the client's cost unless caused by "
         "Miradore.",
         "8.  Equipment and materials listed above are not included and will be arranged by the client or quoted "
         "separately at the client's request.",
-        "9.  The client is to provide safe site access, temporary power, secure storage and a clear work area.",
-        "10.  This quotation is valid for 30 days from the date of issue.",
+        "9.  Content produced for the tunnel is mastered to the tunnel canvas only. Re-use on the room canvas "
+        "requires the re-scaling and re-stitching quoted at item 5 and cannot be transferred as is.",
+        "10.  The client is to provide safe site access, temporary power, secure storage and a clear work area.",
+        "11.  This quotation is valid for 30 days from the date of issue.",
     ]
     for note in notes:
-        pdf.multi_cell(180, 4.0, note, align="L", new_x="LMARGIN", new_y="NEXT")
+        pdf.multi_cell(180, 3.8, note, align="L", new_x="LMARGIN", new_y="NEXT")
 
-    pdf.ln(5)
+    pdf.ln(4)
     pdf.add_signature_block()
 
     out_pdf = os.path.join(BASE, "PLOP_Makers_MISK_Immersive_Screens_Programme_Quotation.pdf")
