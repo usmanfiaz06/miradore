@@ -24,7 +24,6 @@ TUNNEL_BUILD = 80000
 SUPPORT_DAY_RATE = 7500
 ART_WEEK_DAYS = 6                     # Misk Art Week 2026: 5 - 10 December
 DISMANTLE_RATE = 0.05                 # 5% of the tunnel build cost
-ROOM_CONTENT_REMASTER = 18000         # rescale and restitch tunnel content to the room canvas
 IMMERSIVE_ROOM = 68000                # unchanged from MRD-QT-2026-0914
 VAT_RATE = 0.15
 
@@ -36,8 +35,8 @@ PHASES = [
         "Content development  -  immersive content around MISK City",
         "Creative development and production of the immersive content programme presented around MISK City: "
         "concept and art direction, 3D scene build, motion production, rendering and delivery mastered to the "
-        "tunnel canvas. Does not include re-working the content for the immersive room, which is quoted at "
-        "item 5 below.",
+        "tunnel canvas. Does not include re-working the content for the immersive room canvas, which is "
+        "quoted separately on request.",
         CONTENT_DEVELOPMENT,
     ),
     (
@@ -57,13 +56,6 @@ PHASES = [
         "Controlled dismantle of the screen cabinets and supporting structure, condition report on each cabinet, "
         "packing and handover for transfer to the immersive room build. Priced at 5% of the tunnel build cost.",
         DISMANTLE_TOTAL,
-    ),
-    (
-        "Content re-master for the immersive room",
-        "Re-working the Art Week content for the five-surface room canvas: re-scaling to the room resolution, "
-        "re-stitching across the wall, corner and floor surfaces, re-blending the seams and re-rendering. The "
-        "tunnel and room canvases differ in geometry and resolution, so the content cannot be transferred as is.",
-        ROOM_CONTENT_REMASTER,
     ),
     (
         "Immersive room build  -  MISK",
@@ -91,6 +83,7 @@ EXCLUSIONS = [
     ("Screens, media and processing", "LED cabinets, processors, servers and spare cabinets"),
     ("Storage and transport", "Storage between the two builds and transfer between sites"),
     ("Permits and approvals", "Event permits, structural certification and public liability cover"),
+    ("Content re-master for the room", "Re-scaling and re-stitching tunnel content to the room canvas"),
 ]
 
 
@@ -322,8 +315,8 @@ def generate():
     subtotal = sum(amount for _, _, amount in PHASES)
     vat = subtotal * VAT_RATE
     grand_total = subtotal + vat
-    assert subtotal == 249000, subtotal
-    assert grand_total == 286350, grand_total
+    assert subtotal == 231000, subtotal
+    assert grand_total == 265650, grand_total
 
     pdf = QuotationPDF(orientation="P", unit="mm", format="A4")
     pdf.alias_nb_pages()
@@ -359,7 +352,7 @@ def generate():
     pdf.cell(
         180,
         4.5,
-        "Amount in words: Two Hundred and Eighty Six Thousand Three Hundred and Fifty Saudi Riyals Only",
+        "Amount in words: Two Hundred and Sixty Five Thousand Six Hundred and Fifty Saudi Riyals Only",
         align="R",
         new_x="LMARGIN",
         new_y="NEXT",
@@ -450,7 +443,7 @@ def generate():
         "8.  Equipment and materials listed above are not included and will be arranged by the client or quoted "
         "separately at the client's request.",
         "9.  Content produced for the tunnel is mastered to the tunnel canvas only. Re-use on the room canvas "
-        "requires the re-scaling and re-stitching quoted at item 5 and cannot be transferred as is.",
+        "requires re-scaling and re-stitching, which is not included and is quoted separately on request.",
         "10.  The client is to provide safe site access, temporary power, secure storage and a clear work area.",
         "11.  This quotation is valid for 30 days from the date of issue.",
     ]
